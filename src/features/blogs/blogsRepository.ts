@@ -21,10 +21,10 @@ export const blogsRepository = {
         return this.map(blog)
     },
     getAll() {
-
+        return db.blogs
     },
     del(id: string) {
-
+        return db.blogs = db.blogs.filter(b => b.id !== id)
     },
     put(blog: BlogInputModel, id: string) {
 

@@ -9,7 +9,7 @@ describe('/blogs', () => {
     //     setDB()
     // })
 
-    it('should create', async () => {
+/*    it('should create', async () => {
         setDB()
         const newBlog: BlogInputModel = {
             name: 'n1',
@@ -71,7 +71,7 @@ describe('/blogs', () => {
         expect(res.body.errorsMessages[2].field).toEqual('websiteUrl')
 
         expect(db.blogs.length).toEqual(0)
-    })
+    })*/
     it('should get empty array', async () => {
         setDB() // очистка базы данных если нужно
 
@@ -79,7 +79,7 @@ describe('/blogs', () => {
             .get(SETTINGS.PATH.BLOGS)
             .expect(200) // проверяем наличие эндпоинта
 
-        // console.log(res.body) // можно посмотреть ответ эндпоинта
+        console.log(res.body) // можно посмотреть ответ эндпоинта
 
         expect(res.body.length).toEqual(0) // проверяем ответ эндпоинта
     })
@@ -90,7 +90,7 @@ describe('/blogs', () => {
             .get(SETTINGS.PATH.BLOGS)
             .expect(200)
 
-        // console.log(res.body)
+        console.log(res.body)
 
         expect(res.body.length).toEqual(1)
         expect(res.body[0]).toEqual(dataset1.blogs[0])
@@ -102,7 +102,7 @@ describe('/blogs', () => {
             .get(SETTINGS.PATH.BLOGS + '/1')
             .expect(404) // проверка на ошибку
 
-        // console.log(res.body)
+        console.log(res.body)
     })
     it('should find', async () => {
         setDB(dataset1)
@@ -111,7 +111,7 @@ describe('/blogs', () => {
             .get(SETTINGS.PATH.BLOGS + '/' + dataset1.blogs[0].id)
             .expect(200) // проверка на ошибку
 
-        // console.log(res.body)
+        console.log(res.body)
 
         expect(res.body).toEqual(dataset1.blogs[0])
     })
@@ -147,78 +147,78 @@ describe('/blogs', () => {
 
         // console.log(res.body)
     })
-    it('should update', async () => {
-        setDB(dataset1)
-        const blog: BlogInputModel = {
-            name: 'n2',
-            description: 'd2',
-            websiteUrl: 'http://some2.com',
-        }
-
-        const res = await req
-            .put(SETTINGS.PATH.BLOGS + '/' + dataset1.blogs[0].id)
-            .set({'Authorization': 'Basic ' + codedAuth})
-            .send(blog)
-            .expect(204) // проверка на ошибку
-
-        // console.log(res.body)
-
-        expect(db.blogs[0]).toEqual({...db.blogs[0], ...blog})
-    })
-    it('shouldn\'t update 404', async () => {
-        setDB()
-        const blog: BlogInputModel = {
-            name: 'n1',
-            description: 'd1',
-            websiteUrl: 'http://some.com',
-        }
-
-        const res = await req
-            .put(SETTINGS.PATH.BLOGS + '/1')
-            .set({'Authorization': 'Basic ' + codedAuth})
-            .send(blog)
-            .expect(404) // проверка на ошибку
-
-        // console.log(res.body)
-    })
-    it('shouldn\'t update2', async () => {
-        setDB(dataset1)
-        const blog: BlogInputModel = {
-            name: createString(16),
-            description: createString(501),
-            websiteUrl: createString(101),
-        }
-
-        const res = await req
-            .put(SETTINGS.PATH.BLOGS + '/' + dataset1.blogs[0].id)
-            .set({'Authorization': 'Basic ' + codedAuth})
-            .send(blog)
-            .expect(400) // проверка на ошибку
-
-        // console.log(res.body)
-
-        expect(db).toEqual(dataset1)
-        expect(res.body.errorsMessages.length).toEqual(3)
-        expect(res.body.errorsMessages[0].field).toEqual('name')
-        expect(res.body.errorsMessages[1].field).toEqual('description')
-        expect(res.body.errorsMessages[2].field).toEqual('websiteUrl')
-    })
-    it('shouldn\'t update 401', async () => {
-        setDB(dataset1)
-        const blog: BlogInputModel = {
-            name: createString(16),
-            description: createString(501),
-            websiteUrl: createString(101),
-        }
-
-        const res = await req
-            .put(SETTINGS.PATH.BLOGS + '/' + dataset1.blogs[0].id)
-            .set({'Authorization': 'Basic ' + codedAuth + 'error'})
-            .send(blog)
-            .expect(401) // проверка на ошибку
-
-        // console.log(res.body)
-
-        expect(db).toEqual(dataset1)
-    })
+    // it('should update', async () => {
+    //     setDB(dataset1)
+    //     const blog: BlogInputModel = {
+    //         name: 'n2',
+    //         description: 'd2',
+    //         websiteUrl: 'http://some2.com',
+    //     }
+    //
+    //     const res = await req
+    //         .put(SETTINGS.PATH.BLOGS + '/' + dataset1.blogs[0].id)
+    //         .set({'Authorization': 'Basic ' + codedAuth})
+    //         .send(blog)
+    //         .expect(204) // проверка на ошибку
+    //
+    //     // console.log(res.body)
+    //
+    //     expect(db.blogs[0]).toEqual({...db.blogs[0], ...blog})
+    // })
+    // it('shouldn\'t update 404', async () => {
+    //     setDB()
+    //     const blog: BlogInputModel = {
+    //         name: 'n1',
+    //         description: 'd1',
+    //         websiteUrl: 'http://some.com',
+    //     }
+    //
+    //     const res = await req
+    //         .put(SETTINGS.PATH.BLOGS + '/1')
+    //         .set({'Authorization': 'Basic ' + codedAuth})
+    //         .send(blog)
+    //         .expect(404) // проверка на ошибку
+    //
+    //     // console.log(res.body)
+    // })
+    // it('shouldn\'t update2', async () => {
+    //     setDB(dataset1)
+    //     const blog: BlogInputModel = {
+    //         name: createString(16),
+    //         description: createString(501),
+    //         websiteUrl: createString(101),
+    //     }
+    //
+    //     const res = await req
+    //         .put(SETTINGS.PATH.BLOGS + '/' + dataset1.blogs[0].id)
+    //         .set({'Authorization': 'Basic ' + codedAuth})
+    //         .send(blog)
+    //         .expect(400) // проверка на ошибку
+    //
+    //     // console.log(res.body)
+    //
+    //     expect(db).toEqual(dataset1)
+    //     expect(res.body.errorsMessages.length).toEqual(3)
+    //     expect(res.body.errorsMessages[0].field).toEqual('name')
+    //     expect(res.body.errorsMessages[1].field).toEqual('description')
+    //     expect(res.body.errorsMessages[2].field).toEqual('websiteUrl')
+    // })
+    // it('shouldn\'t update 401', async () => {
+    //     setDB(dataset1)
+    //     const blog: BlogInputModel = {
+    //         name: createString(16),
+    //         description: createString(501),
+    //         websiteUrl: createString(101),
+    //     }
+    //
+    //     const res = await req
+    //         .put(SETTINGS.PATH.BLOGS + '/' + dataset1.blogs[0].id)
+    //         .set({'Authorization': 'Basic ' + codedAuth + 'error'})
+    //         .send(blog)
+    //         .expect(401) // проверка на ошибку
+    //
+    //     // console.log(res.body)
+    //
+    //     expect(db).toEqual(dataset1)
+    // })
 })

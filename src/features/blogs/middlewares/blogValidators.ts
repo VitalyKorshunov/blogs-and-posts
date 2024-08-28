@@ -15,8 +15,12 @@ export const websiteUrlValidator = body('websiteUrl').isString().withMessage('no
     .trim().isURL().withMessage('not url')
     .isLength({min: 1, max: 100}).withMessage('more then 100 or 0')
 
-export const findBlogValidator = (req: Request<{id: string}>, res: Response, next: NextFunction) => {
-
+export const findBlogValidator = (req: Request<{ id: string }>, res: Response, next: NextFunction) => {
+    if (blogsRepository.find(req.params.id)) {
+        next()
+    } else {
+        res.sendStatus(404)
+    }
 }
 
 
