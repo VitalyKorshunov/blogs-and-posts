@@ -8,7 +8,8 @@ import {adminMiddleware} from '../../../global-middlewares/admin-middleware'
 // description: string // max 500
 // websiteUrl: string // max 100 ^https://([a-zA-Z0-9_-]+\.)+[a-zA-Z0-9_-]+(\/[a-zA-Z0-9_-]+)*\/?$
 
-// export const nameValidator =
+export const nameValidator = body('name').isString().withMessage('not string').trim()
+    .isLength({min: 1, max: 15}).withMessage('more than 15 or 0')
 export const descriptionValidator = body('description').isString().withMessage('not string')
     .trim().isLength({min: 1, max: 500}).withMessage('more then 500 or 0')
 export const websiteUrlValidator = body('websiteUrl').isString().withMessage('not string')
@@ -27,7 +28,7 @@ export const findBlogValidator = (req: Request<{ id: string }>, res: Response, n
 export const blogValidators = [
     adminMiddleware,
 
-    // nameValidator,
+    nameValidator,
     descriptionValidator,
     websiteUrlValidator,
 

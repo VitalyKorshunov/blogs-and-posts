@@ -21,13 +21,18 @@ export const blogsRepository = {
         return this.map(blog)
     },
     getAll() {
-        return db.blogs
+        return [...db.blogs]
     },
     del(id: string) {
-        return db.blogs = db.blogs.filter(b => b.id !== id)
+        db.blogs = db.blogs.filter(b => b.id !== id)
     },
     put(blog: BlogInputModel, id: string) {
+        const oldBlog = this.find(id)!
+        const mapBlog = {...oldBlog, ...blog, id: oldBlog.id}
+        const newBlog: BlogDbType = this.map(mapBlog)
+        this.del(id);
 
+        db.blogs = [...db.blogs, newBlog]
     },
     map(blog: BlogDbType) {
         const blogForOutput: BlogViewModel = {

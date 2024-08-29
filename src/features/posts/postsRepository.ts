@@ -27,7 +27,7 @@ export const postsRepository = {
         return db.posts.map(p => this.map(p))
     },
     del(id: string) {
-
+        db.posts = db.posts.filter(p => p.id !== id)
     },
     put(post: PostInputModel, id: string) {
         const blog = blogsRepository.find(post.blogId)!

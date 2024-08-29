@@ -11,8 +11,8 @@ export const postsRouter = Router()
 
 postsRouter.post('/', ...postValidators, createPostController)
 postsRouter.get('/', getPostsController)
-postsRouter.get('/:id', findPostController)
-postsRouter.delete('/:id', delPostController)
-postsRouter.put('/:id', putPostController)
+postsRouter.get('/:id', findPostValidator, findPostController)
+postsRouter.delete('/:id', adminMiddleware, findPostValidator, delPostController)
+postsRouter.put('/:id', findPostValidator, ...postValidators, putPostController)
 
 // не забудьте добавить роут в апп

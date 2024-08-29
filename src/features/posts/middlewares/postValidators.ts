@@ -10,18 +10,20 @@ import {adminMiddleware} from '../../../global-middlewares/admin-middleware'
 // content: string // max 1000
 // blogId: string // valid
 
-// export const titleValidator =
-// export const shortDescriptionValidator =
-export const contentValidator = body('content').isString().withMessage('not string')
-    .trim().isLength({min: 1, max: 1000}).withMessage('more then 1000 or 0')
-export const blogIdValidator = body('blogId').isString().withMessage('not string')
-    .trim().custom(blogId => {
+export const titleValidator = body('title').isString().withMessage('not string').trim()
+    .isLength({min: 1, max: 30}).withMessage('more than 30 or 0')
+export const shortDescriptionValidator = body('shortDescription').isString().withMessage('not string').trim()
+    .isLength({min: 1, max: 100}).withMessage('more than 100 or 0')
+export const contentValidator = body('content').isString().withMessage('not string').trim()
+    .isLength({min: 1, max: 1000}).withMessage('more then 1000 or 0')
+export const blogIdValidator = body('blogId').isString().withMessage('not string').trim()
+    .custom(blogId => {
         const blog = blogsRepository.find(blogId)
         // console.log(blog)
         return !!blog
     }).withMessage('no blog')
 
-export const findPostValidator = (req: Request<{id: string}>, res: Response, next: NextFunction) => {
+export const findPostValidator = (req: Request<{ id: string }>, res: Response, next: NextFunction) => {
     const post = postsRepository.find(req.params.id)
     if (!post) {
 
@@ -38,8 +40,8 @@ export const findPostValidator = (req: Request<{id: string}>, res: Response, nex
 export const postValidators = [
     adminMiddleware,
 
-    // titleValidator,
-    // shortDescriptionValidator,
+    titleValidator,
+    shortDescriptionValidator,
     contentValidator,
     blogIdValidator,
 
