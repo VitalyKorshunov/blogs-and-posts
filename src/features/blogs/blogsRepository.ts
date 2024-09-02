@@ -21,7 +21,7 @@ export const blogsRepository = {
         return this.map(blog)
     },
     getAll() {
-        return [...db.blogs]
+        return db.blogs.map(p => this.map(p))
     },
     del(id: string) {
         db.blogs = db.blogs.filter(b => b.id !== id)
