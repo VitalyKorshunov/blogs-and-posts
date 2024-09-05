@@ -1,8 +1,7 @@
 import {body} from 'express-validator'
 import {inputCheckErrorsMiddleware} from '../../../global-middlewares/inputCheckErrorsMiddleware'
-import {blogsRepository} from '../../blogs/blogsRepository'
+import {blogsRepository} from '../../blogs/blogsRepositoryMongoDb'
 import {NextFunction, Request, Response} from 'express'
-import {postsRepository} from '../postsRepository'
 import {adminMiddleware} from '../../../global-middlewares/admin-middleware'
 
 // title: string // max 30
@@ -17,14 +16,15 @@ export const shortDescriptionValidator = body('shortDescription').isString().wit
 export const contentValidator = body('content').isString().withMessage('not string').trim()
     .isLength({min: 1, max: 1000}).withMessage('more then 1000 or 0')
 export const blogIdValidator = body('blogId').isString().withMessage('not string').trim()
-    .custom(blogId => {
-        const blog = blogsRepository.find(blogId)
+    .custom(async blogId => {
+        const blog = await blogsRepository.find(blogId)
         // console.log(blog)
         return !!blog
     }).withMessage('no blog')
 
-export const findPostValidator = (req: Request<{ id: string }>, res: Response, next: NextFunction) => {
-    const post = postsRepository.find(req.params.id)
+export const findPostValidator = async (req: Request<{},{ blogId: string }>, res: Response, next: NextFunction) => {
+    const post = await blogsRepository.find(req.body.blogId)
+
     if (!post) {
 
         res
