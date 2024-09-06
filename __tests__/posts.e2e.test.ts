@@ -1,23 +1,34 @@
-import {req} from './helpers/test-helpers'
-import {db, setDB} from '../src/db/db'
+import {req, testHelpers} from './helpers/test-helpers'
 import {SETTINGS} from '../src/settings'
 import {codedAuth, createString, dataset1, dataset2} from './helpers/datasets'
-import {PostInputModel} from '../src/input-output-types/posts-types'
-import {BlogInputModel} from "../src/input-output-types/blogs-types";
+import {PostInputModel, PostViewModel} from '../src/input-output-types/posts-types'
+import {BlogInputModel, BlogViewModel} from '../src/input-output-types/blogs-types';
+import {ObjectId} from 'mongodb';
+
 
 describe('/posts', () => {
-    // beforeAll(async () => { // очистка базы данных перед началом тестирования
-    //     setDB()
-    // })
+    beforeAll(async () => {
+        await testHelpers.connectDbForTests()
+    })
+    beforeEach(async () => { // очистка базы данных перед началом тестирования
+        await testHelpers.deleteAllData()
+    })
+
+    afterAll(async () => { // очистка базы данных перед началом тестирования
+        await testHelpers.deleteAllData()
+    })
 
     it('should create', async () => {
-        setDB(dataset1)
+        const blog: BlogViewModel = await testHelpers.createOneBlogInDb()
+
         const newPost: PostInputModel = {
             title: 't1',
             shortDescription: 's1',
             content: 'c1',
-            blogId: dataset1.blogs[0].id,
+            blogId: blog.id,
         }
+
+        expect(await testHelpers.countPostsInDb()).toEqual(0)
 
         const res = await req
             .post(SETTINGS.PATH.POSTS)
@@ -25,24 +36,23 @@ describe('/posts', () => {
             .send(newPost) // отправка данных
             .expect(201)
 
-        // console.log(res.body)
-
         expect(res.body.title).toEqual(newPost.title)
         expect(res.body.shortDescription).toEqual(newPost.shortDescription)
         expect(res.body.content).toEqual(newPost.content)
         expect(res.body.blogId).toEqual(newPost.blogId)
-        expect(res.body.blogName).toEqual(dataset1.blogs[0].name)
+        expect(res.body.blogName).toEqual(blog.name)
         expect(typeof res.body.id).toEqual('string')
-
-        expect(res.body).toEqual(db.posts[0])
+        expect(typeof res.body.createdAt).toEqual('string')
     })
-    it('shouldn\'t create 401', async () => {
-        setDB(dataset1)
+
+    it('shouldn\'t create, 401', async () => {
+        const blog: BlogViewModel = await testHelpers.createOneBlogInDb()
+
         const newPost: PostInputModel = {
             title: 't1',
             shortDescription: 's1',
             content: 'c1',
-            blogId: dataset1.blogs[0].id,
+            blogId: blog.id,
         }
 
         const res = await req
@@ -50,17 +60,16 @@ describe('/posts', () => {
             .send(newPost) // отправка данных
             .expect(401)
 
-        // console.log(res.body)
-
-        expect(db.posts.length).toEqual(0)
+        expect(await testHelpers.countPostsInDb()).toEqual(0)
     })
     it('shouldn\'t create', async () => {
-        setDB()
+        const blog: BlogViewModel = await testHelpers.createOneBlogInDb()
+
         const newPost: PostInputModel = {
             title: createString(31),
             content: createString(1001),
             shortDescription: createString(101),
-            blogId: '1',
+            blogId: '1'
         }
 
         const res = await req
@@ -69,113 +78,109 @@ describe('/posts', () => {
             .send(newPost) // отправка данных
             .expect(400)
 
-        // console.log(res.body)
-
         expect(res.body.errorsMessages.length).toEqual(4)
         expect(res.body.errorsMessages[0].field).toEqual('title')
         expect(res.body.errorsMessages[1].field).toEqual('shortDescription')
         expect(res.body.errorsMessages[2].field).toEqual('content')
         expect(res.body.errorsMessages[3].field).toEqual('blogId')
 
-        expect(db.posts.length).toEqual(0)
+        expect(await testHelpers.countPostsInDb()).toEqual(0)
     })
-    it('should get empty array', async () => {
-        setDB() // очистка базы данных если нужно
 
+    it('should get empty array', async () => {
         const res = await req
             .get(SETTINGS.PATH.POSTS)
-            .expect(200) // проверяем наличие эндпоинта
-
-        // console.log(res.body) // можно посмотреть ответ эндпоинта
+            .expect(200)
 
         expect(res.body.length).toEqual(0) // проверяем ответ эндпоинта
     })
     it('should get not empty array', async () => {
-        setDB(dataset2) // заполнение базы данных начальными данными если нужно
+        const blog = await testHelpers.createOneBlogInDb();
+        const post = await testHelpers.createOnePostInDb(blog.id)
 
         const res = await req
             .get(SETTINGS.PATH.POSTS)
             .expect(200)
 
-        // console.log(res.body)
+        const mappedPost = await testHelpers.findAndMapPost(post.id)
 
         expect(res.body.length).toEqual(1)
-        expect(res.body[0]).toEqual(dataset2.posts[0])
+        expect(res.body[0]).toEqual(mappedPost)
     })
-    it('shouldn\'t find', async () => {
-        setDB(dataset1)
 
+    it('shouldn\'t find test1, 404', async () => {
         const res = await req
             .get(SETTINGS.PATH.POSTS + '/1')
-            .expect(404) // проверка на ошибку
-
-        // console.log(res.body)
+            .expect(404)
+    })
+    it('shouldn\'t find test2, 404', async () => {
+        const res = await req
+            .get(SETTINGS.PATH.POSTS + '/' + (new ObjectId().toString()))
+            .expect(404)
     })
     it('should find', async () => {
-        setDB(dataset2)
+        const blog = await testHelpers.createOneBlogInDb();
+        const post = await testHelpers.createOnePostInDb(blog.id)
 
         const res = await req
-            .get(SETTINGS.PATH.POSTS + '/' + dataset2.posts[0].id)
+            .get(SETTINGS.PATH.POSTS + '/' + post.id)
             .expect(200) // проверка на ошибку
 
-        // console.log(res.body)
+        const mappedBlog = await testHelpers.findAndMapPost(post.id)
 
-        expect(res.body).toEqual(dataset2.posts[0])
+        expect(res.body).toEqual(mappedBlog)
     })
+
     it('should del', async () => {
-        setDB(dataset2)
+        const blog = await testHelpers.createOneBlogInDb();
+        const post = await testHelpers.createOnePostInDb(blog.id)
+
+        expect(await testHelpers.countPostsInDb()).toEqual(1)
 
         const res = await req
-            .delete(SETTINGS.PATH.POSTS + '/' + dataset2.posts[0].id)
+            .delete(SETTINGS.PATH.POSTS + '/' + post.id)
             .set({'Authorization': 'Basic ' + codedAuth})
-            .expect(204) // проверка на ошибку
+            .expect(204)
 
-        // console.log(res.body)
-
-        expect(db.posts.length).toEqual(0)
+        expect(await testHelpers.countPostsInDb()).toEqual(0)
     })
     it('shouldn\'t del', async () => {
-        setDB()
-
         const res = await req
             .delete(SETTINGS.PATH.POSTS + '/1')
             .set({'Authorization': 'Basic ' + codedAuth})
-            .expect(404) // проверка на ошибку
-
-        // console.log(res.body)
+            .expect(404)
     })
     it('shouldn\'t del 401', async () => {
-        setDB()
-
         const res = await req
             .delete(SETTINGS.PATH.POSTS + '/1')
-            .set({'Authorization': 'Basic' + codedAuth}) // no ' '
-            .expect(401) // проверка на ошибку
-
-        // console.log(res.body)
+            .set({'Authorization': 'Basic' + codedAuth}) // no space after Basic' '
+            .expect(401)
     })
+
     it('should update', async () => {
-        setDB(dataset2)
-        const post: PostInputModel = {
+        const blog = await testHelpers.createOneBlogInDb();
+        const post = await testHelpers.createOnePostInDb(blog.id)
+
+        const newPost: PostInputModel = {
             title: 't2',
             shortDescription: 's2',
             content: 'c2',
-            blogId: dataset2.blogs[1].id,
+            blogId: blog.id,
         }
 
         const res = await req
-            .put(SETTINGS.PATH.POSTS + '/' + dataset2.posts[0].id)
+            .put(SETTINGS.PATH.POSTS + '/' + post.id)
             .set({'Authorization': 'Basic ' + codedAuth})
-            .send(post)
-            .expect(204) // проверка на ошибку
+            .send(newPost)
+            .expect(204)
 
-        // console.log(res.body)
+        const updatedPost: PostViewModel | undefined = await testHelpers.findAndMapPost(post.id)
+        const expectedPost: PostViewModel = {...newPost, blogName: blog.name, id: post.id, createdAt: post.createdAt}
 
-        expect(db.posts[0]).toEqual({...db.posts[0], ...post, blogName: dataset2.blogs[1].name})
+        expect(updatedPost).toEqual(expectedPost)
     })
     it('shouldn\'t update 404', async () => {
-        setDB()
-        const post: PostInputModel = {
+        const newPost: PostInputModel = {
             title: 't1',
             shortDescription: 's1',
             content: 'c1',
@@ -185,14 +190,14 @@ describe('/posts', () => {
         const res = await req
             .put(SETTINGS.PATH.POSTS + '/1')
             .set({'Authorization': 'Basic ' + codedAuth})
-            .send(post)
-            .expect(404) // проверка на ошибку
-
-        // console.log(res.body)
+            .send(newPost)
+            .expect(404)
     })
     it('shouldn\'t update2', async () => {
-        setDB(dataset2)
-        const post: PostInputModel = {
+        const blog = await testHelpers.createOneBlogInDb();
+        const post = await testHelpers.createOnePostInDb(blog.id)
+
+        const newPost: PostInputModel = {
             title: createString(31),
             content: createString(1001),
             shortDescription: createString(101),
@@ -200,14 +205,13 @@ describe('/posts', () => {
         }
 
         const res = await req
-            .put(SETTINGS.PATH.POSTS + '/' + dataset2.posts[0].id)
+            .put(SETTINGS.PATH.POSTS + '/' + post.id)
             .set({'Authorization': 'Basic ' + codedAuth})
-            .send(post)
-            .expect(400) // проверка на ошибку
+            .send(newPost)
+            .expect(400)
 
-        // console.log(res.body)
+        expect(post).toEqual(await testHelpers.findAndMapPost(post.id))
 
-        expect(db).toEqual(dataset2)
         expect(res.body.errorsMessages.length).toEqual(4)
         expect(res.body.errorsMessages[0].field).toEqual('title')
         expect(res.body.errorsMessages[1].field).toEqual('shortDescription')
@@ -215,8 +219,10 @@ describe('/posts', () => {
         expect(res.body.errorsMessages[3].field).toEqual('blogId')
     })
     it('shouldn\'t update 401', async () => {
-        setDB(dataset2)
-        const post: PostInputModel = {
+        const blog = await testHelpers.createOneBlogInDb();
+        const post = await testHelpers.createOnePostInDb(blog.id)
+
+        const newPost: PostInputModel = {
             title: createString(31),
             content: createString(1001),
             shortDescription: createString(101),
@@ -224,13 +230,11 @@ describe('/posts', () => {
         }
 
         const res = await req
-            .put(SETTINGS.PATH.POSTS + '/' + dataset2.posts[0].id)
+            .put(SETTINGS.PATH.POSTS + '/' + post.id)
             .set({'Authorization': 'Basic ' + codedAuth + 'error'})
-            .send(post)
-            .expect(401) // проверка на ошибку
+            .send(newPost)
+            .expect(401)
 
-        // console.log(res.body)
-
-        expect(db).toEqual(dataset2)
+        expect(post).toEqual(await testHelpers.findAndMapPost(post.id))
     })
 })

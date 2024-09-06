@@ -4,6 +4,7 @@ import {SETTINGS} from './settings'
 import {blogsRouter} from './features/blogs'
 import {testingRouter} from './features/testing'
 import {postsRouter} from './features/posts'
+import {connectToDB} from './db/mongo-db';
 
 export const app = express() // создать приложение
 app.use(express.json()) // создание свойств-объектов body и query во всех реквестах

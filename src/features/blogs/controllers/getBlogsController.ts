@@ -1,7 +1,8 @@
 import {Request, Response} from 'express'
 import {BlogViewModel} from '../../../input-output-types/blogs-types'
-import {blogsRepository} from '../blogsRepository'
+import {blogsRepository} from '../blogsRepositoryMongoDb'
 
-export const getBlogsController = (req: Request, res: Response<BlogViewModel[]>) => {
-    res.status(200).json(blogsRepository.getAll())
+export const getBlogsController = async (req: Request, res: Response<BlogViewModel[]>) => {
+    const blogs = await blogsRepository.getAll();
+    res.status(200).json(blogs)
 }

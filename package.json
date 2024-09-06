@@ -6,7 +6,7 @@
   "scripts": {
     "watch": "tsc -w",
     "dev": "yarn nodemon --inspect dist/index.js",
-    "jest": "jest -i",
+    "jest": "jest -i --detectOpenHandles",
     "jest:coverage": "jest -i --coverage"
   },
   "dependencies": {

@@ -1,8 +1,9 @@
-import {body} from 'express-validator'
+import {body, param} from 'express-validator'
 import {inputCheckErrorsMiddleware} from '../../../global-middlewares/inputCheckErrorsMiddleware'
 import {NextFunction, Request, Response} from 'express'
-import {blogsRepository} from '../blogsRepository'
+import {blogsRepository} from '../blogsRepositoryMongoDb'
 import {adminMiddleware} from '../../../global-middlewares/admin-middleware'
+import {ObjectId} from 'mongodb';
 
 // name: string // max 15
 // description: string // max 500
@@ -15,9 +16,14 @@ export const descriptionValidator = body('description').isString().withMessage('
 export const websiteUrlValidator = body('websiteUrl').isString().withMessage('not string')
     .trim().isURL().withMessage('not url')
     .isLength({min: 1, max: 100}).withMessage('more then 100 or 0')
+export const findBlogValidator = async (req: Request<{ id: string }>, res: Response, next: NextFunction) => {
+    if (!ObjectId.isValid(req.params.id)) {
+        res.status(404).json({error: 'invalid id'})
+        return
+    }
+    const post = await blogsRepository.find(req.params.id)
 
-export const findBlogValidator = (req: Request<{ id: string }>, res: Response, next: NextFunction) => {
-    if (blogsRepository.find(req.params.id)) {
+    if (post) {
         next()
     } else {
         res.sendStatus(404)

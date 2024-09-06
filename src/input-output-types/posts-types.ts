@@ -12,4 +12,5 @@ export type PostViewModel = {
     content: string // max 1000
     blogId: string // valid
     blogName: string
+    createdAt: string
 }

@@ -1,7 +1,9 @@
 import {Request, Response} from 'express'
 import {PostViewModel} from '../../../input-output-types/posts-types'
-import {postsRepository} from '../postsRepository'
+import {postsRepository} from '../postsRepositoryMongoDb'
 
-export const getPostsController = (req: Request, res: Response<PostViewModel[]>) => {
-    res.status(200).json(postsRepository.getAll())
+export const getPostsController = async (req: Request, res: Response<PostViewModel[]>) => {
+    const posts = await postsRepository.getAll();
+
+    res.status(200).json(posts)
 }
