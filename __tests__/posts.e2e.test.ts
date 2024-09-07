@@ -1,14 +1,13 @@
 import {req, testHelpers} from './helpers/test-helpers'
 import {SETTINGS} from '../src/settings'
-import {codedAuth, createString, dataset1, dataset2} from './helpers/datasets'
+import {codedAuth, createString} from './helpers/datasets'
 import {PostInputModel, PostViewModel} from '../src/input-output-types/posts-types'
-import {BlogInputModel, BlogViewModel} from '../src/input-output-types/blogs-types';
+import {BlogViewModel} from '../src/input-output-types/blogs-types';
 import {ObjectId} from 'mongodb';
-
 
 describe('/posts', () => {
     beforeAll(async () => {
-        await testHelpers.connectDbForTests()
+        await testHelpers.connectToDbForTests()
     })
     beforeEach(async () => { // очистка базы данных перед началом тестирования
         await testHelpers.deleteAllData()
@@ -16,6 +15,7 @@ describe('/posts', () => {
 
     afterAll(async () => { // очистка базы данных перед началом тестирования
         await testHelpers.deleteAllData()
+        await testHelpers.closeConnectToDbForTests()
     })
 
     it('should create', async () => {
@@ -44,7 +44,6 @@ describe('/posts', () => {
         expect(typeof res.body.id).toEqual('string')
         expect(typeof res.body.createdAt).toEqual('string')
     })
-
     it('shouldn\'t create, 401', async () => {
         const blog: BlogViewModel = await testHelpers.createOneBlogInDb()
 
@@ -62,7 +61,7 @@ describe('/posts', () => {
 
         expect(await testHelpers.countPostsInDb()).toEqual(0)
     })
-    it('shouldn\'t create', async () => {
+    it('shouldn\'t create with incorrect blogId, 400', async () => {
         const blog: BlogViewModel = await testHelpers.createOneBlogInDb()
 
         const newPost: PostInputModel = {
@@ -83,6 +82,29 @@ describe('/posts', () => {
         expect(res.body.errorsMessages[1].field).toEqual('shortDescription')
         expect(res.body.errorsMessages[2].field).toEqual('content')
         expect(res.body.errorsMessages[3].field).toEqual('blogId')
+
+        expect(await testHelpers.countPostsInDb()).toEqual(0)
+    })
+    it('shouldn\'t create with correct blogId, 400', async () => {
+        const blog: BlogViewModel = await testHelpers.createOneBlogInDb()
+
+        const newPost: PostInputModel = {
+            title: createString(31),
+            content: createString(1001),
+            shortDescription: createString(101),
+            blogId: blog.id
+        }
+
+        const res = await req
+            .post(SETTINGS.PATH.POSTS)
+            .set({'Authorization': 'Basic ' + codedAuth})
+            .send(newPost) // отправка данных
+            .expect(400)
+
+        expect(res.body.errorsMessages.length).toEqual(3)
+        expect(res.body.errorsMessages[0].field).toEqual('title')
+        expect(res.body.errorsMessages[1].field).toEqual('shortDescription')
+        expect(res.body.errorsMessages[2].field).toEqual('content')
 
         expect(await testHelpers.countPostsInDb()).toEqual(0)
     })
@@ -179,12 +201,14 @@ describe('/posts', () => {
 
         expect(updatedPost).toEqual(expectedPost)
     })
-    it('shouldn\'t update 404', async () => {
+    it('shouldn\'t update with incorrect id, 404', async () => {
+        const blog = await testHelpers.createOneBlogInDb();
+
         const newPost: PostInputModel = {
             title: 't1',
             shortDescription: 's1',
             content: 'c1',
-            blogId: dataset1.blogs[0].id,
+            blogId: blog.id,
         }
 
         const res = await req
@@ -193,7 +217,23 @@ describe('/posts', () => {
             .send(newPost)
             .expect(404)
     })
-    it('shouldn\'t update2', async () => {
+    it('shouldn\'t update with not found id, 404', async () => {
+        const blog = await testHelpers.createOneBlogInDb();
+
+        const newPost: PostInputModel = {
+            title: 't1',
+            shortDescription: 's1',
+            content: 'c1',
+            blogId: blog.id,
+        }
+
+        const res = await req
+            .put(SETTINGS.PATH.POSTS + '/' + new ObjectId().toString())
+            .set({'Authorization': 'Basic ' + codedAuth})
+            .send(newPost)
+            .expect(404)
+    })
+    it('shouldn\'t update2, 400', async () => {
         const blog = await testHelpers.createOneBlogInDb();
         const post = await testHelpers.createOnePostInDb(blog.id)
 

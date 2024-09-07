@@ -1,6 +1,6 @@
 import {app} from '../../src/app'
 import {agent} from 'supertest'
-import {connectToDB, db} from '../../src/db/mongo-db';
+import {closeConnectToDB, connectToDB, db} from '../../src/db/mongo-db';
 import {SETTINGS} from '../../src/settings';
 import {BlogInputModel, BlogViewModel} from '../../src/input-output-types/blogs-types';
 import {codedAuth} from './datasets';
@@ -13,11 +13,15 @@ import {PostDbType} from '../../src/db/post-db-type';
 export const req = agent(app)
 
 export const testHelpers = {
-    connectDbForTests: async () => {
+    connectToDbForTests: async () => {
         if (!await connectToDB(SETTINGS.MONGO_URL, SETTINGS.DB_NAME_FOR_TESTS)) {
             console.log('not connect to db');
             process.exit(1);
         }
+    },
+
+    closeConnectToDbForTests: async () => {
+        await closeConnectToDB()
     },
 
     deleteAllData: async () => {

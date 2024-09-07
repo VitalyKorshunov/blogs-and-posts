@@ -1,8 +1,8 @@
 import {Request, Response} from 'express'
-import {postsRepository} from '../postsRepositoryMongoDb'
+import {postsService} from '../domain/posts-service';
 
 export const delPostController = async (req: Request<{id: string}>, res: Response) => {
-    await postsRepository.del(req.params.id)
+    await postsService.del(req.params.id)
 
     res.sendStatus(204)
 }

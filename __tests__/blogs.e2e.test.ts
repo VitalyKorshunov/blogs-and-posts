@@ -4,17 +4,16 @@ import {BlogInputModel} from '../src/input-output-types/blogs-types'
 import {codedAuth, createString} from './helpers/datasets'
 import {ObjectId} from 'mongodb';
 
-
-
 describe('/blogs', () => {
     beforeAll(async () => {
-        await testHelpers.connectDbForTests()
+        await testHelpers.connectToDbForTests()
     })
     beforeEach(async () => { // очистка базы данных перед началом тестирования
         await testHelpers.deleteAllData()
     })
     afterAll(async () => { // очистка базы данных перед началом тестирования
         await testHelpers.deleteAllData()
+        await testHelpers.closeConnectToDbForTests()
     })
 
     it('should create blog, 201', async () => {
@@ -23,7 +22,6 @@ describe('/blogs', () => {
             description: 'd1',
             websiteUrl: 'http://some.com',
         }
-
         const res = await req
             .post(SETTINGS.PATH.BLOGS)
             .set({'Authorization': 'Basic ' + codedAuth})

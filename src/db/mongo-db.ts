@@ -28,3 +28,10 @@ export const connectToDB = async (MONGO_URL: string, DB_NAME: string) => {
         return false
     }
 }
+
+export const closeConnectToDB = async () => {
+     await client.close()
+    console.log('connect to db is closed')
+
+
+}
