@@ -85,6 +85,30 @@ describe('/posts', () => {
 
         expect(await testHelpers.countPostsInDb()).toEqual(0)
     })
+    it('shouldn\'t create with not found blogId, 400', async () => {
+        const blog: BlogViewModel = await testHelpers.createOneBlogInDb()
+
+        const newPost: PostInputModel = {
+            title: createString(31),
+            content: createString(1001),
+            shortDescription: createString(101),
+            blogId: '63189b06003380064c4193be'
+        }
+
+        const res = await req
+            .post(SETTINGS.PATH.POSTS)
+            .set({'Authorization': 'Basic ' + codedAuth})
+            .send(newPost) // отправка данных
+            .expect(400)
+
+        expect(res.body.errorsMessages.length).toEqual(4)
+        expect(res.body.errorsMessages[0].field).toEqual('title')
+        expect(res.body.errorsMessages[1].field).toEqual('shortDescription')
+        expect(res.body.errorsMessages[2].field).toEqual('content')
+        expect(res.body.errorsMessages[3].field).toEqual('blogId')
+
+        expect(await testHelpers.countPostsInDb()).toEqual(0)
+    })
     it('shouldn\'t create with correct blogId, 400', async () => {
         const blog: BlogViewModel = await testHelpers.createOneBlogInDb()
 

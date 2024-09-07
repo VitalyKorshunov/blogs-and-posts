@@ -18,7 +18,9 @@ export const blogIdValidator = body('blogId').isString().withMessage('not string
     .custom(async (blogId: string) => {
         const blog: BlogDbType | null = await blogsService.find(blogId)
 
-        return blog?._id
+        if (!blog) {
+            throw new Error('no blog')
+        }
     }).withMessage('no blog')
 
 export const findPostValidator = async (req: Request<{ id: string }>, res: Response, next: NextFunction) => {
