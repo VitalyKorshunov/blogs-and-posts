@@ -14,7 +14,7 @@ export const req = agent(app)
 
 export const testHelpers = {
     connectToDbForTests: async () => {
-        if (!await connectToDB(SETTINGS.MONGO_URL, SETTINGS.DB_NAME_FOR_TESTS)) {
+        if (!await connectToDB('mongodb://localhost:27017', SETTINGS.DB_NAME)) {
             console.log('not connect to db');
             process.exit(1);
         }

@@ -23,7 +23,6 @@ export const blogIdValidator = body('blogId').isString().withMessage('not string
 
 export const findPostValidator = async (req: Request<{ id: string }>, res: Response, next: NextFunction) => {
     if (!ObjectId.isValid(req.params.id)) {
-        console.log('Тут 401 бы')
         res.status(404).json({})
         return
     }
