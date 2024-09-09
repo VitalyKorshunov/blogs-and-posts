@@ -16,12 +16,10 @@ export const contentValidator = body('content').isString().withMessage('not stri
     .isLength({min: 1, max: 1000}).withMessage('more then 1000 or 0')
 export const blogIdValidator = body('blogId').isString().withMessage('not string').trim()
     .custom(async (blogId: string) => {
+        if (!ObjectId.isValid(blogId)) throw new Error('invalid id')
         const blog: BlogDbType | null = await blogsService.find(blogId)
-
-        if (!blog) {
-            throw new Error('no blog')
-        }
-    }).withMessage('no blog')
+        if (!blog) throw new Error('no blog')
+    })
 
 export const findPostValidator = async (req: Request<{ id: string }>, res: Response, next: NextFunction) => {
     if (!ObjectId.isValid(req.params.id)) {

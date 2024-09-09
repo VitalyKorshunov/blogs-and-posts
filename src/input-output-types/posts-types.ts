@@ -5,6 +5,14 @@ export type PostInputModel = {
     blogId: string // valid
 }
 
+export type BlogPostInputModel = {
+    title: string // max 30
+    shortDescription: string // max 100
+    content: string // max 1000
+}
+
+export type PostId = string
+
 export type PostViewModel = {
     id: string
     title: string // max 30

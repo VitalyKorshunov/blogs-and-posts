@@ -1,12 +1,14 @@
-import {BlogInputModel, BlogViewModel} from '../../../input-output-types/blogs-types';
+import {BlogId, BlogInputModel, BlogViewModel} from '../../../input-output-types/blogs-types';
 import {BlogDbType} from '../../../db/blog-db-type';
 import {ObjectId} from 'mongodb';
 import {blogsRepository} from '../repositories/blogsRepository';
 import {blogsQueryRepository} from '../repositories/blogsQueryRepository';
+import {BlogPostInputModel, PostId} from '../../../input-output-types/posts-types';
+import {postsService} from '../../posts/domain/posts-service';
 
 
 export const blogsService = {
-    async create(blog: BlogInputModel): Promise<string> {
+    async create(blog: BlogInputModel): Promise<BlogId> {
         const newBlog: BlogDbType = {
             _id: new ObjectId(),
             name: blog.name,
@@ -17,11 +19,11 @@ export const blogsService = {
         }
         return await blogsRepository.create(newBlog)
     },
-    async find(id: string): Promise<BlogDbType | null> {
+    async find(id: BlogId): Promise<BlogDbType | null> {
         //todo Как тут лучше было бы написать типизацию? С null или без?
         return await blogsQueryRepository.find(id);
     },
-    async findAndMap(id: string): Promise<BlogViewModel> {
+    async findAndMap(id: BlogId): Promise<BlogViewModel> {
         // return await blogsRepository.findAndMap(id)
         const blog: BlogDbType | null = await this.find(id)
 
@@ -32,14 +34,15 @@ export const blogsService = {
 
         return blogs.map(blog => this.map(blog))
     },
-    async del(id: string): Promise<number> {
+    async del(id: BlogId): Promise<number> {
         return await blogsRepository.del(id)
     },
-    async put(blog: BlogInputModel, id: string): Promise<number> {
+    async put(blog: BlogInputModel, id: BlogId): Promise<number> {
         const updatedBlog = {...blog}
 
         return await blogsRepository.put(updatedBlog, id)
     },
+
 
     map(blog: BlogDbType) {
         const blogForOutput: BlogViewModel = {
@@ -51,5 +54,8 @@ export const blogsService = {
             isMembership: blog.isMembership
         }
         return blogForOutput
+    },
+    async createPostForBlog(blogId: BlogId, post: BlogPostInputModel): Promise<PostId> {
+        return await postsService.create({blogId: blogId, ...post})
     },
 }
