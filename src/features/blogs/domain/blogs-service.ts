@@ -1,13 +1,27 @@
-import {BlogId, BlogInputModel, BlogViewModel} from '../../../input-output-types/blogs-types';
+import {BlogId, BlogInputModel, BlogPostFilterViewModel, BlogViewModel} from '../../../input-output-types/blogs-types';
 import {BlogDbType} from '../../../db/blog-db-type';
 import {ObjectId} from 'mongodb';
 import {blogsRepository} from '../repositories/blogsRepository';
 import {blogsQueryRepository} from '../repositories/blogsQueryRepository';
 import {BlogPostInputModel, PostId} from '../../../input-output-types/posts-types';
 import {postsService} from '../../posts/domain/posts-service';
+import {postsQueryRepository} from '../../posts/repositories/postsQueryRepository';
+import {SortQueryDbType} from '../../../db/query-db-type';
 
 
 export const blogsService = {
+    map(blog: BlogDbType) {
+        const blogForOutput: BlogViewModel = {
+            id: blog._id.toString(),
+            description: blog.description,
+            websiteUrl: blog.websiteUrl,
+            name: blog.name,
+            createdAt: blog.createdAt,
+            isMembership: blog.isMembership
+        }
+        return blogForOutput
+    },
+
     async create(blog: BlogInputModel): Promise<BlogId> {
         const newBlog: BlogDbType = {
             _id: new ObjectId(),
@@ -20,7 +34,6 @@ export const blogsService = {
         return await blogsRepository.create(newBlog)
     },
     async find(id: BlogId): Promise<BlogDbType | null> {
-        //todo Как тут лучше было бы написать типизацию? С null или без?
         return await blogsQueryRepository.find(id);
     },
     async findAndMap(id: BlogId): Promise<BlogViewModel> {
@@ -42,20 +55,37 @@ export const blogsService = {
 
         return await blogsRepository.put(updatedBlog, id)
     },
-
-
-    map(blog: BlogDbType) {
-        const blogForOutput: BlogViewModel = {
-            id: blog._id.toString(),
-            description: blog.description,
-            websiteUrl: blog.websiteUrl,
-            name: blog.name,
-            createdAt: blog.createdAt,
-            isMembership: blog.isMembership
-        }
-        return blogForOutput
-    },
     async createPostForBlog(blogId: BlogId, post: BlogPostInputModel): Promise<PostId> {
         return await postsService.create({blogId: blogId, ...post})
     },
+    async sortPostsInBlog(id: BlogId, query: any): Promise<BlogPostFilterViewModel> {
+        console.log('before newQuery', {...query})
+        // const newQuery = {
+        //     pageNumber: query.pageNumber ? query.pageNumber : 1,
+        //     pageSize: query.pageSize ? query.pageSize : 10,
+        //     sortBy: query.sortBy ? query.sortBy : 'CreatedAt',
+        //     sortDirection: query.sortDirection ? query.sortDirection : 'desc'
+        // }
+        // console.log('newQuery:', newQuery)
+
+        const queryToDb: SortQueryDbType = {
+            pageSize: query.pageSize,
+            sortDirection: query.sortDirection,
+            countSkips: (query.pageNumber - 1) * query.pageSize,
+            sortBy: query.sortBy
+        }
+
+        const posts = await postsQueryRepository.filterBlogPost(id, queryToDb);
+        console.log(posts)
+        const totalPosts = await postsQueryRepository.totalPosts(id)
+        // const searchTerm = query.
+        const pagesCount = Math.ceil(totalPosts / query.pageSize)
+        return {
+            pagesCount: pagesCount,
+            page: query.pageNumber,
+            pageSize: query.pageSize,
+            totalCount: totalPosts,
+            items:  posts.map(post => postsService.map(post))
+        }
+    }
 }

@@ -22,7 +22,6 @@ export const testHelpers = {
 
     closeConnectToDbForTests: async () => {
         await closeConnectToDB()
-        console.log('connect to db closed');
     },
 
     deleteAllData: async () => {

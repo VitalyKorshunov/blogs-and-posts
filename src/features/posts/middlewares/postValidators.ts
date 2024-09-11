@@ -10,11 +10,14 @@ import {BlogDbType} from '../../../db/blog-db-type';
 
 export const titleValidator = body('title').isString().withMessage('not string').trim()
     .isLength({min: 1, max: 30}).withMessage('more than 30 or 0')
+
 export const shortDescriptionValidator = body('shortDescription').isString().withMessage('not string').trim()
     .isLength({min: 1, max: 100}).withMessage('more than 100 or 0')
+
 export const contentValidator = body('content').isString().withMessage('not string').trim()
     .isLength({min: 1, max: 1000}).withMessage('more then 1000 or 0')
-export const blogIdValidator = body('blogId').isString().withMessage('not string').trim()
+
+export const blogIdBodyValidator = body('blogId').isString().withMessage('not string').trim()
     .custom(async (blogId: string) => {
         if (!ObjectId.isValid(blogId)) throw new Error('invalid id')
         const blog: BlogDbType | null = await blogsService.find(blogId)
@@ -45,7 +48,8 @@ export const postValidators = [
     titleValidator,
     shortDescriptionValidator,
     contentValidator,
-    blogIdValidator,
+    blogIdBodyValidator,
 
     inputCheckErrorsMiddleware,
 ]
+

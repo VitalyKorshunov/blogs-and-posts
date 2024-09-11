@@ -10,14 +10,17 @@ export type BodyType = {
     // ...
 }
 
-export type QueryType = {
-    search?: string
+export type SortQueryType = {
+    pageNumber: number
+    pageSize: number
+    sortBy: string
+    sortDirection: 'asc' | 'desc'
 }
 
 export type OutputType = void /*| OutputErrorsType | OutputVideoType*/
 
 export const someController = (
-    req: Request<ParamType, OutputType, BodyType, QueryType>,
+    req: Request<ParamType, OutputType, BodyType, SortQueryType>,
     res: Response<OutputType>
 ) => {
 

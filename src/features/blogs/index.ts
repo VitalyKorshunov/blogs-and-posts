@@ -1,21 +1,15 @@
 import {Router} from 'express'
-import {createBlogController} from './controllers/createBlogController'
-import {getBlogsController} from './controllers/getBlogsController'
-import {findBlogController} from './controllers/findBlogController'
-import {delBlogController} from './controllers/delBlogController'
-import {putBlogController} from './controllers/putBlogController'
-import {blogValidators, findBlogValidator} from './middlewares/blogValidators'
+import {blogPostValidators, blogValidators, findBlogValidator, sortPostsValidators} from './middlewares/blogValidators'
 import {adminMiddleware} from '../../global-middlewares/admin-middleware'
-import {postValidators} from '../posts/middlewares/postValidators';
-import {createPostForBlogController} from './controllers/createPostForBlogController';
+import {SETTINGS} from '../../settings';
+import {blogsControllers} from './controllers/blogsControllers';
 
 export const blogsRouter = Router()
 
-blogsRouter.post('/', ...blogValidators, createBlogController)
-blogsRouter.post('/:id/posts', ...postValidators, createPostForBlogController)
-blogsRouter.get('/', getBlogsController)
-blogsRouter.get('/:id', findBlogValidator, findBlogController)
-blogsRouter.delete('/:id', adminMiddleware, findBlogValidator, delBlogController)
-blogsRouter.put('/:id', findBlogValidator, ...blogValidators, putBlogController)
-
-// не забудьте добавить роут в апп
+blogsRouter.post('/', ...blogValidators, blogsControllers.createBlog)
+blogsRouter.post('/:id' + SETTINGS.PATH.POSTS, ...blogPostValidators, blogsControllers.createPostInBlog)
+blogsRouter.get('/', blogsControllers.getBlogs)
+blogsRouter.get('/:id', findBlogValidator, blogsControllers.findBlog)
+blogsRouter.get('/:id' + SETTINGS.PATH.POSTS, ...sortPostsValidators, blogsControllers.getSortedPostsInBlog)
+blogsRouter.delete('/:id', adminMiddleware, findBlogValidator, blogsControllers.delBlog)
+blogsRouter.put('/:id', findBlogValidator, ...blogValidators, blogsControllers.putBlog)

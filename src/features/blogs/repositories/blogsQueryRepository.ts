@@ -13,7 +13,11 @@ export const blogsQueryRepository = {
 
         return await blogCollection.findOne(this.getValidQueryId(id));
     },
-    async getAll(): Promise<BlogDbType[]> {
+    async getAll(paginatedQuery: any = '', term: string = ''): Promise</*BlogViewModel*/BlogDbType[]> {
+        const filter = {
+            name: term
+        }
+        // const blogs = blogCollection.find(filter).toArray()
         //todo: Какой способ поиска и фильтрации предпочтительней:
         // 1). find({_id: id}, {field: true, ...etc})
         // 2). findOne({_id: id}) и затем маппинг
