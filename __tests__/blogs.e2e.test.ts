@@ -201,6 +201,82 @@ describe('/blogs', () => {
         expect(res.body).toEqual(createdBlog)
     })
 
+    it('should find filtered posts in blog, 200', async () => {
+        const createdBlog = await testHelpers.createOneBlogInDb()
+        const post1 = await testHelpers.createOnePostInDb(createdBlog.id)
+        const post2 = await testHelpers.createOnePostInDb(createdBlog.id)
+        const post3 = await testHelpers.createOnePostInDb(createdBlog.id)
+
+        const query = {
+            pageNumber: 3,
+            pageSize: 1,
+            sortBy: 'createdAt',
+            sortDirection: 'asc'
+        }
+
+        const res = await req
+            .get(SETTINGS.PATH.BLOGS + '/' + createdBlog.id + SETTINGS.PATH.POSTS)
+            .query(query)
+            .expect(200)
+
+        expect(res.body).toEqual({items: [post3], pagesCount: 3, page: 3, pageSize: 1, totalCount: 3})
+
+        const query2 = {
+            pageNumber: 1,
+            pageSize: 2,
+            sortBy: 'createdAt',
+            sortDirection: 'desc'
+        }
+
+        const res2 = await req
+            .get(SETTINGS.PATH.BLOGS + '/' + createdBlog.id + SETTINGS.PATH.POSTS)
+            .query(query2)
+            .expect(200)
+
+        expect(res2.body).toEqual({items: [post3, post2], pagesCount: 2, page: 1, pageSize: 2, totalCount: 3})
+
+        const query3 = {}
+
+        const res3 = await req
+            .get(SETTINGS.PATH.BLOGS + '/' + createdBlog.id + SETTINGS.PATH.POSTS)
+            .query(query3)
+            .expect(200)
+
+        expect(res3.body).toEqual({items: [post3, post2, post1], pagesCount: 1, page: 1, pageSize: 10, totalCount: 3})
+
+        const query4 = {
+            pageNumber: 1,
+            pageSize: 101, //10
+            sortBy: '1234', // _id
+            sortDirection: 'asd' // desc
+        }
+
+        const res4 = await req
+            .get(SETTINGS.PATH.BLOGS + '/' + createdBlog.id + SETTINGS.PATH.POSTS)
+            .query(query4)
+            .expect(200)
+
+        expect(res4.body).toEqual({items: [post1, post2, post3], pagesCount: 1, page: 1, pageSize: 10, totalCount: 3})
+    })
+    it('shouldn\'t find filtered posts in blog, 404', async () => {
+        const createdBlog = await testHelpers.createOneBlogInDb()
+        const post1 = await testHelpers.createOnePostInDb(createdBlog.id)
+        const post2 = await testHelpers.createOnePostInDb(createdBlog.id)
+        const post3 = await testHelpers.createOnePostInDb(createdBlog.id)
+
+        const query = {
+            pageNumber: 1,
+            pageSize: 101,
+            sortBy: '1234',
+            sortDirection: 'asd'
+        }
+
+        const res = await req
+            .get(SETTINGS.PATH.BLOGS + '/' + createdBlog.id + '1' + SETTINGS.PATH.POSTS)
+            .query(query)
+            .expect(404)
+    })
+
     it('should del, 204', async () => {
         const createdBlog = await testHelpers.createOneBlogInDb()
 

@@ -17,17 +17,22 @@ export const websiteUrlValidator = body('websiteUrl').isString().withMessage('no
     .trim().isURL().withMessage('not url')
     .isLength({min: 1, max: 100}).withMessage('more then 100 or 0')
 
-export const pageNumberValidator = query('pageNumber').default(1)
-    .toInt().isInt().withMessage('incorrect value')
+export const pageNumberValidator = query('pageNumber').default(1).toInt()
+    .customSanitizer(pageNumber => {
+        return (isNaN(pageNumber)) ? 1 : pageNumber
+    })
 
-export const pageSizeValidator = query('pageSize').default(10)
-    .toInt().isInt().withMessage('incorrect number')
+export const pageSizeValidator = query('pageSize').default(10).toInt()
+    .customSanitizer(pageSize => {
+        return (isNaN(pageSize) || pageSize > 100) ? 10 : pageSize
+    })
 
-export const sortByValidator = query('sortBy').default('createdAt')
-    .isString().withMessage('not string').trim()
+export const sortByValidator = query('sortBy').default('createdAt').trim()
 
 export const sortDirectionValidator = query('sortDirection').default('desc')
-    .isString().withMessage('not string').trim().toLowerCase().isIn(['desc', 'asc', 'ascending', 'descending', 1, -1]).withMessage('incorrect value')
+    .trim().toLowerCase().customSanitizer(sortDirection => {
+        return (['desc', 'asc'].includes(sortDirection)) ? sortDirection : 'desc'
+    })
 
 export const findBlogValidator = async (req: Request<{ id: string }>, res: Response, next: NextFunction) => {
     if (!ObjectId.isValid(req.params.id)) {
@@ -67,6 +72,8 @@ export const blogPostValidators = [
 ]
 
 export const sortPostsValidators = [
+    findBlogValidator,
+
     pageNumberValidator,
     pageSizeValidator,
     sortByValidator,

@@ -22,13 +22,11 @@ export const postsQueryRepository = {
 
         return await postCollection
             .find({blogId: id})
-            .sort({[query.sortBy]: query.sortDirection === 'desc' ? -1 : 1})
+            .sort({[query.sortBy]: query.sortDirection.includes('asc' || 'ascending') ? 1 : -1})
             .skip(query.countSkips)
             .limit(query.pageSize).toArray() as PostDbType[]
     },
     async totalPosts(id: BlogId): Promise<number> {
-        const res =  await postCollection.countDocuments({blogId: id})
-        console.log('totalPosts from db', res)
-        return res
+        return await postCollection.countDocuments({blogId: id})
     }
 }
