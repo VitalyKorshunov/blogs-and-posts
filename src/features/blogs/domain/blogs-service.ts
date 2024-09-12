@@ -59,14 +59,6 @@ export const blogsService = {
         return await postsService.create({blogId: blogId, ...post})
     },
     async sortPostsInBlog(id: BlogId, query: any): Promise<BlogPostFilterViewModel> {
-        console.log('before newQuery', {...query})
-        // const newQuery = {
-        //     pageNumber: query.pageNumber ? query.pageNumber : 1,
-        //     pageSize: query.pageSize ? query.pageSize : 10,
-        //     sortBy: query.sortBy ? query.sortBy : 'CreatedAt',
-        //     sortDirection: query.sortDirection ? query.sortDirection : 'desc'
-        // }
-        // console.log('newQuery:', newQuery)
 
         const queryToDb: SortQueryDbType = {
             pageSize: query.pageSize,
@@ -75,8 +67,7 @@ export const blogsService = {
             sortBy: query.sortBy
         }
 
-        const posts = await postsQueryRepository.filterBlogPost(id, queryToDb);
-        console.log(posts)
+        const posts = await postsQueryRepository.filterBlogPost(queryToDb, id);
         const totalPosts = await postsQueryRepository.totalPosts(id)
         // const searchTerm = query.
         const pagesCount = Math.ceil(totalPosts / query.pageSize)
@@ -85,7 +76,7 @@ export const blogsService = {
             page: query.pageNumber,
             pageSize: query.pageSize,
             totalCount: totalPosts,
-            items:  posts.map(post => postsService.map(post))
+            items: posts.map(post => postsService.map(post))
         }
     }
 }

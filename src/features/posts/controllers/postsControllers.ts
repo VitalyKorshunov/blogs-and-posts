@@ -1,6 +1,7 @@
 import {Request, Response} from 'express';
 import {PostInputModel, PostViewModel} from '../../../input-output-types/posts-types';
 import {postsService} from '../domain/posts-service';
+import {BlogPostFilterViewModel} from '../../../input-output-types/blogs-types';
 
 export const postsControllers = {
     async createPost(req: Request<any, any, PostInputModel>, res: Response<PostViewModel>) {
@@ -24,8 +25,8 @@ export const postsControllers = {
             .json(post)
     },
 
-    async getPosts(req: Request, res: Response<PostViewModel[]>) {
-        const posts = await postsService.getAll();
+    async getPosts(req: Request, res: Response<BlogPostFilterViewModel>) {
+        const posts = await postsService.sortPosts(req.query);
         res
             .status(200)
             .json(posts)

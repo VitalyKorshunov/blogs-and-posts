@@ -1,4 +1,4 @@
-import {body} from 'express-validator'
+import {body, query} from 'express-validator'
 import {inputCheckErrorsMiddleware} from '../../../global-middlewares/inputCheckErrorsMiddleware'
 import {NextFunction, Request, Response} from 'express'
 import {adminMiddleware} from '../../../global-middlewares/admin-middleware'
@@ -7,6 +7,7 @@ import {blogsService} from '../../blogs/domain/blogs-service';
 import {postsService} from '../domain/posts-service';
 import {PostDbType} from '../../../db/post-db-type';
 import {BlogDbType} from '../../../db/blog-db-type';
+
 
 export const titleValidator = body('title').isString().withMessage('not string').trim()
     .isLength({min: 1, max: 30}).withMessage('more than 30 or 0')
@@ -42,6 +43,23 @@ export const findPostValidator = async (req: Request<{ id: string }>, res: Respo
     }
 }
 
+ const pageNumberValidator = query('pageNumber').default(1).toInt()
+    .customSanitizer(pageNumber => {
+        return (isNaN(pageNumber)) ? 1 : pageNumber
+    })
+
+ const pageSizeValidator = query('pageSize').default(10).toInt()
+    .customSanitizer(pageSize => {
+        return (isNaN(pageSize) || pageSize > 100) ? 10 : pageSize
+    })
+
+ const sortByValidator = query('sortBy').default('createdAt').trim()
+
+ const sortDirectionValidator = query('sortDirection').default('desc')
+    .trim().toLowerCase().customSanitizer(sortDirection => {
+        return (['desc', 'asc'].includes(sortDirection)) ? sortDirection : 'desc'
+    })
+
 export const postValidators = [
     adminMiddleware,
 
@@ -53,3 +71,10 @@ export const postValidators = [
     inputCheckErrorsMiddleware,
 ]
 
+export const sortPostsValidators = [
+    pageNumberValidator,
+    pageSizeValidator,
+    sortByValidator,
+    sortDirectionValidator,
+
+]

@@ -9,8 +9,6 @@ export const blogsQueryRepository = {
         return {_id: new ObjectId(id)}
     },
     async find(id: BlogId): Promise<BlogDbType | null> {
-        //todo Как тут лучше было бы написать типизацию? С null или без?
-
         return await blogCollection.findOne(this.getValidQueryId(id));
     },
     async getAll(paginatedQuery: any = '', term: string = ''): Promise</*BlogViewModel*/BlogDbType[]> {
@@ -18,9 +16,6 @@ export const blogsQueryRepository = {
             name: term
         }
         // const blogs = blogCollection.find(filter).toArray()
-        //todo: Какой способ поиска и фильтрации предпочтительней:
-        // 1). find({_id: id}, {field: true, ...etc})
-        // 2). findOne({_id: id}) и затем маппинг
 
         return await blogCollection.find({}).toArray()
     }

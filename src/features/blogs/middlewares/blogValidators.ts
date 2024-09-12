@@ -71,7 +71,7 @@ export const blogPostValidators = [
     inputCheckErrorsMiddleware,
 ]
 
-export const sortPostsValidators = [
+export const sortPostsInBlogValidators = [
     findBlogValidator,
 
     pageNumberValidator,

@@ -16,17 +16,28 @@ export const postsQueryRepository = {
     async getAll(): Promise<PostDbType[]> {
         return await postCollection.find({}).toArray()
     },
-    async filterBlogPost(id: BlogId, query: SortQueryDbType): Promise<PostDbType[]> {
+    async filterBlogPost(query: SortQueryDbType, id: BlogId): Promise<PostDbType[]> {
         // todo: Доработать
         const _id = this.getValidQueryId(id)
 
         return await postCollection
             .find({blogId: id})
-            .sort({[query.sortBy]: query.sortDirection.includes('asc' || 'ascending') ? 1 : -1})
+            .sort({[query.sortBy]: query.sortDirection.includes('asc') ? 1 : -1})
             .skip(query.countSkips)
             .limit(query.pageSize).toArray() as PostDbType[]
     },
-    async totalPosts(id: BlogId): Promise<number> {
-        return await postCollection.countDocuments({blogId: id})
+
+    async filterPosts(query: SortQueryDbType): Promise<PostDbType[]> {
+        // todo: Доработать
+
+        return await postCollection
+            .find({})
+            .sort({[query.sortBy]: query.sortDirection.includes('asc') ? 1 : -1})
+            .skip(query.countSkips)
+            .limit(query.pageSize).toArray() as PostDbType[]
+    },
+    async totalPosts(id?: BlogId | undefined): Promise<number> {
+        const sortByField = id ? {blogId: id} : {}
+        return await postCollection.countDocuments(sortByField)
     }
 }

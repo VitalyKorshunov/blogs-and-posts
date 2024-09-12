@@ -5,6 +5,8 @@ import {ObjectId} from 'mongodb';
 import {blogsService} from '../../blogs/domain/blogs-service';
 import {postsRepository} from '../repositories/postsRepository';
 import {postsQueryRepository} from '../repositories/postsQueryRepository';
+import {BlogPostFilterViewModel} from '../../../input-output-types/blogs-types';
+import {SortQueryDbType} from '../../../db/query-db-type';
 
 
 export const postsService = {
@@ -44,6 +46,28 @@ export const postsService = {
         const updatedPost = {...post, blogName: blog!.name}
 
         return postsRepository.put(updatedPost, id)
+    },
+
+    async sortPosts(query: any): Promise<BlogPostFilterViewModel> {
+
+        const queryToDb: SortQueryDbType = {
+            pageSize: query.pageSize,
+            sortDirection: query.sortDirection,
+            countSkips: (query.pageNumber - 1) * query.pageSize,
+            sortBy: query.sortBy
+        }
+
+        const posts = await postsQueryRepository.filterPosts(queryToDb);
+        const totalPosts = await postsQueryRepository.totalPosts()
+        // const searchTerm = query.
+        const pagesCount = Math.ceil(totalPosts / query.pageSize)
+        return {
+            pagesCount: pagesCount,
+            page: query.pageNumber,
+            pageSize: query.pageSize,
+            totalCount: totalPosts,
+            items: posts.map(post => postsService.map(post))
+        }
     },
 
     map(post: PostDbType) {
