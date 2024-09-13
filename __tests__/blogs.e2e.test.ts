@@ -1,6 +1,6 @@
 import {req, testHelpers} from './helpers/test-helpers'
 import {SETTINGS} from '../src/settings'
-import {BlogInputModel, BlogViewModel} from '../src/input-output-types/blogs-types'
+import {BlogInputModel, BlogsSortViewModel, BlogViewModel} from '../src/input-output-types/blogs-types'
 import {codedAuth, createString} from './helpers/datasets'
 import {ObjectId} from 'mongodb';
 import {BlogPostInputModel, PostViewModel} from '../src/input-output-types/posts-types';
@@ -167,18 +167,129 @@ describe('/blogs', () => {
         const res = await req
             .get(SETTINGS.PATH.BLOGS)
             .expect(200)
-
-        expect(res.body.length).toEqual(0)
+        const expectedResult: BlogsSortViewModel = {
+            pagesCount: 0,
+            page: 1,
+            pageSize: 10,
+            totalCount: 0,
+            items: []
+        }
+        expect(res.body).toEqual(expectedResult)
     })
     it('should get not empty array, 200', async () => {
-        const createdBlog = await testHelpers.createOneBlogInDb()
+        const blog1 = await testHelpers.createOneBlogInDb()
+        const blog2 = await testHelpers.createOneBlogInDb()
+        const blog3 = await testHelpers.createOneBlogInDb()
+        const blog4 = await testHelpers.createOneBlogInDb()
 
-        const res = await req
+        const query1 = {}
+
+        const res1 = await req
             .get(SETTINGS.PATH.BLOGS)
+            .query(query1)
             .expect(200)
 
-        expect(res.body.length).toEqual(1)
-        expect(res.body[0]).toEqual(createdBlog)
+        const expectedResult1: BlogsSortViewModel = {
+            pagesCount: 1,
+            page: 1,
+            pageSize: 10,
+            totalCount: 4,
+            items: [blog4, blog3, blog2, blog1]
+        }
+
+        expect(res1.body).toEqual(expectedResult1)
+
+        const query2 = {
+            searchNameTerm: '',
+            sortBy: 'createdAt',
+            sortDirection: 'asc',
+            pageNumber: 2,
+            pageSize: 1
+        }
+
+        const res2 = await req
+            .get(SETTINGS.PATH.BLOGS)
+            .query(query2)
+            .expect(200)
+
+        const expectedResult2: BlogsSortViewModel = {
+            pagesCount: 4,
+            page: 2,
+            pageSize: 1,
+            totalCount: 4,
+            items: [blog2]
+        }
+
+        expect(res2.body).toEqual(expectedResult2)
+
+        const query3 = {
+            searchNameTerm: 'dsad',
+            sortBy: 'createdAt',
+            sortDirection: 'asc',
+            pageNumber: 1,
+            pageSize: 1
+        }
+
+        const res3 = await req
+            .get(SETTINGS.PATH.BLOGS)
+            .query(query3)
+            .expect(200)
+
+        const expectedResult3: BlogsSortViewModel = {
+            pagesCount: 0,
+            page: 1,
+            pageSize: 1,
+            totalCount: 0,
+            items: []
+        }
+
+        expect(res3.body).toEqual(expectedResult3)
+
+        const query4 = {
+            searchNameTerm: 'n',
+            sortBy: 'createdAt',
+            sortDirection: '',
+            pageNumber: 1,
+            pageSize: 3
+        }
+
+        const res4 = await req
+            .get(SETTINGS.PATH.BLOGS)
+            .query(query4)
+            .expect(200)
+
+        const expectedResult4: BlogsSortViewModel = {
+            pagesCount: 2,
+            page: 1,
+            pageSize: 3,
+            totalCount: 4,
+            items: [blog4, blog3, blog2]
+        }
+
+        expect(res4.body).toEqual(expectedResult4)
+
+        const query5 = {
+            searchNameTerm: '',
+            sortBy: '',
+            sortDirection: '',
+            pageNumber: 1,
+            pageSize: 111
+        }
+
+        const res5 = await req
+            .get(SETTINGS.PATH.BLOGS)
+            .query(query5)
+            .expect(200)
+
+        const expectedResult5: BlogsSortViewModel = {
+            pagesCount: 1,
+            page: 1,
+            pageSize: 10,
+            totalCount: 4,
+            items: [blog4, blog3, blog2, blog1 ]
+        }
+
+        expect(res5.body).toEqual(expectedResult5)
     })
 
     it('shouldn\'t find test1, 404', async () => {

@@ -42,11 +42,11 @@ export const blogsService = {
 
         return this.map(blog!)
     },
-    async getAll(): Promise<BlogViewModel[]> {
-        const blogs: BlogDbType[] = await blogsQueryRepository.getAll()
+/*    async getAll(query: any): Promise<BlogViewModel[]> {
+        const blogs: BlogDbType[] = await blogsQueryRepository.getAll(query)
 
         return blogs.map(blog => this.map(blog))
-    },
+    },*/
     async del(id: BlogId): Promise<number> {
         return await blogsRepository.del(id)
     },

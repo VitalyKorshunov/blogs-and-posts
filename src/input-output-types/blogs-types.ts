@@ -24,3 +24,10 @@ export type BlogPostFilterViewModel = {
     totalCount: number
     items: PostViewModel[]
 }
+export type BlogsSortViewModel = {
+    pagesCount: number
+    page: number
+    pageSize: number
+    totalCount: number
+    items: BlogViewModel[]
+}

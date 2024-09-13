@@ -1,9 +1,14 @@
 import {Request, Response} from 'express';
-import {BlogInputModel, BlogPostFilterViewModel, BlogViewModel} from '../../../input-output-types/blogs-types';
+import {
+    BlogInputModel,
+    BlogPostFilterViewModel,
+    BlogsSortViewModel,
+    BlogViewModel
+} from '../../../input-output-types/blogs-types';
 import {blogsService} from '../domain/blogs-service';
 import {BlogPostInputModel, PostId, PostViewModel} from '../../../input-output-types/posts-types';
 import {postsService} from '../../posts/domain/posts-service';
-import {ParamType, SortQueryType} from '../some';
+import {blogsQueryRepository} from '../repositories/blogsQueryRepository';
 
 export const blogsControllers = {
     async createBlog(req: Request<any, any, BlogInputModel>, res: Response<BlogViewModel>) {
@@ -37,8 +42,8 @@ export const blogsControllers = {
         res.status(200).json(blog)
     },
 
-    async getBlogs(req: Request, res: Response<BlogViewModel[]>) {
-        const blogs = await blogsService.getAll();
+    async getBlogs(req: Request, res: Response<BlogsSortViewModel>) {
+        const blogs = await blogsQueryRepository.getAll(req.query);
         res.status(200).json(blogs)
     },
 

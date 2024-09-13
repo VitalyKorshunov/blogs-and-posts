@@ -17,6 +17,14 @@ export type SortQueryType = {
     sortDirection: 'asc' | 'desc'
 }
 
+export type BlogsQueryDBType = {
+    searchNameTerm: Object
+    countSkips: number
+    pageSize: number
+    sortBy: string
+    sortDirection: 'asc' | 'desc'
+}
+
 export type OutputType = void /*| OutputErrorsType | OutputVideoType*/
 
 export const someController = (

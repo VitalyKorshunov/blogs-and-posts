@@ -81,3 +81,12 @@ export const sortPostsInBlogValidators = [
 
     inputCheckErrorsMiddleware,
 ]
+
+export const sortBlogsValidators = [
+    pageNumberValidator,
+    pageSizeValidator,
+    sortByValidator,
+    sortDirectionValidator,
+
+    inputCheckErrorsMiddleware,
+]
