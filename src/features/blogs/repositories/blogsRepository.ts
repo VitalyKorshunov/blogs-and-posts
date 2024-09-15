@@ -20,19 +20,8 @@ export const blogsRepository = {
         return blog.deletedCount
     },
     async put(blog: BlogInputModel, id: BlogId): Promise<number> {
-        const blogUpdated = await blogCollection.updateOne(this.getValidQueryId(id), {$set: blog})
+        const updatedBlog = await blogCollection.updateOne(this.getValidQueryId(id), {$set: blog})
 
-        return blogUpdated.modifiedCount
+        return updatedBlog.modifiedCount
     },
-    // map(blog: BlogDbType) {
-    //     const blogForOutput: BlogViewModel = {
-    //         id: blog._id.toString(),
-    //         description: blog.description,
-    //         websiteUrl: blog.websiteUrl,
-    //         name: blog.name,
-    //         createdAt: blog.createdAt,
-    //         isMembership: blog.isMembership
-    //     }
-    //     return blogForOutput
-    // },
 }

@@ -4,6 +4,8 @@ import {ObjectId} from 'mongodb';
 import {IdQueryDbType} from '../../../db/query-db-type';
 import {BlogId, BlogsSortViewModel, BlogViewModel} from '../../../input-output-types/blogs-types';
 import {BlogsQueryDBType} from '../some';
+import {postsQueryRepository} from '../../posts/repositories/postsQueryRepository';
+import {PostsSortViewModel} from '../../../input-output-types/posts-types';
 
 export const blogsQueryRepository = {
     getValidQueryId(id: string): IdQueryDbType {
@@ -24,26 +26,32 @@ export const blogsQueryRepository = {
     async find(id: BlogId): Promise<BlogDbType | null> {
         return await blogCollection.findOne(this.getValidQueryId(id));
     },
-    async getAll(query: any/*paginatedQuery: any = '', term: string = ''*/): Promise</*BlogViewModel*/BlogsSortViewModel> {
+    async findAndMap(id: BlogId): Promise<BlogViewModel> {
+        const blog: BlogDbType | null = await this.find(id)
+
+        if (blog) {
+            return this.map(blog)
+                    } else {
+            throw new Error('blog not found (blogsQueryRepository.findAndMap)')
+        }
+    },
+    async getAll(query: any): Promise<BlogsSortViewModel> {
         const filter: BlogsQueryDBType = {
-            searchNameTerm: query.searchNameTerm ? {name: {$regex: query.searchNameTerm, $options: 'i'}}: {},
+            searchNameTerm: query.searchNameTerm ? {name: {$regex: query.searchNameTerm, $options: 'i'}} : {},
             sortBy: query.sortBy ? query.sortBy : 'createdAt',
             sortDirection: query.sortDirection ? query.sortDirection : 'desc',
-            countSkips: query.pageNumber  ? (query.pageNumber - 1) * query.pageSize : 0,
+            countSkips: query.pageNumber ? (query.pageNumber - 1) * query.pageSize : 0,
             pageSize: query.pageSize ? query.pageSize : 10
         }
-        // const blogs = blogCollection.find(filter).toArray()
-// console.log('getAll', filter)
-        const blogs =  await blogCollection
+
+        const blogs = await blogCollection
             .find(filter.searchNameTerm)
             .sort(filter.sortBy, filter.sortDirection)
             .skip(filter.countSkips)
             .limit(filter.pageSize)
             .toArray()
 
-
         const totalPosts = await blogCollection.countDocuments(filter.searchNameTerm)
-        // const searchTerm = query.
         const pagesCount = Math.ceil(totalPosts / filter.pageSize)
 
         return {
@@ -53,5 +61,8 @@ export const blogsQueryRepository = {
             totalCount: totalPosts,
             items: blogs.map(blog => this.map(blog))
         }
-    }
+    },
+    async sortPostsInBlog(blogId: BlogId, query: any): Promise<PostsSortViewModel> {
+        return postsQueryRepository.sortPosts(query, blogId)
+    },
 }

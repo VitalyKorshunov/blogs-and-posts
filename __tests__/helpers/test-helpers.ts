@@ -93,7 +93,7 @@ export const testHelpers = {
         const post: PostDbType = await db.collection(SETTINGS.POST_COLLECTION_NAME).findOne(queryId) as PostDbType
         return {
             id: post._id.toString(),
-            blogId: post.blogId,
+            blogId: post.blogId.toString(),
             blogName: post.blogName,
             content: post.content,
             shortDescription: post.shortDescription,

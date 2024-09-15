@@ -1,85 +1,44 @@
-import {PostInputModel, PostViewModel} from '../../../input-output-types/posts-types';
+import {PostId, PostInputModel} from '../../../input-output-types/posts-types';
 import {BlogDbType} from '../../../db/blog-db-type';
 import {PostDbType} from '../../../db/post-db-type';
 import {ObjectId} from 'mongodb';
-import {blogsService} from '../../blogs/domain/blogs-service';
 import {postsRepository} from '../repositories/postsRepository';
-import {postsQueryRepository} from '../repositories/postsQueryRepository';
-import {BlogPostFilterViewModel} from '../../../input-output-types/blogs-types';
-import {SortQueryDbType} from '../../../db/query-db-type';
+import {blogsQueryRepository} from '../../blogs/repositories/blogsQueryRepository';
 
 
 export const postsService = {
     async create(post: PostInputModel): Promise<string> {
-        const blogName: BlogDbType | null = await blogsService.find(post.blogId)
+        // todo: обращаться за получением blogName к blogsQueryRepository или добавить метод в postsRepository?
+        const blog: BlogDbType | null = await blogsQueryRepository.find(post.blogId)
 
-        const newPost: PostDbType = {
-            _id: new ObjectId(),
-            title: post.title,
-            content: post.content,
-            shortDescription: post.shortDescription,
-            blogId: post.blogId,
-            blogName: blogName!.name,
-            createdAt: new Date().toISOString()
+        if (blog) {
+            const newPost: PostDbType = {
+                _id: new ObjectId(),
+                title: post.title,
+                content: post.content,
+                shortDescription: post.shortDescription,
+                blogId: new ObjectId(post.blogId),
+                blogName: blog.name,
+                createdAt: new Date().toISOString()
+            }
+
+            return await postsRepository.create(newPost)
+        } else {
+            throw new Error('Blog not found (postsService.create)')
         }
-
-        return await postsRepository.create(newPost)
     },
-    async find(id: string): Promise<PostDbType | null> {
-        return await postsQueryRepository.find(id)
-    },
-    async findAndMap(id: string): Promise<PostViewModel> {
-        const post: PostDbType | null = await this.find(id)
-
-        return this.map(post!)
-    },
-    async getAll(): Promise<PostViewModel[]> {
-        const posts: PostDbType[] = await postsQueryRepository.getAll()
-
-        return posts.map((post) => this.map(post))
-    },
-    async del(id: string): Promise<number> {
+    async del(id: PostId): Promise<number> {
         return postsRepository.del(id)
     },
-    async put(post: PostInputModel, id: string): Promise<number> {
-        const blog = await blogsService.find(post.blogId)
-        const updatedPost = {...post, blogName: blog!.name}
+    async put(post: PostInputModel, id: PostId): Promise<number> {
+        const blog: BlogDbType | null = await blogsQueryRepository.find(post.blogId)
 
-        return postsRepository.put(updatedPost, id)
-    },
+        if (blog) {
+            const updatedPost = {...post, blogName: blog.name}
 
-    async sortPosts(query: any): Promise<BlogPostFilterViewModel> {
-
-        const queryToDb: SortQueryDbType = {
-            pageSize: query.pageSize,
-            sortDirection: query.sortDirection,
-            countSkips: (query.pageNumber - 1) * query.pageSize,
-            sortBy: query.sortBy
-        }
-
-        const posts = await postsQueryRepository.filterPosts(queryToDb);
-        const totalPosts = await postsQueryRepository.totalPosts()
-        // const searchTerm = query.
-        const pagesCount = Math.ceil(totalPosts / query.pageSize)
-        return {
-            pagesCount: pagesCount,
-            page: query.pageNumber,
-            pageSize: query.pageSize,
-            totalCount: totalPosts,
-            items: posts.map(post => postsService.map(post))
+            return await postsRepository.put(updatedPost, id)
+        } else {
+            throw new Error('Blog not found (postsService.put)')
         }
     },
-
-    map(post: PostDbType) {
-        const postForOutput: PostViewModel = {
-            id: post._id.toString(),
-            title: post.title,
-            shortDescription: post.shortDescription,
-            content: post.content,
-            blogId: post.blogId,
-            blogName: post.blogName,
-            createdAt: post.createdAt
-        }
-        return postForOutput
-    }
 }

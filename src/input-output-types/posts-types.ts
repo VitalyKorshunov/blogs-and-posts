@@ -22,3 +22,18 @@ export type PostViewModel = {
     blogName: string
     createdAt: string
 }
+
+export type PostsQueryDbType = {
+    countSkips: number
+    pageSize: number
+    sortBy: string
+    sortDirection: 'asc' | 'desc'
+}
+
+export type PostsSortViewModel = {
+    pagesCount: number
+    page: number
+    pageSize: number
+    totalCount: number
+    items: PostViewModel[]
+}

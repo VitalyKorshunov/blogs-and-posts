@@ -3,10 +3,10 @@ import {inputCheckErrorsMiddleware} from '../../../global-middlewares/inputCheck
 import {NextFunction, Request, Response} from 'express'
 import {adminMiddleware} from '../../../global-middlewares/admin-middleware'
 import {ObjectId} from 'mongodb';
-import {blogsService} from '../../blogs/domain/blogs-service';
-import {postsService} from '../domain/posts-service';
 import {PostDbType} from '../../../db/post-db-type';
 import {BlogDbType} from '../../../db/blog-db-type';
+import {blogsQueryRepository} from '../../blogs/repositories/blogsQueryRepository';
+import {postsQueryRepository} from '../repositories/postsQueryRepository';
 
 
 export const titleValidator = body('title').isString().withMessage('not string').trim()
@@ -21,7 +21,7 @@ export const contentValidator = body('content').isString().withMessage('not stri
 export const blogIdBodyValidator = body('blogId').isString().withMessage('not string').trim()
     .custom(async (blogId: string) => {
         if (!ObjectId.isValid(blogId)) throw new Error('invalid id')
-        const blog: BlogDbType | null = await blogsService.find(blogId)
+        const blog: BlogDbType | null = await blogsQueryRepository.find(blogId)
         if (!blog) throw new Error('no blog')
     })
 
@@ -31,7 +31,7 @@ export const findPostValidator = async (req: Request<{ id: string }>, res: Respo
         return
     }
 
-    const post: PostDbType | null = await postsService.find(req.params.id)
+    const post: PostDbType | null = await postsQueryRepository.find(req.params.id)
 
     if (post) {
         next()
@@ -43,19 +43,19 @@ export const findPostValidator = async (req: Request<{ id: string }>, res: Respo
     }
 }
 
- const pageNumberValidator = query('pageNumber').default(1).toInt()
+const pageNumberValidator = query('pageNumber').default(1).toInt()
     .customSanitizer(pageNumber => {
         return (isNaN(pageNumber)) ? 1 : pageNumber
     })
 
- const pageSizeValidator = query('pageSize').default(10).toInt()
+const pageSizeValidator = query('pageSize').default(10).toInt()
     .customSanitizer(pageSize => {
         return (isNaN(pageSize) || pageSize > 100) ? 10 : pageSize
     })
 
- const sortByValidator = query('sortBy').default('createdAt').trim()
+const sortByValidator = query('sortBy').default('createdAt').trim()
 
- const sortDirectionValidator = query('sortDirection').default('desc')
+const sortDirectionValidator = query('sortDirection').default('desc')
     .trim().toLowerCase().customSanitizer(sortDirection => {
         return (['desc', 'asc'].includes(sortDirection)) ? sortDirection : 'desc'
     })
@@ -76,5 +76,4 @@ export const sortPostsValidators = [
     pageSizeValidator,
     sortByValidator,
     sortDirectionValidator,
-
 ]
