@@ -1,8 +1,8 @@
-import {PostDbType} from '../../../db/post-db-type'
+import {PostDbType, PostsQueryDbType} from '../../../db/post-db-type'
 import {postCollection} from '../../../db/mongo-db';
 import {ObjectId} from 'mongodb';
 import {IdQueryDbType,} from '../../../db/query-db-type';
-import {PostId, PostsQueryDbType, PostsSortViewModel, PostViewModel} from '../../../input-output-types/posts-types';
+import {PostId, PostsSortViewModel, PostViewModel} from '../../../input-output-types/posts-types';
 import {BlogId,} from '../../../input-output-types/blogs-types';
 
 export const postsQueryRepository = {

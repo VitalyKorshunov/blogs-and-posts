@@ -1,33 +1,20 @@
-export type PostInputModel = {
-    title: string // max 30
-    shortDescription: string // max 100
-    content: string // max 1000
-    blogId: string // valid
-}
-
-export type BlogPostInputModel = {
-    title: string // max 30
-    shortDescription: string // max 100
-    content: string // max 1000
-}
-
 export type PostId = string
+
+export type PostInputModel = {
+    title: string
+    shortDescription: string
+    content: string
+    blogId: string
+}
 
 export type PostViewModel = {
     id: string
-    title: string // max 30
-    shortDescription: string // max 100
-    content: string // max 1000
-    blogId: string // valid
+    title: string
+    shortDescription: string
+    content: string
+    blogId: string
     blogName: string
     createdAt: string
-}
-
-export type PostsQueryDbType = {
-    countSkips: number
-    pageSize: number
-    sortBy: string
-    sortDirection: 'asc' | 'desc'
 }
 
 export type PostsSortViewModel = {
@@ -36,4 +23,18 @@ export type PostsSortViewModel = {
     pageSize: number
     totalCount: number
     items: PostViewModel[]
+}
+
+export type BlogPostInputModel = {
+    title: string
+    shortDescription: string
+    content: string
+}
+
+export type UpdatePostType = {
+    title: string
+    shortDescription: string
+    content: string
+    blogId: string
+    blogName: string
 }

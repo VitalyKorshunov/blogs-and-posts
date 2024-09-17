@@ -1,5 +1,5 @@
 import {BlogDbType} from '../../../db/blog-db-type'
-import {BlogId, BlogInputModel} from '../../../input-output-types/blogs-types'
+import {BlogId, UpdateBlogType} from '../../../input-output-types/blogs-types'
 import {blogCollection} from '../../../db/mongo-db';
 import {ObjectId} from 'mongodb';
 import {IdQueryDbType} from '../../../db/query-db-type';
@@ -19,7 +19,7 @@ export const blogsRepository = {
 
         return blog.deletedCount
     },
-    async put(blog: BlogInputModel, id: BlogId): Promise<number> {
+    async put(blog: UpdateBlogType, id: BlogId): Promise<number> {
         const updatedBlog = await blogCollection.updateOne(this.getValidQueryId(id), {$set: blog})
 
         return updatedBlog.modifiedCount

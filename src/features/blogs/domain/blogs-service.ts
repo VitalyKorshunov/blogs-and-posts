@@ -1,4 +1,4 @@
-import {BlogId, BlogInputModel} from '../../../input-output-types/blogs-types';
+import {BlogId, BlogInputModel, UpdateBlogType} from '../../../input-output-types/blogs-types';
 import {BlogDbType} from '../../../db/blog-db-type';
 import {ObjectId} from 'mongodb';
 import {blogsRepository} from '../repositories/blogsRepository';
@@ -23,7 +23,11 @@ export const blogsService = {
         return await blogsRepository.del(id)
     },
     async put(blog: BlogInputModel, id: BlogId): Promise<number> {
-        const updatedBlog = {...blog}
+        const updatedBlog: UpdateBlogType = {
+            name: blog.name,
+            description: blog.description,
+            websiteUrl: blog.websiteUrl
+        }
 
         return await blogsRepository.put(updatedBlog, id)
     },

@@ -19,7 +19,7 @@ export const postsControllers = {
             .sendStatus(204)
     },
 
-    async findPost(req: Request<ParamType>, res: Response<PostViewModel | {}>) {
+    async findPost(req: Request<ParamType>, res: Response<PostViewModel>) {
         const post = await postsQueryRepository.findAndMap(req.params.id)
         res
             .status(200)

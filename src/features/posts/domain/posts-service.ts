@@ -1,4 +1,4 @@
-import {PostId, PostInputModel} from '../../../input-output-types/posts-types';
+import {PostId, PostInputModel, UpdatePostType} from '../../../input-output-types/posts-types';
 import {BlogDbType} from '../../../db/blog-db-type';
 import {PostDbType} from '../../../db/post-db-type';
 import {ObjectId} from 'mongodb';
@@ -7,7 +7,7 @@ import {blogsQueryRepository} from '../../blogs/repositories/blogsQueryRepositor
 
 
 export const postsService = {
-    async create(post: PostInputModel): Promise<string> {
+    async create(post: PostInputModel): Promise<PostId> {
         // todo: обращаться за получением blogName к blogsQueryRepository или добавить метод в postsRepository?
         const blog: BlogDbType | null = await blogsQueryRepository.find(post.blogId)
 
@@ -34,7 +34,13 @@ export const postsService = {
         const blog: BlogDbType | null = await blogsQueryRepository.find(post.blogId)
 
         if (blog) {
-            const updatedPost = {...post, blogName: blog.name}
+            const updatedPost: UpdatePostType = {
+                title: post.title,
+                content: post.content,
+                shortDescription: post.shortDescription,
+                blogId: post.blogId,
+                blogName: blog.name
+            }
 
             return await postsRepository.put(updatedPost, id)
         } else {
