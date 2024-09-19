@@ -19,4 +19,7 @@ export const usersRepository = {
 
         return user.deletedCount
     },
+    async find(field: string, value: string): Promise<Object | null> {
+        return await userCollection.findOne({[field]: value})
+    },
 }

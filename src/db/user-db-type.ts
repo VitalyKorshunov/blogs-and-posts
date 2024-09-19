@@ -13,4 +13,6 @@ export type UsersQueryDbType = {
     pageSize: number
     sortBy: string
     sortDirection: 'asc' | 'desc'
+    searchLoginTerm: string | null
+    searchEmailTerm: string | null
 }

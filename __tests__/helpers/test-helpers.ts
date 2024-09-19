@@ -9,6 +9,8 @@ import {IdQueryDbType} from '../../src/db/query-db-type';
 import {ObjectId} from 'mongodb';
 import {BlogDbType} from '../../src/db/blog-db-type';
 import {PostDbType} from '../../src/db/post-db-type';
+import {UserInputModel, UserViewModel} from '../../src/input-output-types/users-types';
+import {UserDbType} from '../../src/db/user-db-type';
 
 export const req = agent(app)
 
@@ -73,6 +75,22 @@ export const testHelpers = {
         return {...newPost, id: res.body.id, blogName: res.body.blogName, createdAt: res.body.createdAt}
     },
 
+    createOneUserInDb: async (): Promise<UserViewModel> => {
+        const newUser: UserInputModel = {
+            login: '123',
+            email: '123@123.com',
+            password: '123456'
+        };
+
+        const res = await req
+            .post(SETTINGS.PATH.USERS)
+            .set({'Authorization': 'Basic ' + codedAuth})
+            .send(newUser) // отправка данных
+            .expect(201);
+
+        return {...newUser, id: res.body.id, createdAt: res.body.createdAt};
+    },
+
     findAndMapBlog: async (id: string): Promise<BlogViewModel> => {
         const queryId: IdQueryDbType = {_id: new ObjectId(id)}
 
@@ -100,5 +118,17 @@ export const testHelpers = {
             title: post.title,
             createdAt: post.createdAt
         };
-    }
+    },
+
+    findAndMapUser: async (id: string): Promise<UserViewModel> => {
+        const queryId: IdQueryDbType = {_id: new ObjectId(id)}
+
+        const user: UserDbType = await db.collection(SETTINGS.USER_COLLECTION_NAME).findOne(queryId) as UserDbType
+        return {
+            id: user._id.toString(),
+            login: user.login,
+            email: user.email,
+            createdAt: user.createdAt
+        };
+    },
 }
