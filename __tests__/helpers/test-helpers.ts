@@ -42,6 +42,12 @@ export const testHelpers = {
         return posts.length;
     },
 
+    countUsersInDb: async () => {
+        const users = await db.collection(SETTINGS.USER_COLLECTION_NAME).find({}).toArray()
+
+        return users.length;
+    },
+
     createOneBlogInDb: async (): Promise<BlogViewModel> => {
         const newBlog: BlogInputModel = {
             name: 'n1',
@@ -75,20 +81,20 @@ export const testHelpers = {
         return {...newPost, id: res.body.id, blogName: res.body.blogName, createdAt: res.body.createdAt}
     },
 
-    createOneUserInDb: async (): Promise<UserViewModel> => {
+    createOneUserInDb: async (login: string = '123'): Promise<UserViewModel> => {
         const newUser: UserInputModel = {
-            login: '123',
-            email: '123@123.com',
+            login: login,
+            email: `${login}@123.com`,
             password: '123456'
         };
 
         const res = await req
             .post(SETTINGS.PATH.USERS)
             .set({'Authorization': 'Basic ' + codedAuth})
-            .send(newUser) // отправка данных
+            .send(newUser)
             .expect(201);
 
-        return {...newUser, id: res.body.id, createdAt: res.body.createdAt};
+        return {login: newUser.login, email: newUser.email, id: res.body.id, createdAt: res.body.createdAt};
     },
 
     findAndMapBlog: async (id: string): Promise<BlogViewModel> => {

@@ -1,4 +1,4 @@
-import {postCollection, userCollection} from '../../../db/mongo-db';
+import {userCollection} from '../../../db/mongo-db';
 import {ObjectId} from 'mongodb';
 import {IdQueryDbType,} from '../../../db/query-db-type';
 import {UserDbType, UsersQueryDbType} from '../../../db/user-db-type';
@@ -34,9 +34,6 @@ export const usersQueryRepository = {
         return await this.sortPosts(query)
     },
     async sortPosts(query: any): Promise<UsersSortViewModel> {
-        // const blogValidDbId: ObjectId | null = blogId ? this.getValidQueryId(blogId)._id : null
-        // const findFilter = blogValidDbId ? {blogId: blogValidDbId} : {}
-
         const filter: UsersQueryDbType = {
             sortBy: query.sortBy ? query.sortBy : 'createdAt',
             sortDirection: query.sortDirection ? query.sortDirection : 'desc',
@@ -47,10 +44,10 @@ export const usersQueryRepository = {
         }
 
         const findFilter = filter.searchLoginTerm
-            ? {login: filter.searchLoginTerm}
+            ? {login: {$regex: query.searchLoginTerm, $options: 'i'}}
             : filter.searchEmailTerm
-                ? {email: filter.searchEmailTerm}
-                : {}
+                ? {email: {$regex: filter.searchEmailTerm, $options: 'i'}}
+                : {};
 
         const users = await userCollection
             .find(findFilter)
