@@ -31,9 +31,9 @@ export const usersQueryRepository = {
         }
     },
     async getAll(query: any): Promise<UsersSortViewModel> {
-        return await this.sortPosts(query)
+        return await this.sortUsers(query)
     },
-    async sortPosts(query: any): Promise<UsersSortViewModel> {
+    async sortUsers(query: any): Promise<UsersSortViewModel> {
         const filter: UsersQueryDbType = {
             sortBy: query.sortBy ? query.sortBy : 'createdAt',
             sortDirection: query.sortDirection ? query.sortDirection : 'desc',
@@ -43,20 +43,31 @@ export const usersQueryRepository = {
             searchEmailTerm: query.searchEmailTerm ? query.searchEmailTerm : null,
         }
 
-        const findFilter = filter.searchLoginTerm
+        const findLoginFilter = filter.searchLoginTerm
             ? {login: {$regex: query.searchLoginTerm, $options: 'i'}}
-            : filter.searchEmailTerm
-                ? {email: {$regex: filter.searchEmailTerm, $options: 'i'}}
-                : {};
+            : null
+        const findEmailFilter = filter.searchEmailTerm
+            ? {email: {$regex: filter.searchEmailTerm, $options: 'i'}}
+            : null;
 
+        const findFilter = []
+        if (findLoginFilter) findFilter.push(findLoginFilter);
+        if (findEmailFilter) findFilter.push(findEmailFilter);
+        if (findFilter.length === 0) findFilter.push({});
+
+        console.log(findFilter)
         const users = await userCollection
-            .find(findFilter)
+            .find({
+                $or: findFilter
+            })
             .sort(filter.sortBy, filter.sortDirection)
             .skip(filter.countSkips)
             .limit(filter.pageSize)
             .toArray()
 
-        const totalUsers = await userCollection.countDocuments(findFilter)
+        const totalUsers = await userCollection.countDocuments({
+            $or: findFilter
+        })
         const pagesCount = Math.ceil(totalUsers / filter.pageSize)
 
         return {

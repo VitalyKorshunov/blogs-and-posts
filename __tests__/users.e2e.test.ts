@@ -139,10 +139,10 @@ describe('/users', () => {
 
         expect(await testHelpers.countUsersInDb()).toEqual(0)
     })
-    it('should get not empty array, 200', async () => {
+    it('should get not empty and correct array, 200', async () => {
         const user1 = await testHelpers.createOneUserInDb('123')
-        const user2 = await testHelpers.createOneUserInDb('123s4')
-        const user3 = await testHelpers.createOneUserInDb('1s2345')
+        const user2 = await testHelpers.createOneUserInDb('1234')
+        const user3 = await testHelpers.createOneUserInDb('1s23s45')
         const user4 = await testHelpers.createOneUserInDb('123456S')
 
         const query1 = {}
@@ -212,7 +212,8 @@ describe('/users', () => {
         expect(res3.body).toEqual(expectedResult3)
 
         const query4 = {
-            searchLoginTerm: 's',
+            searchLoginTerm: 's4',
+            searchEmailTerm: '4@',
             sortBy: 'createdAt',
             sortDirection: '',
             pageNumber: 1,
@@ -229,8 +230,8 @@ describe('/users', () => {
             pagesCount: 1,
             page: 1,
             pageSize: 3,
-            totalCount: 3,
-            items: [user4, user3, user2]
+            totalCount: 2,
+            items: [user3, user2]
         }
 
         expect(res4.body).toEqual(expectedResult4)
@@ -253,8 +254,8 @@ describe('/users', () => {
             pagesCount: 1,
             page: 1,
             pageSize: 3,
-            totalCount: 3,
-            items: [user4, user3, user2]
+            totalCount: 2,
+            items: [user4, user3]
         }
 
         expect(res4_2.body).toEqual(expectedResult4_2)
