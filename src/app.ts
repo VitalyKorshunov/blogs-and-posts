@@ -5,6 +5,7 @@ import {blogsRouter} from './features/blogs'
 import {testingRouter} from './features/testing'
 import {postsRouter} from './features/posts'
 import {usersRouter} from './features/users';
+import {authRouter} from './features/auth';
 
 export const app = express() // создать приложение
 app.use(express.json()) // создание свойств-объектов body и query во всех реквестах
@@ -15,6 +16,7 @@ app.get('/', (req, res) => {
     res.status(200).json({version: '1.5.0'})
 })
 
+app.use(SETTINGS.PATH.AUTH, authRouter)
 app.use(SETTINGS.PATH.BLOGS, blogsRouter)
 app.use(SETTINGS.PATH.POSTS, postsRouter)
 app.use(SETTINGS.PATH.USERS, usersRouter)

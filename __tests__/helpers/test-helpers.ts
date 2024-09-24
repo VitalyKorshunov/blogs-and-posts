@@ -81,11 +81,11 @@ export const testHelpers = {
         return {...newPost, id: res.body.id, blogName: res.body.blogName, createdAt: res.body.createdAt}
     },
 
-    createOneUserInDb: async (login: string = '123'): Promise<UserViewModel> => {
+    createOneUserInDb: async (login: string = '123', password: string = '123456'): Promise<UserViewModel> => {
         const newUser: UserInputModel = {
             login: login,
             email: `${login}@123.com`,
-            password: '123456'
+            password: password
         };
 
         const res = await req
