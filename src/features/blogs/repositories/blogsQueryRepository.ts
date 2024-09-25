@@ -1,4 +1,4 @@
-import {BlogDbType} from '../../../db/blog-db-type'
+import {BlogDbOutputType} from '../../../db/blog-db-type'
 import {blogCollection} from '../../../db/mongo-db';
 import {ObjectId} from 'mongodb';
 import {IdQueryDbType} from '../../../db/query-db-type';
@@ -8,10 +8,11 @@ import {postsQueryRepository} from '../../posts/repositories/postsQueryRepositor
 import {PostsSortViewModel} from '../../../input-output-types/posts-types';
 
 export const blogsQueryRepository = {
-    getValidQueryId(id: string): IdQueryDbType {
+    _getValidQueryId(id: string): IdQueryDbType {
         return {_id: new ObjectId(id)}
     },
-    map(blog: BlogDbType) {
+
+    _mapToBlogViewModel(blog: BlogDbOutputType) {
         const blogForOutput: BlogViewModel = {
             id: blog._id.toString(),
             description: blog.description,
@@ -23,15 +24,15 @@ export const blogsQueryRepository = {
         return blogForOutput
     },
 
-    async find(id: BlogId): Promise<BlogDbType | null> {
-        return await blogCollection.findOne(this.getValidQueryId(id));
-    },
+    // async find(id: BlogId): Promise<BlogDbOutputType | null> {
+    //     return await blogCollection.findOne(this._getValidQueryId(id))
+    // },
     async findAndMap(id: BlogId): Promise<BlogViewModel> {
-        const blog: BlogDbType | null = await this.find(id)
+        const blog: BlogDbOutputType | null = await blogCollection.findOne(this._getValidQueryId(id))
 
         if (blog) {
-            return this.map(blog)
-                    } else {
+            return this._mapToBlogViewModel(blog)
+        } else {
             throw new Error('blog not found (blogsQueryRepository.findAndMap)')
         }
     },
@@ -59,7 +60,7 @@ export const blogsQueryRepository = {
             page: query.pageNumber,
             pageSize: filter.pageSize,
             totalCount: totalPosts,
-            items: blogs.map(blog => this.map(blog))
+            items: blogs.map(blog => this._mapToBlogViewModel(blog))
         }
     },
     async sortPostsInBlog(blogId: BlogId, query: any): Promise<PostsSortViewModel> {

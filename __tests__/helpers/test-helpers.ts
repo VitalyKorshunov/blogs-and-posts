@@ -7,8 +7,8 @@ import {codedAuth} from './datasets';
 import {PostInputModel, PostViewModel} from '../../src/input-output-types/posts-types';
 import {IdQueryDbType} from '../../src/db/query-db-type';
 import {ObjectId} from 'mongodb';
-import {BlogDbType} from '../../src/db/blog-db-type';
-import {PostDbType} from '../../src/db/post-db-type';
+import {BlogDbOutputType} from '../../src/db/blog-db-type';
+import {PostDbOutputType} from '../../src/db/post-db-type';
 import {UserInputModel, UserViewModel} from '../../src/input-output-types/users-types';
 import {UserDbType} from '../../src/db/user-db-type';
 
@@ -100,7 +100,7 @@ export const testHelpers = {
     findAndMapBlog: async (id: string): Promise<BlogViewModel> => {
         const queryId: IdQueryDbType = {_id: new ObjectId(id)}
 
-        const blog: BlogDbType = await db.collection(SETTINGS.BLOG_COLLECTION_NAME).findOne(queryId) as BlogDbType
+        const blog: BlogDbOutputType = await db.collection(SETTINGS.BLOG_COLLECTION_NAME).findOne(queryId) as BlogDbOutputType
         return {
             id: blog._id.toString(),
             name: blog.name,
@@ -114,7 +114,7 @@ export const testHelpers = {
     findAndMapPost: async (id: string): Promise<PostViewModel> => {
         const queryId: IdQueryDbType = {_id: new ObjectId(id)}
 
-        const post: PostDbType = await db.collection(SETTINGS.POST_COLLECTION_NAME).findOne(queryId) as PostDbType
+        const post: PostDbOutputType = await db.collection(SETTINGS.POST_COLLECTION_NAME).findOne(queryId) as PostDbOutputType
         return {
             id: post._id.toString(),
             blogId: post.blogId.toString(),

@@ -1,6 +1,5 @@
 import {BlogId, BlogInputModel, UpdateBlogType} from '../../../input-output-types/blogs-types';
-import {BlogDbType} from '../../../db/blog-db-type';
-import {ObjectId} from 'mongodb';
+import {BlogDbInputType} from '../../../db/blog-db-type';
 import {blogsRepository} from '../repositories/blogsRepository';
 import {BlogPostInputModel, PostId} from '../../../input-output-types/posts-types';
 import {postsService} from '../../posts/domain/posts-service';
@@ -8,9 +7,7 @@ import {postsService} from '../../posts/domain/posts-service';
 
 export const blogsService = {
     async create(blog: BlogInputModel): Promise<BlogId> {
-        // todo: Генерация id на уровне сервиса или репозитория?
-        const newBlog: BlogDbType = {
-            _id: new ObjectId(), // todo: в каком виде отправлять id в репозиторий (_id or id)?
+        const newBlog: BlogDbInputType = {
             name: blog.name,
             description: blog.description,
             websiteUrl: blog.websiteUrl,

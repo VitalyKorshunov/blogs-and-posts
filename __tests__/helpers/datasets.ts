@@ -1,5 +1,3 @@
-import {BlogDbType} from '../../src/db/blog-db-type'
-import {PostDbType} from '../../src/db/post-db-type'
 import {fromUTF8ToBase64} from '../../src/global-middlewares/admin-middleware'
 import {SETTINGS} from '../../src/settings'
 

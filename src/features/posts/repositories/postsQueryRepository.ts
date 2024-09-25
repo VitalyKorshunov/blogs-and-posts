@@ -1,4 +1,4 @@
-import {PostDbType, PostsQueryDbType} from '../../../db/post-db-type'
+import {PostDbOutputType, PostsQueryDbType} from '../../../db/post-db-type'
 import {postCollection} from '../../../db/mongo-db';
 import {ObjectId} from 'mongodb';
 import {IdQueryDbType,} from '../../../db/query-db-type';
@@ -6,10 +6,10 @@ import {PostId, PostsSortViewModel, PostViewModel} from '../../../input-output-t
 import {BlogId,} from '../../../input-output-types/blogs-types';
 
 export const postsQueryRepository = {
-    getValidQueryId(id: PostId): IdQueryDbType {
+    _getValidQueryId(id: PostId): IdQueryDbType {
         return {_id: new ObjectId(id)}
     },
-    map(post: PostDbType) {
+    _mapToPostViewModel(post: PostDbOutputType) {
         const postForOutput: PostViewModel = {
             id: post._id.toString(),
             title: post.title,
@@ -22,14 +22,12 @@ export const postsQueryRepository = {
         return postForOutput
     },
 
-    async find(postId: PostId): Promise<PostDbType | null> {
-        return await postCollection.findOne(this.getValidQueryId(postId))
-    },
+
     async findAndMap(postId: PostId): Promise<PostViewModel> {
-        const post: PostDbType | null = await this.find(postId)
+        const post: PostDbOutputType | null = await postCollection.findOne(this._getValidQueryId(postId))
 
         if (post) {
-            return this.map(post)
+            return this._mapToPostViewModel(post)
         } else {
             throw new Error('post not found (postsQueryRepository.findAndMap)')
         }
@@ -40,7 +38,7 @@ export const postsQueryRepository = {
     async sortPosts(query: any, blogId?: BlogId): Promise<PostsSortViewModel> {
         //todo: оставить универсальный метод для использования в blogsQueryRepository или продублировать его там же?
         // Универсальность достигнута с помощью необязательного blogId
-        const blogValidDbId: ObjectId | null = blogId ? this.getValidQueryId(blogId)._id : null
+        const blogValidDbId: ObjectId | null = blogId ? this._getValidQueryId(blogId)._id : null
         const findFilter = blogValidDbId ? {blogId: blogValidDbId} : {}
 
         const filter: PostsQueryDbType = {
@@ -64,7 +62,7 @@ export const postsQueryRepository = {
             page: query.pageNumber,
             pageSize: filter.pageSize,
             totalCount: totalPosts,
-            items: posts.map(post => this.map(post))
+            items: posts.map(post => this._mapToPostViewModel(post))
         }
     },
 }

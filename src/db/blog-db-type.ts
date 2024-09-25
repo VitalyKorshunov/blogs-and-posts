@@ -1,10 +1,27 @@
 import {ObjectId} from 'mongodb';
 
-export type BlogDbType = {
+export type BlogDbInputType = {
+    name: string
+    description: string
+    websiteUrl: string
+    createdAt: string
+    isMembership: boolean
+}
+
+export type BlogDbOutputType = {
     _id: ObjectId
-    name: string // max 15
-    description: string // max 500
-    websiteUrl: string // max 100 ^https://([a-zA-Z0-9_-]+\.)+[a-zA-Z0-9_-]+(\/[a-zA-Z0-9_-]+)*\/?$
+    name: string
+    description: string
+    websiteUrl: string
+    createdAt: string
+    isMembership: boolean
+}
+
+export type BlogDbWithCorrectIdType = {
+    id: string
+    name: string
+    description: string
+    websiteUrl: string
     createdAt: string
     isMembership: boolean
 }

@@ -48,7 +48,6 @@ describe('/auth', () => {
             .post(SETTINGS.PATH.AUTH + '/login')
             .send(sendBody1)
             .expect(400)
-        console.log(res1.body)
 
         expect(res1.body.errorsMessages[0].field).toEqual('loginOrEmail')
         expect(res1.body.errorsMessages[1].field).toEqual('password')
@@ -62,7 +61,6 @@ describe('/auth', () => {
             .post(SETTINGS.PATH.AUTH + '/login')
             .send(sendBody2)
             .expect(400)
-        console.log(res2.body)
 
         expect(res2.body.errorsMessages[0].field).toEqual('loginOrEmail')
         expect(res2.body.errorsMessages[1].field).toEqual('password')
@@ -77,7 +75,6 @@ describe('/auth', () => {
             .post(SETTINGS.PATH.AUTH + '/login')
             .send(sendBody3)
             .expect(400)
-        console.log(res3.body)
 
         expect(res3.body.errorsMessages[0].field).toEqual('loginOrEmail')
     })

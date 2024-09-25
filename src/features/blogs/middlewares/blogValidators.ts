@@ -3,9 +3,9 @@ import {inputCheckErrorsMiddleware} from '../../../global-middlewares/inputCheck
 import {NextFunction, Request, Response} from 'express'
 import {adminMiddleware} from '../../../global-middlewares/admin-middleware'
 import {ObjectId} from 'mongodb';
-import {BlogDbType} from '../../../db/blog-db-type';
+import {BlogDbInputType} from '../../../db/blog-db-type';
 import {contentValidator, shortDescriptionValidator, titleValidator} from '../../posts/middlewares/postValidators';
-import {blogsQueryRepository} from '../repositories/blogsQueryRepository';
+import {blogsRepository} from '../repositories/blogsRepository';
 
 export const nameValidator = body('name').isString().withMessage('not string').trim()
     .isLength({min: 1, max: 15}).withMessage('more than 15 or 0')
@@ -40,9 +40,9 @@ export const findBlogValidator = async (req: Request<{ id: string }>, res: Respo
         return
     }
 
-    const post: BlogDbType | null = await blogsQueryRepository.find(req.params.id)
+    const blog: BlogDbInputType | null = await blogsRepository.find(req.params.id)
 
-    if (post) {
+    if (blog) {
         next()
     } else {
         res.sendStatus(404)

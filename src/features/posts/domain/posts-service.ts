@@ -1,37 +1,38 @@
 import {PostId, PostInputModel, UpdatePostType} from '../../../input-output-types/posts-types';
-import {BlogDbType} from '../../../db/blog-db-type';
-import {PostDbType} from '../../../db/post-db-type';
-import {ObjectId} from 'mongodb';
+import {BlogDbWithCorrectIdType} from '../../../db/blog-db-type';
+import {PostDbInputType} from '../../../db/post-db-type';
 import {postsRepository} from '../repositories/postsRepository';
-import {blogsQueryRepository} from '../../blogs/repositories/blogsQueryRepository';
+import {blogsRepository} from '../../blogs/repositories/blogsRepository';
 
+class NotFoundError {
+    constructor(public message: string = 'entity not found') {
+    }
+}
 
 export const postsService = {
     async create(post: PostInputModel): Promise<PostId> {
-        // todo: обращаться за получением blogName к blogsQueryRepository или добавить метод в postsRepository?
-        const blog: BlogDbType | null = await blogsQueryRepository.find(post.blogId)
+        const blog: BlogDbWithCorrectIdType | null = await blogsRepository.find(post.blogId)
 
         if (blog) {
-            const newPost: PostDbType = {
-                _id: new ObjectId(),
+            const newPost: PostDbInputType = {
                 title: post.title,
                 content: post.content,
                 shortDescription: post.shortDescription,
-                blogId: new ObjectId(post.blogId),
+                blogId: blog.id,
                 blogName: blog.name,
                 createdAt: new Date().toISOString()
             }
 
             return await postsRepository.create(newPost)
         } else {
-            throw new Error('Blog not found (postsService.create)')
+            throw new NotFoundError('Blog not found (postsService.create)')
         }
     },
     async del(id: PostId): Promise<number> {
         return postsRepository.del(id)
     },
     async put(post: PostInputModel, id: PostId): Promise<number> {
-        const blog: BlogDbType | null = await blogsQueryRepository.find(post.blogId)
+        const blog: BlogDbWithCorrectIdType | null = await blogsRepository.find(post.blogId)
 
         if (blog) {
             const updatedPost: UpdatePostType = {
