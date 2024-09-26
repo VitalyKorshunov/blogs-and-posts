@@ -307,6 +307,13 @@ describe('/users', () => {
             .set({'Authorization': 'Basic ' + codedAuth})
             .expect(404)
 
+        console.log(res.body)
+
+        await req
+            .delete(SETTINGS.PATH.USERS + '/' + createdUser.id + '1')
+            .set({'Authorization': 'Basic ' + codedAuth})
+            .expect(404)
+
         expect(await testHelpers.countUsersInDb()).toEqual(1)
     })
     it('shouldn\'t del 401', async () => {
@@ -314,7 +321,7 @@ describe('/users', () => {
 
         expect(await testHelpers.countUsersInDb()).toEqual(1)
 
-        const res = await req
+        await req
             .delete(SETTINGS.PATH.USERS + '/' + createdUser.id)
             .set({'Authorization': 'Basic' + codedAuth}) // no ' '
             .expect(401)

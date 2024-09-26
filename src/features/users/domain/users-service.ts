@@ -13,23 +13,22 @@ export type Errors = {
 
 export const usersService = {
     async create(user: UserInputModel): Promise<UserId | Errors> {
-        const isFind = async (login: string, email: string) => {
-            const isLogin = await usersRepository.find('login', login)
-            const isEmail = await usersRepository.find('email', email)
-
-
+        const isLoginOrEmailExist = async (login: string, email: string) => {
             const errors: Errors = {
                 errorsMessages: []
             }
 
-            if (isLogin) errors.errorsMessages.push({field: 'login', message: 'login should be unique'})
-            if (isEmail) errors.errorsMessages.push({field: 'email', message: 'email should be unique'})
+            const isLoginExist = await usersRepository.findLoginOrEmail('login', login)
+            const isEmailExist = await usersRepository.findLoginOrEmail('email', email)
+
+            if (isLoginExist) errors.errorsMessages.push({field: 'login', message: 'login should be unique'})
+            if (isEmailExist) errors.errorsMessages.push({field: 'email', message: 'email should be unique'})
 
             return errors.errorsMessages.length ? errors : false
         }
 
-        const isFound = await isFind(user.login, user.email)
-        if (isFound) return isFound
+        const isFoundLoginOrEmail = await isLoginOrEmailExist(user.login, user.email)
+        if (isFoundLoginOrEmail) return isFoundLoginOrEmail
 
 
         const passHash = await bcrypt.hash(user.password, 12)

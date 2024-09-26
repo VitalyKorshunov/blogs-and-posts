@@ -5,7 +5,7 @@ import {UserDbType, UsersQueryDbType} from '../../../db/user-db-type';
 import {UserId, UsersSortViewModel, UserViewModel} from '../../../input-output-types/users-types';
 
 export const usersQueryRepository = {
-    getValidQueryId(id: UserId): IdQueryDbType {
+    _getValidQueryId(id: UserId): IdQueryDbType {
         return {_id: new ObjectId(id)}
     },
     map(user: UserDbType) {
@@ -19,7 +19,7 @@ export const usersQueryRepository = {
     },
 
     async find(userId: UserId): Promise<UserDbType | null> {
-        return await userCollection.findOne(this.getValidQueryId(userId))
+        return await userCollection.findOne(this._getValidQueryId(userId))
     },
     async findAndMap(userId: UserId): Promise<UserViewModel> {
         const user: UserDbType | null = await this.find(userId)
@@ -55,7 +55,6 @@ export const usersQueryRepository = {
         if (findEmailFilter) findFilter.push(findEmailFilter);
         if (findFilter.length === 0) findFilter.push({});
 
-        console.log(findFilter)
         const users = await userCollection
             .find({
                 $or: findFilter

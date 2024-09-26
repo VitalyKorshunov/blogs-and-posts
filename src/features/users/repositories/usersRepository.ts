@@ -5,7 +5,7 @@ import {UserId} from '../../../input-output-types/users-types';
 import {UserDbType} from '../../../db/user-db-type';
 
 export const usersRepository = {
-    getValidQueryId(id: UserId): IdQueryDbType {
+    _getValidQueryId(id: UserId): IdQueryDbType {
         return {_id: new ObjectId(id)}
     },
 
@@ -14,12 +14,13 @@ export const usersRepository = {
 
         return _id.insertedId.toString()
     },
+
     async del(userId: UserId): Promise<number> {
-        const user = await userCollection.deleteOne(this.getValidQueryId(userId))
+        const user = await userCollection.deleteOne(this._getValidQueryId(userId))
 
         return user.deletedCount
     },
-    async find(field: string, value: string): Promise<Object | null> {
+    async findLoginOrEmail(field: string, value: string): Promise<Object | null> {
         return await userCollection.findOne({[field]: value})
     },
 }

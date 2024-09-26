@@ -49,8 +49,7 @@ export const findUserValidator = async (req: Request<{ id: string }>, res: Respo
         next()
     } else {
         res
-            .status(404)
-            .json({})
+            .sendStatus(404)
         return
     }
 }
