@@ -1,9 +1,9 @@
-import {fromUTF8ToBase64} from '../../src/global-middlewares/admin-middleware'
+
 import {SETTINGS} from '../../src/settings'
+import {base64EncodeAndDecode} from '../../src/global-middlewares/admin-middleware';
 
-// готовые данные для переиспользования в тестах
 
-export const codedAuth = fromUTF8ToBase64(SETTINGS.ADMIN)
+export const codedAuth = base64EncodeAndDecode.encodeFromUTF8ToBase64(SETTINGS.ADMIN)
 
 export const createString = (length: number) => {
     let s = ''

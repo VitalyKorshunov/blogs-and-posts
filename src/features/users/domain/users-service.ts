@@ -1,8 +1,7 @@
 import {UserId, UserInputModel} from '../../../input-output-types/users-types';
-import {UserDbType} from '../../../db/user-db-type';
-import {ObjectId} from 'mongodb';
+import {UserDbInputType} from '../../../db/user-db-type';
 import {usersRepository} from '../repositories/usersRepository';
-import bcrypt from 'bcrypt';
+import {hashPassService} from '../../../common/adapters/hashPassService';
 
 export type Errors = {
     errorsMessages: {
@@ -12,28 +11,28 @@ export type Errors = {
 }
 
 export const usersService = {
+    async _checkExistValueInField(field: string, value: string): Promise<boolean> {
+        const isExist = await usersRepository.findUserByFieldAndValue(field, value)
+
+        return !!isExist
+    },
+
+
     async create(user: UserInputModel): Promise<UserId | Errors> {
-        const isLoginOrEmailExist = async (login: string, email: string) => {
-            const errors: Errors = {
-                errorsMessages: []
-            }
+        const errors: Errors = {
+            errorsMessages: []
+        }
+        const isLoginExist = await this._checkExistValueInField('login', user.login)
+        const isEmailExist = await this._checkExistValueInField('email', user.email)
+        if (isLoginExist) errors.errorsMessages.push({field: 'login', message: 'login should be unique'})
+        if (isEmailExist) errors.errorsMessages.push({field: 'email', message: 'email should be unique'})
 
-            const isLoginExist = await usersRepository.findLoginOrEmail('login', login)
-            const isEmailExist = await usersRepository.findLoginOrEmail('email', email)
-
-            if (isLoginExist) errors.errorsMessages.push({field: 'login', message: 'login should be unique'})
-            if (isEmailExist) errors.errorsMessages.push({field: 'email', message: 'email should be unique'})
-
-            return errors.errorsMessages.length ? errors : false
+        if (errors.errorsMessages.length) {
+            return errors
         }
 
-        const isFoundLoginOrEmail = await isLoginOrEmailExist(user.login, user.email)
-        if (isFoundLoginOrEmail) return isFoundLoginOrEmail
-
-
-        const passHash = await bcrypt.hash(user.password, 12)
-        const newUser: UserDbType = {
-            _id: new ObjectId(),
+        const passHash = await hashPassService.generateHash(user.password)
+        const newUser: UserDbInputType = {
             login: user.login,
             email: user.email,
             passHash: passHash,

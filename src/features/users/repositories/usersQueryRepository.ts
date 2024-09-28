@@ -8,7 +8,7 @@ export const usersQueryRepository = {
     _getValidQueryId(id: UserId): IdQueryDbType {
         return {_id: new ObjectId(id)}
     },
-    map(user: UserDbType) {
+    _mapToUserViewModel(user: UserDbType) {
         const userForOutput: UserViewModel = {
             id: user._id.toString(),
             login: user.login,
@@ -25,7 +25,7 @@ export const usersQueryRepository = {
         const user: UserDbType | null = await this.find(userId)
 
         if (user) {
-            return this.map(user)
+            return this._mapToUserViewModel(user)
         } else {
             throw new Error('user not found (usersQueryRepository.findAndMap)')
         }
@@ -74,7 +74,7 @@ export const usersQueryRepository = {
             page: query.pageNumber,
             pageSize: filter.pageSize,
             totalCount: totalUsers,
-            items: users.map(user => this.map(user))
+            items: users.map(user => this._mapToUserViewModel(user))
         }
     },
 }

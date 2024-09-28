@@ -1,16 +1,24 @@
 import {Request, Response} from 'express';
-import {authQueryRepository} from '../repositories/authQueryRepository';
 import {AuthInputModel} from '../../../input-output-types/auth-types';
+import {authService} from '../domain/auth-service';
+import {authQueryRepository} from '../repositories/authQueryRepository';
 
 export const authControllers = {
     async authenticateUser(req: Request<{}, {}, AuthInputModel>, res: Response) {
-        const isAuthenticate = await authQueryRepository.authenticateUser(req.body);
+        const accessToken = await authService.loginUser(req.body.loginOrEmail, req.body.password);
 
-        if (isAuthenticate) {
-            res.sendStatus(204)
+        if (accessToken) {
+            res.status(200).json({accessToken: accessToken})
         } else {
             res.sendStatus(401)
         }
     },
 
+    async getUserInfo(req: Request, res: Response) {
+        const userInfo = await authQueryRepository.getUserById(req.user!.id)
+
+        if (userInfo) {
+            res.status(200).json(userInfo)
+        }
+    }
 }

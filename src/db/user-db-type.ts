@@ -2,10 +2,17 @@ import {ObjectId} from 'mongodb';
 
 export type UserDbType = {
     _id: ObjectId
-    login: string // max 30
-    email: string // max 100
-    passHash: string // max 1000
-    createdAt: string // valid
+    login: string
+    email: string
+    passHash: string
+    createdAt: string
+}
+
+export type UserDbInputType = {
+    login: string
+    email: string
+    passHash: string
+    createdAt: string
 }
 
 export type UsersQueryDbType = {
@@ -15,4 +22,12 @@ export type UsersQueryDbType = {
     sortDirection: 'asc' | 'desc'
     searchLoginTerm: string | null
     searchEmailTerm: string | null
+}
+//todo заменить другие сущности похожим типом
+export type UserOutputDbViewModel = {
+    id: string
+    login: string
+    email: string
+    passHash: string
+    createdAt: string
 }

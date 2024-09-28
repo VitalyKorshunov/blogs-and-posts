@@ -1,6 +1,7 @@
 import {req, testHelpers} from './helpers/test-helpers'
 import {SETTINGS} from '../src/settings'
 import {AuthInputModel} from '../src/input-output-types/auth-types';
+import {jwtService} from '../src/common/adapters/jwt.service';
 
 describe('/auth', () => {
     beforeAll(async () => {
@@ -14,17 +15,21 @@ describe('/auth', () => {
         await testHelpers.closeConnectToDbForTests()
     })
 
-    it('should correct auth, 204', async () => {
+    it('should correct auth/login, 204', async () => {
         await testHelpers.createOneUserInDb('123', '123456')
 
         const sendBody1: AuthInputModel = {
             loginOrEmail: '123',
             password: '123456'
         }
-        await req
+        const res1 = await req
             .post(SETTINGS.PATH.AUTH + '/login')
             .send(sendBody1)
-            .expect(204)
+            .expect(200)
+console.log(res1.headers)
+        const payloadRes1 = await jwtService.verifyToken(res1.body.accessToken)
+        expect(payloadRes1).not.toEqual(null)
+
 
         const sendBody2: AuthInputModel = {
             loginOrEmail: '123@123.com',
@@ -33,7 +38,7 @@ describe('/auth', () => {
         await req
             .post(SETTINGS.PATH.AUTH + '/login')
             .send(sendBody2)
-            .expect(204)
+            .expect(200)
     })
 
     it('should incorrect auth, 400', async () => {
