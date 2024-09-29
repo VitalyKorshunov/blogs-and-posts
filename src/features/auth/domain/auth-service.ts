@@ -1,10 +1,10 @@
 import {usersRepository} from '../../users/repositories/usersRepository';
-import {UserOutputDbViewModel} from '../../../db/user-db-type';
 import {hashPassService} from '../../../common/adapters/hashPassService';
 import {jwtService} from '../../../common/adapters/jwt.service';
+import {UserServiceModel} from '../../../types/entities/users-types';
 
 export const authService = {
-    async _findUserByLoginOrEmail(loginOrEmail: string): Promise<UserOutputDbViewModel | null> {
+    async _findUserByLoginOrEmail(loginOrEmail: string): Promise<UserServiceModel | null> {
         const field = loginOrEmail.includes('@') ? 'email' : 'login'
 
         return await usersRepository.findUserByFieldAndValue(field, loginOrEmail)

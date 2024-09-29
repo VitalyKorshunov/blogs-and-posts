@@ -1,6 +1,6 @@
 import {req, testHelpers} from './helpers/test-helpers'
 import {SETTINGS} from '../src/settings'
-import {AuthInputModel} from '../src/input-output-types/auth-types';
+import {AuthInputModel} from '../src/types/auth/auth-types';
 import {jwtService} from '../src/common/adapters/jwt.service';
 
 describe('/auth', () => {
@@ -16,7 +16,7 @@ describe('/auth', () => {
     })
 
     it('should correct auth/login, 204', async () => {
-        await testHelpers.createOneUserInDb('123', '123456')
+        await testHelpers.createUserInDb('123', '123456')
 
         const sendBody1: AuthInputModel = {
             loginOrEmail: '123',
@@ -26,13 +26,13 @@ describe('/auth', () => {
             .post(SETTINGS.PATH.AUTH + '/login')
             .send(sendBody1)
             .expect(200)
-console.log(res1.headers)
+
         const payloadRes1 = await jwtService.verifyToken(res1.body.accessToken)
         expect(payloadRes1).not.toEqual(null)
 
 
         const sendBody2: AuthInputModel = {
-            loginOrEmail: '123@123.com',
+            loginOrEmail: '123@gmail.com',
             password: '123456'
         }
         await req
@@ -40,9 +40,8 @@ console.log(res1.headers)
             .send(sendBody2)
             .expect(200)
     })
-
     it('should incorrect auth, 400', async () => {
-        await testHelpers.createOneUserInDb('123', '123456')
+        await testHelpers.createUserInDb('123', '123456')
 
         const sendBody1: AuthInputModel = {
             loginOrEmail: '11',
@@ -83,9 +82,8 @@ console.log(res1.headers)
 
         expect(res3.body.errorsMessages[0].field).toEqual('loginOrEmail')
     })
-
     it('should incorrect login or password , 401', async () => {
-        await testHelpers.createOneUserInDb('123', '123456')
+        await testHelpers.createUserInDb('123', '123456')
 
         const sendBody1: AuthInputModel = {
             loginOrEmail: '123',
@@ -116,4 +114,9 @@ console.log(res1.headers)
             .send(sendBody3)
             .expect(401)
     })
+
+    it('should return info about user, 200', async () => {
+        await testHelpers.createUserInDb()
+    })
+
 })

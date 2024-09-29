@@ -13,6 +13,14 @@ export type UserViewModel = {
     createdAt: string
 }
 
+export type UserServiceModel = {
+    id: string
+    login: string
+    email: string
+    passHash: string
+    createdAt: string
+}
+
 export type UsersSortViewModel = {
     pagesCount: number
     page: number

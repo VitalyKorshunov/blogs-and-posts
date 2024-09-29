@@ -1,9 +1,9 @@
 import {req, testHelpers} from './helpers/test-helpers'
 import {SETTINGS} from '../src/settings'
-import {BlogInputModel, BlogsSortViewModel, BlogViewModel} from '../src/input-output-types/blogs-types'
+import {BlogInputModel, BlogsSortViewModel, BlogViewModel} from '../src/types/entities/blogs-types'
 import {codedAuth, createString} from './helpers/datasets'
 import {ObjectId} from 'mongodb';
-import {BlogPostInputModel, PostViewModel} from '../src/input-output-types/posts-types';
+import {BlogPostInputModel, PostViewModel} from '../src/types/entities/posts-types';
 
 describe('/blogs', () => {
     beforeAll(async () => {
@@ -26,7 +26,7 @@ describe('/blogs', () => {
         const res = await req
             .post(SETTINGS.PATH.BLOGS)
             .set({'Authorization': 'Basic ' + codedAuth})
-            .send(newBlog) // отправка данных
+            .send(newBlog)
             .expect(201)
 
         expect(res.body.name).toEqual(newBlog.name)
@@ -37,7 +37,7 @@ describe('/blogs', () => {
         expect(typeof res.body.isMembership).toEqual('boolean')
     })
     it('shouldn\'t create blog, 401', async () => {
-        const createdBlog = await testHelpers.createOneBlogInDb()
+        const createdBlog = await testHelpers.createBlogInDb()
 
         const newBlog: BlogInputModel = {
             name: 'b1',
@@ -53,7 +53,7 @@ describe('/blogs', () => {
         expect(await testHelpers.countBlogsInDb()).toEqual(1)
     })
     it('shouldn\'t create blog, 400', async () => {
-        const createdBlog = await testHelpers.createOneBlogInDb()
+        const createdBlog = await testHelpers.createBlogInDb()
 
         const newBlog: BlogInputModel = {
             name: createString(16),
@@ -76,7 +76,7 @@ describe('/blogs', () => {
     })
 
     it('should create post in blog, 201', async () => {
-        const blog: BlogViewModel = await testHelpers.createOneBlogInDb()
+        const blog: BlogViewModel = await testHelpers.createBlogInDb()
 
         const newPost: BlogPostInputModel = {
             title: 'p1',
@@ -109,7 +109,7 @@ describe('/blogs', () => {
         expect(typeof res.body.createdAt).toEqual('string')
     })
     it('shouldn\'t create post in blog with incorrect fields, 400', async () => {
-        const blog: BlogViewModel = await testHelpers.createOneBlogInDb()
+        const blog: BlogViewModel = await testHelpers.createBlogInDb()
 
         const newPost: BlogPostInputModel = {
             title: createString(31),
@@ -146,7 +146,7 @@ describe('/blogs', () => {
         expect(await testHelpers.countPostsInDb()).toEqual(0)
     })
     it('shouldn\'t create post in blog with incorrect auth, 401', async () => {
-        const blog: BlogViewModel = await testHelpers.createOneBlogInDb()
+        const blog: BlogViewModel = await testHelpers.createBlogInDb()
 
         const newPost: BlogPostInputModel = {
             title: 'p1',
@@ -177,10 +177,10 @@ describe('/blogs', () => {
         expect(res.body).toEqual(expectedResult)
     })
     it('should get not empty array, 200', async () => {
-        const blog1 = await testHelpers.createOneBlogInDb()
-        const blog2 = await testHelpers.createOneBlogInDb()
-        const blog3 = await testHelpers.createOneBlogInDb()
-        const blog4 = await testHelpers.createOneBlogInDb()
+        const blog1 = await testHelpers.createBlogInDb()
+        const blog2 = await testHelpers.createBlogInDb()
+        const blog3 = await testHelpers.createBlogInDb()
+        const blog4 = await testHelpers.createBlogInDb()
 
         const query1 = {}
 
@@ -286,7 +286,7 @@ describe('/blogs', () => {
             page: 1,
             pageSize: 10,
             totalCount: 4,
-            items: [blog4, blog3, blog2, blog1 ]
+            items: [blog4, blog3, blog2, blog1]
         }
 
         expect(res5.body).toEqual(expectedResult5)
@@ -303,7 +303,7 @@ describe('/blogs', () => {
             .expect(404)
     })
     it('should find, 200', async () => {
-        const createdBlog = await testHelpers.createOneBlogInDb()
+        const createdBlog = await testHelpers.createBlogInDb()
 
         const res = await req
             .get(SETTINGS.PATH.BLOGS + '/' + createdBlog.id)
@@ -313,10 +313,10 @@ describe('/blogs', () => {
     })
 
     it('should find filtered posts in blog, 200', async () => {
-        const createdBlog = await testHelpers.createOneBlogInDb()
-        const post1 = await testHelpers.createOnePostInDb(createdBlog.id)
-        const post2 = await testHelpers.createOnePostInDb(createdBlog.id)
-        const post3 = await testHelpers.createOnePostInDb(createdBlog.id)
+        const createdBlog = await testHelpers.createBlogInDb()
+        const post1 = await testHelpers.createPostInDb(createdBlog.id)
+        const post2 = await testHelpers.createPostInDb(createdBlog.id)
+        const post3 = await testHelpers.createPostInDb(createdBlog.id)
 
         const query = {
             pageNumber: 3,
@@ -370,10 +370,10 @@ describe('/blogs', () => {
         expect(res4.body).toEqual({items: [post1, post2, post3], pagesCount: 1, page: 1, pageSize: 10, totalCount: 3})
     })
     it('shouldn\'t find filtered posts in blog, 404', async () => {
-        const createdBlog = await testHelpers.createOneBlogInDb()
-        const post1 = await testHelpers.createOnePostInDb(createdBlog.id)
-        const post2 = await testHelpers.createOnePostInDb(createdBlog.id)
-        const post3 = await testHelpers.createOnePostInDb(createdBlog.id)
+        const createdBlog = await testHelpers.createBlogInDb()
+        const post1 = await testHelpers.createPostInDb(createdBlog.id)
+        const post2 = await testHelpers.createPostInDb(createdBlog.id)
+        const post3 = await testHelpers.createPostInDb(createdBlog.id)
 
         const query = {
             pageNumber: 1,
@@ -389,7 +389,7 @@ describe('/blogs', () => {
     })
 
     it('should del, 204', async () => {
-        const createdBlog = await testHelpers.createOneBlogInDb()
+        const createdBlog = await testHelpers.createBlogInDb()
 
         expect(await testHelpers.countBlogsInDb()).toEqual(1)
 
@@ -401,7 +401,7 @@ describe('/blogs', () => {
         expect(await testHelpers.countBlogsInDb()).toEqual(0)
     })
     it('shouldn\'t del, 404', async () => {
-        const createdBlog = await testHelpers.createOneBlogInDb()
+        const createdBlog = await testHelpers.createBlogInDb()
 
         expect(await testHelpers.countBlogsInDb()).toEqual(1)
 
@@ -413,7 +413,7 @@ describe('/blogs', () => {
         expect(await testHelpers.countBlogsInDb()).toEqual(1)
     })
     it('shouldn\'t del 401', async () => {
-        const createdBlog = await testHelpers.createOneBlogInDb()
+        const createdBlog = await testHelpers.createBlogInDb()
 
         expect(await testHelpers.countBlogsInDb()).toEqual(1)
 
@@ -426,7 +426,7 @@ describe('/blogs', () => {
     })
 
     it('should update, 204', async () => {
-        const createdBlog = await testHelpers.createOneBlogInDb()
+        const createdBlog = await testHelpers.createBlogInDb()
 
         const blogToUpdate: BlogInputModel = {
             name: 'n2',
@@ -445,7 +445,7 @@ describe('/blogs', () => {
         expect(updatedBlog).toEqual({...createdBlog, ...blogToUpdate})
     })
     it('shouldn\'t update 404', async () => {
-        const createdBlog = await testHelpers.createOneBlogInDb()
+        const createdBlog = await testHelpers.createBlogInDb()
 
         const updatedBlog: BlogInputModel = {
             name: 'n1',
@@ -463,7 +463,7 @@ describe('/blogs', () => {
 
     })
     it('shouldn\'t update2', async () => {
-        const createdBlog = await testHelpers.createOneBlogInDb()
+        const createdBlog = await testHelpers.createBlogInDb()
 
         const blogToUpdate: BlogInputModel = {
             name: createString(16),
@@ -487,7 +487,7 @@ describe('/blogs', () => {
         expect(res.body.errorsMessages[2].field).toEqual('websiteUrl')
     })
     it('shouldn\'t update 401', async () => {
-        const newBlog = await testHelpers.createOneBlogInDb()
+        const newBlog = await testHelpers.createBlogInDb()
 
         const blogToUpdate: BlogInputModel = {
             name: createString(16),

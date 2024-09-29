@@ -31,7 +31,16 @@ export type BlogPostInputModel = {
     content: string
 }
 
-export type UpdatePostType = {
+export type PostCreateType = {
+    title: string
+    shortDescription: string
+    content: string
+    blogId: string
+    blogName: string
+    createdAt: string
+}
+
+export type PostUpdateType = {
     title: string
     shortDescription: string
     content: string

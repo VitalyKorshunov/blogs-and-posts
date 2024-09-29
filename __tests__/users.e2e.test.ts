@@ -1,7 +1,7 @@
 import {req, testHelpers} from './helpers/test-helpers'
 import {SETTINGS} from '../src/settings'
 import {codedAuth} from './helpers/datasets'
-import {UserInputModel, UsersSortViewModel} from '../src/input-output-types/users-types';
+import {UserInputModel, UsersSortViewModel} from '../src/types/entities/users-types';
 
 describe('/users', () => {
     beforeAll(async () => {
@@ -59,7 +59,7 @@ describe('/users', () => {
         expect(await testHelpers.countUsersInDb()).toEqual(2)
     })
     it('shouldn\'t create user, 401', async () => {
-        const createdUser = await testHelpers.createOneUserInDb()
+        const createdUser = await testHelpers.createUserInDb()
 
         const newUser: UserInputModel = {
             login: '12345',
@@ -75,7 +75,7 @@ describe('/users', () => {
         expect(await testHelpers.countUsersInDb()).toEqual(1)
     })
     it('shouldn\'t create user, 400', async () => {
-        const createdUser = await testHelpers.createOneUserInDb()
+        const createdUser = await testHelpers.createUserInDb()
 
         const newUser1: UserInputModel = {
             login: '12', //length 2
@@ -140,10 +140,10 @@ describe('/users', () => {
         expect(await testHelpers.countUsersInDb()).toEqual(0)
     })
     it('should get not empty and correct array, 200', async () => {
-        const user1 = await testHelpers.createOneUserInDb('123')
-        const user2 = await testHelpers.createOneUserInDb('1234')
-        const user3 = await testHelpers.createOneUserInDb('1s23s45')
-        const user4 = await testHelpers.createOneUserInDb('123456S')
+        const user1 = await testHelpers.createUserInDb('123')
+        const user2 = await testHelpers.createUserInDb('1234')
+        const user3 = await testHelpers.createUserInDb('1s23s45')
+        const user4 = await testHelpers.createUserInDb('123456S')
 
         const query1 = {}
 
@@ -286,7 +286,7 @@ describe('/users', () => {
     })
 
     it('should del, 204', async () => {
-        const createdUser = await testHelpers.createOneUserInDb()
+        const createdUser = await testHelpers.createUserInDb()
 
         expect(await testHelpers.countUsersInDb()).toEqual(1)
 
@@ -298,7 +298,7 @@ describe('/users', () => {
         expect(await testHelpers.countBlogsInDb()).toEqual(0)
     })
     it('shouldn\'t del, 404', async () => {
-        const createdUser = await testHelpers.createOneUserInDb()
+        const createdUser = await testHelpers.createUserInDb()
 
         expect(await testHelpers.countUsersInDb()).toEqual(1)
 
@@ -317,7 +317,7 @@ describe('/users', () => {
         expect(await testHelpers.countUsersInDb()).toEqual(1)
     })
     it('shouldn\'t del 401', async () => {
-        const createdUser = await testHelpers.createOneUserInDb()
+        const createdUser = await testHelpers.createUserInDb()
 
         expect(await testHelpers.countUsersInDb()).toEqual(1)
 

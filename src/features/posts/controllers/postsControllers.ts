@@ -1,8 +1,8 @@
 import {Request, Response} from 'express';
-import {PostInputModel, PostsSortViewModel, PostViewModel} from '../../../input-output-types/posts-types';
+import {PostInputModel, PostsSortViewModel, PostViewModel} from '../../../types/entities/posts-types';
 import {postsService} from '../domain/posts-service';
-import {ParamType} from '../../blogs/some';
 import {postsQueryRepository} from '../repositories/postsQueryRepository';
+import {ParamType} from '../../../types/request-response/request-types';
 
 export const postsControllers = {
     async createPost(req: Request<any, any, PostInputModel>, res: Response<PostViewModel>) {
@@ -38,6 +38,4 @@ export const postsControllers = {
         res
             .sendStatus(204)
     },
-
-
 }

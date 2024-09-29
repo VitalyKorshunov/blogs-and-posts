@@ -3,7 +3,6 @@ import {inputCheckErrorsMiddleware} from '../../../global-middlewares/inputCheck
 import {adminMiddleware} from '../../../global-middlewares/admin-middleware'
 import {ObjectId} from 'mongodb';
 import {NextFunction, Request, Response} from 'express';
-import {UserDbType} from '../../../db/user-db-type';
 import {usersQueryRepository} from '../repositories/usersQueryRepository';
 
 
@@ -43,9 +42,9 @@ export const findUserValidator = async (req: Request<{ id: string }>, res: Respo
         return
     }
 
-    const user: UserDbType | null = await usersQueryRepository.find(req.params.id)
+    const isUserFound: boolean = await usersQueryRepository.isUserFound(req.params.id)
 
-    if (user) {
+    if (isUserFound) {
         next()
     } else {
         res

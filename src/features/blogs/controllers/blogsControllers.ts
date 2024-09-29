@@ -1,10 +1,10 @@
 import {Request, Response} from 'express';
-import {BlogInputModel, BlogsSortViewModel, BlogViewModel} from '../../../input-output-types/blogs-types';
+import {BlogInputModel, BlogsSortViewModel, BlogViewModel} from '../../../types/entities/blogs-types';
 import {blogsService} from '../domain/blogs-service';
-import {BlogPostInputModel, PostId, PostsSortViewModel, PostViewModel} from '../../../input-output-types/posts-types';
+import {BlogPostInputModel, PostId, PostsSortViewModel, PostViewModel} from '../../../types/entities/posts-types';
 import {blogsQueryRepository} from '../repositories/blogsQueryRepository';
 import {postsQueryRepository} from '../../posts/repositories/postsQueryRepository';
-import {ParamType} from '../some';
+import {ParamType} from '../../../types/request-response/request-types';
 
 export const blogsControllers = {
     async createBlog(req: Request<any, any, BlogInputModel>, res: Response<BlogViewModel>) {

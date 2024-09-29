@@ -1,13 +1,12 @@
-import {BlogId, BlogInputModel, UpdateBlogType} from '../../../input-output-types/blogs-types';
-import {BlogDbInputType} from '../../../db/blog-db-type';
+import {BlogCreateType, BlogId, BlogInputModel, BlogUpdateType} from '../../../types/entities/blogs-types';
 import {blogsRepository} from '../repositories/blogsRepository';
-import {BlogPostInputModel, PostId} from '../../../input-output-types/posts-types';
+import {BlogPostInputModel, PostId} from '../../../types/entities/posts-types';
 import {postsService} from '../../posts/domain/posts-service';
 
 
 export const blogsService = {
     async create(blog: BlogInputModel): Promise<BlogId> {
-        const newBlog: BlogDbInputType = {
+        const newBlog: BlogCreateType = {
             name: blog.name,
             description: blog.description,
             websiteUrl: blog.websiteUrl,
@@ -20,7 +19,7 @@ export const blogsService = {
         return await blogsRepository.del(id)
     },
     async put(blog: BlogInputModel, id: BlogId): Promise<number> {
-        const updatedBlog: UpdateBlogType = {
+        const updatedBlog: BlogUpdateType = {
             name: blog.name,
             description: blog.description,
             websiteUrl: blog.websiteUrl

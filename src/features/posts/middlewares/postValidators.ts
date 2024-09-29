@@ -3,9 +3,8 @@ import {inputCheckErrorsMiddleware} from '../../../global-middlewares/inputCheck
 import {NextFunction, Request, Response} from 'express'
 import {adminMiddleware} from '../../../global-middlewares/admin-middleware'
 import {ObjectId} from 'mongodb';
-import {BlogDbInputType} from '../../../db/blog-db-type';
-import {postsRepository} from '../repositories/postsRepository';
-import {blogsRepository} from '../../blogs/repositories/blogsRepository';
+import {blogsQueryRepository} from '../../blogs/repositories/blogsQueryRepository';
+import {postsQueryRepository} from '../repositories/postsQueryRepository';
 
 
 export const titleValidator = body('title').isString().withMessage('not string').trim()
@@ -20,8 +19,10 @@ export const contentValidator = body('content').isString().withMessage('not stri
 export const blogIdBodyValidator = body('blogId').isString().withMessage('not string').trim()
     .custom(async (blogId: string) => {
         if (!ObjectId.isValid(blogId)) throw new Error('invalid id')
-        const blog: BlogDbInputType | null = await blogsRepository.find(blogId)
-        if (!blog) throw new Error('no blog')
+
+        const isBlogFound: boolean = await blogsQueryRepository.isBlogFound(blogId)
+
+        if (!isBlogFound) throw new Error('no blog')
     })
 
 export const findPostValidator = async (req: Request<{ id: string }>, res: Response, next: NextFunction) => {
@@ -30,9 +31,9 @@ export const findPostValidator = async (req: Request<{ id: string }>, res: Respo
         return
     }
 
-    const post = await postsRepository.find(req.params.id)
+    const isPostFound = await postsQueryRepository.isPostFound(req.params.id)
 
-    if (post) {
+    if (isPostFound) {
         next()
     } else {
         res

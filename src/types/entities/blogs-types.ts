@@ -23,7 +23,15 @@ export type BlogsSortViewModel = {
     items: BlogViewModel[]
 }
 
-export type UpdateBlogType = {
+export type BlogCreateType = {
+    name: string
+    description: string
+    websiteUrl: string
+    createdAt: string
+    isMembership: boolean
+}
+
+export type BlogUpdateType = {
     name: string
     description: string
     websiteUrl: string

@@ -17,7 +17,9 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
     const payload = await jwtService.verifyToken(token)
 
     if (payload) {
-        req.user = {id: payload.id}
+        const {id} = payload
+
+        req.user = {id: id} as {id: string}
         next()
     } else {
         res.sendStatus(401)

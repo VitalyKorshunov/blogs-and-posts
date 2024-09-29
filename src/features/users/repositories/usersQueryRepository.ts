@@ -1,14 +1,14 @@
 import {userCollection} from '../../../db/mongo-db';
-import {ObjectId} from 'mongodb';
-import {IdQueryDbType,} from '../../../db/query-db-type';
-import {UserDbType, UsersQueryDbType} from '../../../db/user-db-type';
-import {UserId, UsersSortViewModel, UserViewModel} from '../../../input-output-types/users-types';
+import {ObjectId, WithId} from 'mongodb';
+import {IdQueryDbType,} from '../../../types/db/query-db-type';
+import {UserDbType, UsersQueryDbType} from '../../../types/db/user-db-type';
+import {UserId, UsersSortViewModel, UserViewModel} from '../../../types/entities/users-types';
 
 export const usersQueryRepository = {
-    _getValidQueryId(id: UserId): IdQueryDbType {
+    _toIdQuery(id: UserId): IdQueryDbType {
         return {_id: new ObjectId(id)}
     },
-    _mapToUserViewModel(user: UserDbType) {
+    _mapToUserViewModel(user: WithId<UserDbType>) {
         const userForOutput: UserViewModel = {
             id: user._id.toString(),
             login: user.login,
@@ -18,11 +18,14 @@ export const usersQueryRepository = {
         return userForOutput
     },
 
-    async find(userId: UserId): Promise<UserDbType | null> {
-        return await userCollection.findOne(this._getValidQueryId(userId))
+
+    async isUserFound(id: UserId): Promise<boolean> {
+        const user: number = await userCollection.countDocuments(this._toIdQuery(id));
+
+        return !!user
     },
     async findAndMap(userId: UserId): Promise<UserViewModel> {
-        const user: UserDbType | null = await this.find(userId)
+        const user: WithId<UserDbType> | null = await userCollection.findOne(this._toIdQuery(userId))
 
         if (user) {
             return this._mapToUserViewModel(user)

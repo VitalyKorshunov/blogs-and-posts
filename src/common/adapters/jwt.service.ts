@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken'
 import {SETTINGS} from '../../settings';
-import {JwtVerifyViewModel} from '../../input-output-types/jwt-types';
+import {JwtVerifyViewModel} from '../../types/auth/jwt-types';
 
 export const jwtService = {
     async createToken(userId: string): Promise<string | null> {

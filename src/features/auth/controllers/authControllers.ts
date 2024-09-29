@@ -1,5 +1,5 @@
 import {Request, Response} from 'express';
-import {AuthInputModel} from '../../../input-output-types/auth-types';
+import {AuthInputModel} from '../../../types/auth/auth-types';
 import {authService} from '../domain/auth-service';
 import {authQueryRepository} from '../repositories/authQueryRepository';
 
@@ -19,6 +19,8 @@ export const authControllers = {
 
         if (userInfo) {
             res.status(200).json(userInfo)
+        } else {
+            res.sendStatus(401)
         }
     }
 }

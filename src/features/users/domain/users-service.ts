@@ -1,7 +1,7 @@
-import {UserId, UserInputModel} from '../../../input-output-types/users-types';
-import {UserDbInputType} from '../../../db/user-db-type';
+import {UserId, UserInputModel} from '../../../types/entities/users-types';
 import {usersRepository} from '../repositories/usersRepository';
 import {hashPassService} from '../../../common/adapters/hashPassService';
+import {UserDbType} from '../../../types/db/user-db-type';
 
 export type Errors = {
     errorsMessages: {
@@ -32,7 +32,7 @@ export const usersService = {
         }
 
         const passHash = await hashPassService.generateHash(user.password)
-        const newUser: UserDbInputType = {
+        const newUser: UserDbType = {
             login: user.login,
             email: user.email,
             passHash: passHash,

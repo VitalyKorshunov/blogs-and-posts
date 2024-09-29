@@ -1,8 +1,8 @@
 import {req, testHelpers} from './helpers/test-helpers'
 import {SETTINGS} from '../src/settings'
 import {codedAuth, createString} from './helpers/datasets'
-import {PostInputModel, PostViewModel} from '../src/input-output-types/posts-types'
-import {BlogViewModel} from '../src/input-output-types/blogs-types';
+import {PostInputModel, PostViewModel} from '../src/types/entities/posts-types'
+import {BlogViewModel} from '../src/types/entities/blogs-types';
 import {ObjectId} from 'mongodb';
 
 describe('/posts', () => {
@@ -19,7 +19,7 @@ describe('/posts', () => {
     })
 
     it('should create', async () => {
-        const blog: BlogViewModel = await testHelpers.createOneBlogInDb()
+        const blog: BlogViewModel = await testHelpers.createBlogInDb()
 
         const newPost: PostInputModel = {
             title: 't1',
@@ -45,7 +45,7 @@ describe('/posts', () => {
         expect(typeof res.body.createdAt).toEqual('string')
     })
     it('shouldn\'t create, 401', async () => {
-        const blog: BlogViewModel = await testHelpers.createOneBlogInDb()
+        const blog: BlogViewModel = await testHelpers.createBlogInDb()
 
         const newPost: PostInputModel = {
             title: 't1',
@@ -62,7 +62,7 @@ describe('/posts', () => {
         expect(await testHelpers.countPostsInDb()).toEqual(0)
     })
     it('shouldn\'t create with incorrect blogId, 400', async () => {
-        const blog: BlogViewModel = await testHelpers.createOneBlogInDb()
+        const blog: BlogViewModel = await testHelpers.createBlogInDb()
 
         const newPost: PostInputModel = {
             title: createString(31),
@@ -86,7 +86,7 @@ describe('/posts', () => {
         expect(await testHelpers.countPostsInDb()).toEqual(0)
     })
     it('shouldn\'t create with not found blogId, 400', async () => {
-        const blog: BlogViewModel = await testHelpers.createOneBlogInDb()
+        const blog: BlogViewModel = await testHelpers.createBlogInDb()
 
         const newPost: PostInputModel = {
             title: createString(31),
@@ -110,7 +110,7 @@ describe('/posts', () => {
         expect(await testHelpers.countPostsInDb()).toEqual(0)
     })
     it('shouldn\'t create with correct blogId, 400', async () => {
-        const blog: BlogViewModel = await testHelpers.createOneBlogInDb()
+        const blog: BlogViewModel = await testHelpers.createBlogInDb()
 
         const newPost: PostInputModel = {
             title: createString(31),
@@ -141,10 +141,10 @@ describe('/posts', () => {
         expect(res.body).toEqual({items: [], page: 1, pageSize: 10, pagesCount: 0, totalCount: 0}) // проверяем ответ эндпоинта
     })
     it('should get all posts', async () => {
-        const blog = await testHelpers.createOneBlogInDb();
-        const post1 = await testHelpers.createOnePostInDb(blog.id)
-        const post2 = await testHelpers.createOnePostInDb(blog.id)
-        const post3 = await testHelpers.createOnePostInDb(blog.id)
+        const blog = await testHelpers.createBlogInDb();
+        const post1 = await testHelpers.createPostInDb(blog.id)
+        const post2 = await testHelpers.createPostInDb(blog.id)
+        const post3 = await testHelpers.createPostInDb(blog.id)
 
         const query1 = {}
 
@@ -210,8 +210,8 @@ describe('/posts', () => {
             .expect(404)
     })
     it('should find', async () => {
-        const blog = await testHelpers.createOneBlogInDb();
-        const post = await testHelpers.createOnePostInDb(blog.id)
+        const blog = await testHelpers.createBlogInDb();
+        const post = await testHelpers.createPostInDb(blog.id)
 
         const res = await req
             .get(SETTINGS.PATH.POSTS + '/' + post.id)
@@ -223,8 +223,8 @@ describe('/posts', () => {
     })
 
     it('should del', async () => {
-        const blog = await testHelpers.createOneBlogInDb();
-        const post = await testHelpers.createOnePostInDb(blog.id)
+        const blog = await testHelpers.createBlogInDb();
+        const post = await testHelpers.createPostInDb(blog.id)
 
         expect(await testHelpers.countPostsInDb()).toEqual(1)
 
@@ -249,8 +249,8 @@ describe('/posts', () => {
     })
 
     it('should update', async () => {
-        const blog = await testHelpers.createOneBlogInDb();
-        const post = await testHelpers.createOnePostInDb(blog.id)
+        const blog = await testHelpers.createBlogInDb();
+        const post = await testHelpers.createPostInDb(blog.id)
 
         const newPost: PostInputModel = {
             title: 't2',
@@ -271,7 +271,7 @@ describe('/posts', () => {
         expect(updatedPost).toEqual(expectedPost)
     })
     it('shouldn\'t update with incorrect id, 404', async () => {
-        const blog = await testHelpers.createOneBlogInDb();
+        const blog = await testHelpers.createBlogInDb();
 
         const newPost: PostInputModel = {
             title: 't1',
@@ -287,7 +287,7 @@ describe('/posts', () => {
             .expect(404)
     })
     it('shouldn\'t update with not found id, 404', async () => {
-        const blog = await testHelpers.createOneBlogInDb();
+        const blog = await testHelpers.createBlogInDb();
 
         const newPost: PostInputModel = {
             title: 't1',
@@ -303,8 +303,8 @@ describe('/posts', () => {
             .expect(404)
     })
     it('shouldn\'t update2, 400', async () => {
-        const blog = await testHelpers.createOneBlogInDb();
-        const post = await testHelpers.createOnePostInDb(blog.id)
+        const blog = await testHelpers.createBlogInDb();
+        const post = await testHelpers.createPostInDb(blog.id)
 
         const newPost: PostInputModel = {
             title: createString(31),
@@ -328,8 +328,8 @@ describe('/posts', () => {
         expect(res.body.errorsMessages[3].field).toEqual('blogId')
     })
     it('shouldn\'t update 401', async () => {
-        const blog = await testHelpers.createOneBlogInDb();
-        const post = await testHelpers.createOnePostInDb(blog.id)
+        const blog = await testHelpers.createBlogInDb();
+        const post = await testHelpers.createPostInDb(blog.id)
 
         const newPost: PostInputModel = {
             title: createString(31),

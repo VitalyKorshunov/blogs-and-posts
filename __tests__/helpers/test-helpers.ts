@@ -2,15 +2,15 @@ import {app} from '../../src/app'
 import {agent} from 'supertest'
 import {closeConnectToDB, connectToDB, db} from '../../src/db/mongo-db';
 import {SETTINGS} from '../../src/settings';
-import {BlogInputModel, BlogViewModel} from '../../src/input-output-types/blogs-types';
+import {BlogInputModel, BlogViewModel} from '../../src/types/entities/blogs-types';
 import {codedAuth} from './datasets';
-import {PostInputModel, PostViewModel} from '../../src/input-output-types/posts-types';
-import {IdQueryDbType} from '../../src/db/query-db-type';
-import {ObjectId} from 'mongodb';
-import {BlogDbOutputType} from '../../src/db/blog-db-type';
-import {PostDbOutputType} from '../../src/db/post-db-type';
-import {UserInputModel, UserViewModel} from '../../src/input-output-types/users-types';
-import {UserDbType} from '../../src/db/user-db-type';
+import {PostInputModel, PostViewModel} from '../../src/types/entities/posts-types';
+import {IdQueryDbType} from '../../src/types/db/query-db-type';
+import {ObjectId, WithId} from 'mongodb';
+import {UserInputModel, UserViewModel} from '../../src/types/entities/users-types';
+import {UserDbType} from '../../src/types/db/user-db-type';
+import {BlogDbType} from '../../src/types/db/blog-db-type';
+import {PostDbType} from '../../src/types/db/post-db-type';
 
 export const req = agent(app)
 
@@ -48,7 +48,7 @@ export const testHelpers = {
         return users.length;
     },
 
-    createOneBlogInDb: async (): Promise<BlogViewModel> => {
+    createBlogInDb: async (): Promise<BlogViewModel> => {
         const newBlog: BlogInputModel = {
             name: 'n1',
             description: 'd1',
@@ -64,7 +64,7 @@ export const testHelpers = {
         return {...newBlog, id: res.body.id, createdAt: res.body.createdAt, isMembership: res.body.isMembership};
     },
 
-    createOnePostInDb: async (blogId: string): Promise<PostViewModel> => {
+    createPostInDb: async (blogId: string): Promise<PostViewModel> => {
         const newPost: PostInputModel = {
             title: 't1',
             shortDescription: 's1',
@@ -81,10 +81,10 @@ export const testHelpers = {
         return {...newPost, id: res.body.id, blogName: res.body.blogName, createdAt: res.body.createdAt}
     },
 
-    createOneUserInDb: async (login: string = '123', password: string = '123456'): Promise<UserViewModel> => {
+    createUserInDb: async (login: string = '123', password: string = '123456'): Promise<UserViewModel> => {
         const newUser: UserInputModel = {
             login: login,
-            email: `${login}@123.com`,
+            email: `${login}@gmail.com`,
             password: password
         };
 
@@ -100,7 +100,7 @@ export const testHelpers = {
     findAndMapBlog: async (id: string): Promise<BlogViewModel> => {
         const queryId: IdQueryDbType = {_id: new ObjectId(id)}
 
-        const blog: BlogDbOutputType = await db.collection(SETTINGS.BLOG_COLLECTION_NAME).findOne(queryId) as BlogDbOutputType
+        const blog: WithId<BlogDbType> = await db.collection(SETTINGS.BLOG_COLLECTION_NAME).findOne(queryId) as WithId<BlogDbType>
         return {
             id: blog._id.toString(),
             name: blog.name,
@@ -114,7 +114,7 @@ export const testHelpers = {
     findAndMapPost: async (id: string): Promise<PostViewModel> => {
         const queryId: IdQueryDbType = {_id: new ObjectId(id)}
 
-        const post: PostDbOutputType = await db.collection(SETTINGS.POST_COLLECTION_NAME).findOne(queryId) as PostDbOutputType
+        const post: WithId<PostDbType> = await db.collection(SETTINGS.POST_COLLECTION_NAME).findOne(queryId) as WithId<PostDbType>
         return {
             id: post._id.toString(),
             blogId: post.blogId.toString(),
@@ -129,7 +129,7 @@ export const testHelpers = {
     findAndMapUser: async (id: string): Promise<UserViewModel> => {
         const queryId: IdQueryDbType = {_id: new ObjectId(id)}
 
-        const user: UserDbType = await db.collection(SETTINGS.USER_COLLECTION_NAME).findOne(queryId) as UserDbType
+        const user: WithId<UserDbType> = await db.collection(SETTINGS.USER_COLLECTION_NAME).findOne(queryId) as WithId<UserDbType>
         return {
             id: user._id.toString(),
             login: user.login,
@@ -137,4 +137,12 @@ export const testHelpers = {
             createdAt: user.createdAt
         };
     },
+
+    createUsersAndGetAccessTokens(countUsers: number) {
+        const tokens = []
+
+        for (let i = 1; i <= countUsers; i++) {
+            const user = this.createUserInDb(`user${i}`,)
+        }
+    }
 }

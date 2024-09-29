@@ -1,15 +1,15 @@
-import {PostDbOutputType, PostsQueryDbType} from '../../../db/post-db-type'
+import {PostDbType, PostsQueryDbType} from '../../../types/db/post-db-type'
 import {postCollection} from '../../../db/mongo-db';
-import {ObjectId} from 'mongodb';
-import {IdQueryDbType,} from '../../../db/query-db-type';
-import {PostId, PostsSortViewModel, PostViewModel} from '../../../input-output-types/posts-types';
-import {BlogId,} from '../../../input-output-types/blogs-types';
+import {ObjectId, WithId} from 'mongodb';
+import {IdQueryDbType,} from '../../../types/db/query-db-type';
+import {PostId, PostsSortViewModel, PostViewModel} from '../../../types/entities/posts-types';
+import {BlogId,} from '../../../types/entities/blogs-types';
 
 export const postsQueryRepository = {
-    _getValidQueryId(id: PostId): IdQueryDbType {
+    _toIdQuery(id: PostId): IdQueryDbType {
         return {_id: new ObjectId(id)}
     },
-    _mapToPostViewModel(post: PostDbOutputType) {
+    _mapToPostViewModel(post: WithId<PostDbType>) {
         const postForOutput: PostViewModel = {
             id: post._id.toString(),
             title: post.title,
@@ -22,9 +22,13 @@ export const postsQueryRepository = {
         return postForOutput
     },
 
+    async isPostFound(id: PostId): Promise<boolean> {
+        const post: number = await postCollection.countDocuments(this._toIdQuery(id));
 
+        return !!post
+    },
     async findAndMap(postId: PostId): Promise<PostViewModel> {
-        const post: PostDbOutputType | null = await postCollection.findOne(this._getValidQueryId(postId))
+        const post: WithId<PostDbType> | null = await postCollection.findOne(this._toIdQuery(postId))
 
         if (post) {
             return this._mapToPostViewModel(post)
@@ -38,8 +42,8 @@ export const postsQueryRepository = {
     async sortPosts(query: any, blogId?: BlogId): Promise<PostsSortViewModel> {
         //todo: оставить универсальный метод для использования в blogsQueryRepository или продублировать его там же?
         // Универсальность достигнута с помощью необязательного blogId
-        const blogValidDbId: ObjectId | null = blogId ? this._getValidQueryId(blogId)._id : null
-        const findFilter = blogValidDbId ? {blogId: blogValidDbId} : {}
+        const blogObjectId: ObjectId | null = blogId ? this._toIdQuery(blogId)._id : null
+        const findFilter = blogObjectId ? {blogId: blogObjectId} : {}
 
         const filter: PostsQueryDbType = {
             sortBy: query.sortBy ? query.sortBy : 'createdAt',

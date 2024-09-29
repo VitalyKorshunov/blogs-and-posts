@@ -1,8 +1,6 @@
-import {PostId, PostInputModel, UpdatePostType} from '../../../input-output-types/posts-types';
-import {BlogDbWithCorrectIdType} from '../../../db/blog-db-type';
-import {PostDbInputType} from '../../../db/post-db-type';
+import {PostCreateType, PostId, PostInputModel, PostUpdateType} from '../../../types/entities/posts-types';
 import {postsRepository} from '../repositories/postsRepository';
-import {blogsRepository} from '../../blogs/repositories/blogsRepository';
+import {BlogViewModel} from '../../../types/entities/blogs-types';
 
 class NotFoundError {
     constructor(public message: string = 'entity not found') {
@@ -11,10 +9,10 @@ class NotFoundError {
 
 export const postsService = {
     async create(post: PostInputModel): Promise<PostId> {
-        const blog: BlogDbWithCorrectIdType | null = await blogsRepository.find(post.blogId)
+        const blog: BlogViewModel | null = await postsRepository.findBlog(post.blogId)
 
         if (blog) {
-            const newPost: PostDbInputType = {
+            const newPost: PostCreateType = {
                 title: post.title,
                 content: post.content,
                 shortDescription: post.shortDescription,
@@ -32,10 +30,10 @@ export const postsService = {
         return postsRepository.del(id)
     },
     async put(post: PostInputModel, id: PostId): Promise<number> {
-        const blog: BlogDbWithCorrectIdType | null = await blogsRepository.find(post.blogId)
+        const blog: BlogViewModel | null = await postsRepository.findBlog(post.blogId)
 
         if (blog) {
-            const updatedPost: UpdatePostType = {
+            const updatedPost: PostUpdateType = {
                 title: post.title,
                 content: post.content,
                 shortDescription: post.shortDescription,

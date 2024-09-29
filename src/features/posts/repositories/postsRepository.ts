@@ -1,20 +1,16 @@
-import {PostId, UpdatePostType} from '../../../input-output-types/posts-types'
-import {
-    PostDbInputType,
-    PostDbOutputType,
-    PostDbWithCorrectIdType,
-    PostMongoDbInputType,
-    UpdatePostDbType
-} from '../../../db/post-db-type'
-import {postCollection} from '../../../db/mongo-db';
-import {ObjectId} from 'mongodb';
-import {IdQueryDbType} from '../../../db/query-db-type';
+import {PostCreateType, PostId, PostUpdateType, PostViewModel} from '../../../types/entities/posts-types'
+import {PostDbType, UpdatePostDbType} from '../../../types/db/post-db-type'
+import {blogCollection, postCollection} from '../../../db/mongo-db';
+import {ObjectId, WithId} from 'mongodb';
+import {IdQueryDbType} from '../../../types/db/query-db-type';
+import {BlogId, BlogViewModel} from '../../../types/entities/blogs-types';
+import {BlogDbType} from '../../../types/db/blog-db-type';
 
 export const postsRepository = {
-    _getValidQueryId(id: PostId): IdQueryDbType {
+    _toIdQuery(id: PostId): IdQueryDbType {
         return {_id: new ObjectId(id)}
     },
-    _mapToPostWithCorrectId(post: PostDbOutputType): PostDbWithCorrectIdType {
+    _mapToPostWithCorrectId(post: WithId<PostDbType>): PostViewModel {
         const {_id, blogId, ...rest} = post
         return {
             id: _id.toString(),
@@ -22,10 +18,17 @@ export const postsRepository = {
             ...rest
         }
     },
+    _mapToBlogWithCorrectId(blog: WithId<BlogDbType>): BlogViewModel {
+        const {_id, ...rest} = blog
+        return {
+            id: _id.toString(),
+            ...rest
+        }
+    },
 
 
-    async create(post: PostDbInputType): Promise<PostId> {
-        const postToDb: PostMongoDbInputType = {
+    async create(post: PostCreateType): Promise<PostId> {
+        const postToDb: PostDbType = {
             ...post,
             blogId: new ObjectId(post.blogId)
         }
@@ -33,22 +36,23 @@ export const postsRepository = {
 
         return _id.insertedId.toString()
     },
-    async find(id: PostId): Promise<PostDbWithCorrectIdType | null> {
-        const post: PostDbOutputType | null = await postCollection.findOne(this._getValidQueryId(id));
-
-        return post ? this._mapToPostWithCorrectId(post) : null
-    },
     async del(postId: PostId): Promise<number> {
-        const post = await postCollection.deleteOne(this._getValidQueryId(postId))
+        const post = await postCollection.deleteOne(this._toIdQuery(postId))
 
         return post.deletedCount
     },
-    async put(post: UpdatePostType, postId: PostId): Promise<number> {
-        const blogId: ObjectId = this._getValidQueryId(post.blogId)._id
+    async put(post: PostUpdateType, postId: PostId): Promise<number> {
+        const blogId: ObjectId = this._toIdQuery(post.blogId)._id
         const updatedPost: UpdatePostDbType = {...post, blogId: blogId}
 
-        const postUpdated = await postCollection.updateOne(this._getValidQueryId(postId), {$set: updatedPost})
+        const postUpdated = await postCollection.updateOne(this._toIdQuery(postId), {$set: updatedPost})
 
         return postUpdated.modifiedCount
+    },
+
+    async findBlog(id: BlogId): Promise<BlogViewModel | null> {
+        const blog: WithId<BlogDbType> | null = await blogCollection.findOne(this._toIdQuery(id));
+
+        return blog ? this._mapToBlogWithCorrectId(blog) : null
     },
 }

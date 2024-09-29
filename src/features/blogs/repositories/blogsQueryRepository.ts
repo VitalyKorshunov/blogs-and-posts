@@ -1,18 +1,16 @@
-import {BlogDbOutputType} from '../../../db/blog-db-type'
 import {blogCollection} from '../../../db/mongo-db';
-import {ObjectId} from 'mongodb';
-import {IdQueryDbType} from '../../../db/query-db-type';
-import {BlogId, BlogsSortViewModel, BlogViewModel} from '../../../input-output-types/blogs-types';
-import {BlogsQueryDBType} from '../some';
+import {ObjectId, WithId} from 'mongodb';
+import {IdQueryDbType} from '../../../types/db/query-db-type';
+import {BlogId, BlogsSortViewModel, BlogViewModel} from '../../../types/entities/blogs-types';
 import {postsQueryRepository} from '../../posts/repositories/postsQueryRepository';
-import {PostsSortViewModel} from '../../../input-output-types/posts-types';
+import {PostsSortViewModel} from '../../../types/entities/posts-types';
+import {BlogDbType, BlogsQueryDBType} from '../../../types/db/blog-db-type';
 
 export const blogsQueryRepository = {
-    _getValidQueryId(id: string): IdQueryDbType {
+    _toIdQuery(id: string): IdQueryDbType {
         return {_id: new ObjectId(id)}
     },
-
-    _mapToBlogViewModel(blog: BlogDbOutputType) {
+    _mapToBlogViewModel(blog: WithId<BlogDbType>) {
         const blogForOutput: BlogViewModel = {
             id: blog._id.toString(),
             description: blog.description,
@@ -24,11 +22,14 @@ export const blogsQueryRepository = {
         return blogForOutput
     },
 
-    // async find(id: BlogId): Promise<BlogDbOutputType | null> {
-    //     return await blogCollection.findOne(this._getValidQueryId(id))
-    // },
+
+    async isBlogFound(id: BlogId): Promise<boolean> {
+        const blog: number = await blogCollection.countDocuments(this._toIdQuery(id));
+
+        return !!blog
+    },
     async findAndMap(id: BlogId): Promise<BlogViewModel> {
-        const blog: BlogDbOutputType | null = await blogCollection.findOne(this._getValidQueryId(id))
+        const blog: WithId<BlogDbType> | null = await blogCollection.findOne(this._toIdQuery(id))
 
         if (blog) {
             return this._mapToBlogViewModel(blog)

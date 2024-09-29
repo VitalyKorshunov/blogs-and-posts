@@ -1,41 +1,40 @@
 import {userCollection} from '../../../db/mongo-db';
-import {ObjectId} from 'mongodb';
-import {IdQueryDbType} from '../../../db/query-db-type';
-import {UserId} from '../../../input-output-types/users-types';
-import {UserDbInputType, UserDbType, UserOutputDbViewModel} from '../../../db/user-db-type';
+import {ObjectId, WithId} from 'mongodb';
+import {IdQueryDbType} from '../../../types/db/query-db-type';
+import {UserId, UserServiceModel} from '../../../types/entities/users-types';
+import {UserDbType} from '../../../types/db/user-db-type';
 
 export const usersRepository = {
-    _getValidQueryId(id: UserId): IdQueryDbType {
+    _toIdQuery(id: UserId): IdQueryDbType {
         return {_id: new ObjectId(id)}
     },
-    _mapToUserViewModel(user: UserDbType) {
-        const userForOutput: UserOutputDbViewModel = {
+    _mapToUserServiceModel(user: WithId<UserDbType>): UserServiceModel {
+        return {
             id: user._id.toString(),
             login: user.login,
             email: user.email,
             passHash: user.passHash,
             createdAt: user.createdAt
         }
-        return userForOutput
     },
 
-    async create(user: UserDbInputType): Promise<UserId> {
+    async create(user: UserDbType): Promise<UserId> {
         const _id = await userCollection.insertOne(user)
 
         return _id.insertedId.toString()
     },
-    async findUserByFieldAndValue(field: string, value: string): Promise<UserOutputDbViewModel | null> {
+    async findUserByFieldAndValue(field: string, value: string): Promise<UserServiceModel | null> {
         const queryToDb = (
             (field === 'id')
-                ? this._getValidQueryId(value)
+                ? this._toIdQuery(value)
                 : {[field]: value}
         )
 
-        const user: UserDbType | null = await userCollection.findOne(queryToDb)
-        return user ? this._mapToUserViewModel(user) : null
+        const user: WithId<UserDbType> | null = await userCollection.findOne(queryToDb)
+        return user ? this._mapToUserServiceModel(user) : null
     },
     async del(userId: UserId): Promise<number> {
-        const user = await userCollection.deleteOne(this._getValidQueryId(userId))
+        const user = await userCollection.deleteOne(this._toIdQuery(userId))
 
         return user.deletedCount
     },
