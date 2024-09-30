@@ -1,7 +1,7 @@
 import {userCollection} from '../../../db/mongo-db';
 import {ObjectId, WithId} from 'mongodb';
-import {IdQueryDbType,} from '../../../types/db/query-db-type';
-import {UserDbType, UsersQueryDbType} from '../../../types/db/user-db-type';
+import {IdQueryDbType,} from '../../../types/db/query-db-types';
+import {UserDbType, UsersQueryDbType} from '../../../types/db/user-db-types';
 import {UserId, UsersSortViewModel, UserViewModel} from '../../../types/entities/users-types';
 
 export const usersQueryRepository = {

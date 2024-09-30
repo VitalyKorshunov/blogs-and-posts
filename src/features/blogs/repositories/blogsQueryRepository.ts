@@ -1,10 +1,10 @@
 import {blogCollection} from '../../../db/mongo-db';
 import {ObjectId, WithId} from 'mongodb';
-import {IdQueryDbType} from '../../../types/db/query-db-type';
+import {IdQueryDbType} from '../../../types/db/query-db-types';
 import {BlogId, BlogsSortViewModel, BlogViewModel} from '../../../types/entities/blogs-types';
 import {postsQueryRepository} from '../../posts/repositories/postsQueryRepository';
 import {PostsSortViewModel} from '../../../types/entities/posts-types';
-import {BlogDbType, BlogsQueryDBType} from '../../../types/db/blog-db-type';
+import {BlogDbType, BlogsQueryDBType} from '../../../types/db/blog-db-types';
 
 export const blogsQueryRepository = {
     _toIdQuery(id: string): IdQueryDbType {

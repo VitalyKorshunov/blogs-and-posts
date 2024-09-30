@@ -1,7 +1,7 @@
-import {PostDbType, PostsQueryDbType} from '../../../types/db/post-db-type'
+import {PostDbType, PostsQueryDbType} from '../../../types/db/post-db-types'
 import {postCollection} from '../../../db/mongo-db';
 import {ObjectId, WithId} from 'mongodb';
-import {IdQueryDbType,} from '../../../types/db/query-db-type';
+import {IdQueryDbType,} from '../../../types/db/query-db-types';
 import {PostId, PostsSortViewModel, PostViewModel} from '../../../types/entities/posts-types';
 import {BlogId,} from '../../../types/entities/blogs-types';
 

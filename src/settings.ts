@@ -1,4 +1,5 @@
 import {config} from 'dotenv'
+
 config() // добавление переменных из файла .env в process.env
 
 export const SETTINGS = {
@@ -8,6 +9,7 @@ export const SETTINGS = {
         BLOGS: '/blogs',
         POSTS: '/posts',
         USERS: '/users',
+        COMMENTS: '/comments',
         TESTING: '/testing'
     },
 
@@ -17,6 +19,8 @@ export const SETTINGS = {
     BLOG_COLLECTION_NAME: process.env.BLOG_COLLECTION_NAME as string,
     POST_COLLECTION_NAME: process.env.POST_COLLECTION_NAME as string,
     USER_COLLECTION_NAME: process.env.USER_COLLECTION_NAME as string,
+    COMMENT_COLLECTION_NAME: process.env.COMMENT_COLLECTION_NAME as string,
+
     SECRET_KEY: process.env.SECRET_KEY as string,
     LIFE_TIME_JWT: process.env.LIFE_TIME_JWT as string
 }

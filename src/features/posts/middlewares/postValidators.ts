@@ -5,7 +5,10 @@ import {adminMiddleware} from '../../../global-middlewares/admin-middleware'
 import {ObjectId} from 'mongodb';
 import {blogsQueryRepository} from '../../blogs/repositories/blogsQueryRepository';
 import {postsQueryRepository} from '../repositories/postsQueryRepository';
+import {authMiddleware} from '../../../global-middlewares/auth-middleware';
 
+export const commentContentValidator = body('content').isString().withMessage('not string').trim()
+    .isLength({min: 20, max: 300}).withMessage('more than 300 or less than 20')
 
 export const titleValidator = body('title').isString().withMessage('not string').trim()
     .isLength({min: 1, max: 30}).withMessage('more than 30 or 0')
@@ -76,4 +79,13 @@ export const sortPostsValidators = [
     pageSizeValidator,
     sortByValidator,
     sortDirectionValidator,
+]
+
+export const createCommentInPostValidator = [
+    authMiddleware,
+
+    findPostValidator,
+    commentContentValidator,
+
+    inputCheckErrorsMiddleware
 ]

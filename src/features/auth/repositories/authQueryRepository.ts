@@ -1,5 +1,5 @@
 import {UserInfoViewModel} from '../../../types/auth/auth-types';
-import {UserDbType} from '../../../types/db/user-db-type';
+import {UserDbType} from '../../../types/db/user-db-types';
 import {UserId} from '../../../types/entities/users-types';
 import {userCollection} from '../../../db/mongo-db';
 import {ObjectId, WithId} from 'mongodb';

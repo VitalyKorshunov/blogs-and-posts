@@ -43,7 +43,7 @@ export const blogsControllers = {
         res.status(200).json(blogs)
     },
 
-    async getSortedPostsInBlog(req: Request/*<ParamType, {}, {}, SortQueryType>*/, res: Response/*<BlogPostFilterViewModel>*/) {
+    async getPostsInBlog(req: Request/*<ParamType, {}, {}, SortQueryType>*/, res: Response/*<BlogPostFilterViewModel>*/) {
         const sortedPosts: PostsSortViewModel = await blogsQueryRepository.sortPostsInBlog(req.params.id, req.query)
         res.status(200).json(sortedPosts)
     },

@@ -1,8 +1,8 @@
-import {BlogDbType} from '../../../types/db/blog-db-type'
+import {BlogDbType} from '../../../types/db/blog-db-types'
 import {BlogCreateType, BlogId, BlogUpdateType, BlogViewModel} from '../../../types/entities/blogs-types'
 import {blogCollection} from '../../../db/mongo-db';
 import {ObjectId, WithId} from 'mongodb';
-import {IdQueryDbType} from '../../../types/db/query-db-type';
+import {IdQueryDbType} from '../../../types/db/query-db-types';
 
 export const blogsRepository = {
     _toIdQuery(id: string): IdQueryDbType {

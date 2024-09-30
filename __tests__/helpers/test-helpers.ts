@@ -5,12 +5,12 @@ import {SETTINGS} from '../../src/settings';
 import {BlogInputModel, BlogViewModel} from '../../src/types/entities/blogs-types';
 import {codedAuth} from './datasets';
 import {PostInputModel, PostViewModel} from '../../src/types/entities/posts-types';
-import {IdQueryDbType} from '../../src/types/db/query-db-type';
+import {IdQueryDbType} from '../../src/types/db/query-db-types';
 import {ObjectId, WithId} from 'mongodb';
 import {UserInputModel, UserViewModel} from '../../src/types/entities/users-types';
-import {UserDbType} from '../../src/types/db/user-db-type';
-import {BlogDbType} from '../../src/types/db/blog-db-type';
-import {PostDbType} from '../../src/types/db/post-db-type';
+import {UserDbType} from '../../src/types/db/user-db-types';
+import {BlogDbType} from '../../src/types/db/blog-db-types';
+import {PostDbType} from '../../src/types/db/post-db-types';
 
 export const req = agent(app)
 

@@ -1,7 +1,7 @@
 import {UserId, UserInputModel} from '../../../types/entities/users-types';
 import {usersRepository} from '../repositories/usersRepository';
 import {hashPassService} from '../../../common/adapters/hashPassService';
-import {UserDbType} from '../../../types/db/user-db-type';
+import {UserDbType} from '../../../types/db/user-db-types';
 
 export type Errors = {
     errorsMessages: {

@@ -9,7 +9,7 @@ export type PostDbType = {
     createdAt: string
 }
 
-export type UpdatePostDbType = {
+export type PostUpdateDbType = {
     title: string
     shortDescription: string
     content: string

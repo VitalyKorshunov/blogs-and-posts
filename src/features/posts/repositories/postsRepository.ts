@@ -1,10 +1,10 @@
 import {PostCreateType, PostId, PostUpdateType, PostViewModel} from '../../../types/entities/posts-types'
-import {PostDbType, UpdatePostDbType} from '../../../types/db/post-db-type'
+import {PostDbType, PostUpdateDbType} from '../../../types/db/post-db-types'
 import {blogCollection, postCollection} from '../../../db/mongo-db';
 import {ObjectId, WithId} from 'mongodb';
-import {IdQueryDbType} from '../../../types/db/query-db-type';
+import {IdQueryDbType} from '../../../types/db/query-db-types';
 import {BlogId, BlogViewModel} from '../../../types/entities/blogs-types';
-import {BlogDbType} from '../../../types/db/blog-db-type';
+import {BlogDbType} from '../../../types/db/blog-db-types';
 
 export const postsRepository = {
     _toIdQuery(id: PostId): IdQueryDbType {
@@ -43,7 +43,7 @@ export const postsRepository = {
     },
     async put(post: PostUpdateType, postId: PostId): Promise<number> {
         const blogId: ObjectId = this._toIdQuery(post.blogId)._id
-        const updatedPost: UpdatePostDbType = {...post, blogId: blogId}
+        const updatedPost: PostUpdateDbType = {...post, blogId: blogId}
 
         const postUpdated = await postCollection.updateOne(this._toIdQuery(postId), {$set: updatedPost})
 
