@@ -1,8 +1,11 @@
+import {EmailConfirmation} from '../entities/users-types';
+
 export type UserDbType = {
     login: string
     email: string
     passHash: string
-    createdAt: string
+    createdAt: Date
+    emailConfirmation: EmailConfirmation
 }
 
 export type UsersQueryDbType = {

@@ -6,7 +6,7 @@ export type PostDbType = {
     content: string
     blogId: ObjectId
     blogName: string
-    createdAt: string
+    createdAt: Date
 }
 
 export type PostUpdateDbType = {

@@ -1,6 +1,6 @@
 import {config} from 'dotenv'
 
-config() // добавление переменных из файла .env в process.env
+config()
 
 export const SETTINGS = {
     PORT: process.env.PORT || 3003,
@@ -22,5 +22,8 @@ export const SETTINGS = {
     COMMENT_COLLECTION_NAME: process.env.COMMENT_COLLECTION_NAME as string,
 
     SECRET_KEY: process.env.SECRET_KEY as string,
-    LIFE_TIME_JWT: process.env.LIFE_TIME_JWT as string
+    LIFE_TIME_JWT: process.env.LIFE_TIME_JWT as string,
+
+    MAIL_LOGIN: process.env.MAIL_LOGIN as string,
+    MAIL_PASS: process.env.MAIL_PASS as string,
 }

@@ -18,7 +18,14 @@ export type UserServiceModel = {
     login: string
     email: string
     passHash: string
-    createdAt: string
+    createdAt: Date
+    emailConfirmation: EmailConfirmation
+}
+
+export type EmailConfirmation = {
+    expirationDate: Date
+    confirmationCode: string
+    isConfirmed: boolean
 }
 
 export type UsersSortViewModel = {

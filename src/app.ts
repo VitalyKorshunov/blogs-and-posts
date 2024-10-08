@@ -8,13 +8,13 @@ import {usersRouter} from './features/users';
 import {authRouter} from './features/auth';
 import {commentsRouter} from './features/comments';
 
-export const app = express() // создать приложение
-app.use(express.json()) // создание свойств-объектов body и query во всех реквестах
-app.use(cors()) // разрешить любым фронтам делать запросы на наш бэк
+export const app = express()
+
+app.use(cors())
+app.use(express.json())
 
 app.get('/', (req, res) => {
-    // эндпоинт, который будет показывать на верселе какая версия бэкэнда сейчас залита
-    res.status(200).json({version: '1.5.0'})
+    res.status(200).json({version: '1.7.0'})
 })
 
 app.use(SETTINGS.PATH.AUTH, authRouter)

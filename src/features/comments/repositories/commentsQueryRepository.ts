@@ -17,7 +17,7 @@ export const commentsQueryRepository = {
                 userId: comment.commentatorInfo.userId.toString(),
                 userLogin: comment.commentatorInfo.userLogin,
             },
-            createdAt: comment.createdAt
+            createdAt: comment.createdAt.toISOString()
         }
     },
 

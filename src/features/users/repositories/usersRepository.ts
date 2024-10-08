@@ -9,12 +9,10 @@ export const usersRepository = {
         return {_id: new ObjectId(id)}
     },
     _mapToUserServiceModel(user: WithId<UserDbType>): UserServiceModel {
+        const {_id, ...rest} = user
         return {
-            id: user._id.toString(),
-            login: user.login,
-            email: user.email,
-            passHash: user.passHash,
-            createdAt: user.createdAt
+            id: _id.toString(),
+            ...rest
         }
     },
 

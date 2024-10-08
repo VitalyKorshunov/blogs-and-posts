@@ -15,6 +15,15 @@ export type BlogViewModel = {
     isMembership: boolean
 }
 
+export type BlogServiceModel = {
+    id: string
+    name: string
+    description: string
+    websiteUrl: string
+    createdAt: Date
+    isMembership: boolean
+}
+
 export type BlogsSortViewModel = {
     pagesCount: number
     page: number
@@ -27,7 +36,7 @@ export type BlogCreateType = {
     name: string
     description: string
     websiteUrl: string
-    createdAt: string
+    createdAt: Date
     isMembership: boolean
 }
 

@@ -1,5 +1,5 @@
 import {BlogDbType} from '../../../types/db/blog-db-types'
-import {BlogCreateType, BlogId, BlogUpdateType, BlogViewModel} from '../../../types/entities/blogs-types'
+import {BlogCreateType, BlogId, BlogServiceModel, BlogUpdateType} from '../../../types/entities/blogs-types'
 import {blogCollection} from '../../../db/mongo-db';
 import {ObjectId, WithId} from 'mongodb';
 import {IdQueryDbType} from '../../../types/db/query-db-types';
@@ -8,7 +8,7 @@ export const blogsRepository = {
     _toIdQuery(id: string): IdQueryDbType {
         return {_id: new ObjectId(id)}
     },
-    _mapToBlogWithCorrectId(blog: WithId<BlogDbType>): BlogViewModel {
+    _mapToBlogWithCorrectId(blog: WithId<BlogDbType>): BlogServiceModel {
         const {_id, ...rest} = blog
         return {
             id: _id.toString(),

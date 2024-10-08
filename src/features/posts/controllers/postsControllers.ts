@@ -10,7 +10,7 @@ import {commentsQueryRepository} from '../../comments/repositories/commentsQuery
 export const postsControllers = {
     async createPost(req: Request<any, any, PostInputModel>, res: Response<PostViewModel>) {
         const newPostId = await postsService.create(req.body)
-        const newPost = await postsQueryRepository.findAndMap(newPostId)
+        const newPost = await postsQueryRepository.findAndMap(newPostId.data)
         res
             .status(201)
             .json(newPost)

@@ -1,4 +1,4 @@
-import {PostId, PostViewModel} from '../../../types/entities/posts-types';
+import {PostId, PostServiceModel} from '../../../types/entities/posts-types';
 import {commentsRepository} from '../repositories/commentsRepository';
 import {
     CommentCreateType,
@@ -6,17 +6,22 @@ import {
     CommentInputModel,
     CommentUpdateType
 } from '../../../types/entities/comments-types';
-import {UserId, UserViewModel} from '../../../types/entities/users-types';
+import {UserId, UserServiceModel} from '../../../types/entities/users-types';
 
 class NotFoundError {
     constructor(public message: string = 'entity not found') {
     }
 }
 
+enum statusCode {
+    good = 1,
+    bad = 0
+}
+
 export const commentsService = {
     async create(postId: PostId, userId: UserId, comment: CommentInputModel): Promise<CommentId | null> {
-        const post: PostViewModel | null = await commentsRepository.findPostById(postId)
-        const user: UserViewModel | null = await commentsRepository.findUserById(userId)
+        const post: PostServiceModel | null = await commentsRepository.findPostById(postId)
+        const user: UserServiceModel | null = await commentsRepository.findUserById(userId)
 
         if (!post || !user) return null
 
@@ -28,7 +33,7 @@ export const commentsService = {
                     userId: user.id,
                     userLogin: user.login,
                 },
-                createdAt: new Date().toISOString()
+                createdAt: new Date()
             }
 
             return await commentsRepository.create(newComment)
@@ -46,20 +51,22 @@ export const commentsService = {
 
         return commentsRepository.del(commentId)
     },
-    async put(userId: UserId, commentId: CommentId, comment: CommentUpdateType,): Promise<boolean | null> {
+    async updateComment(userId: UserId, commentId: CommentId, comment: CommentUpdateType,): Promise<{
+        statusCode: number
+    }> {
         const user = await commentsRepository.findUserById(userId)
         const oldComment = await commentsRepository.findCommentById(commentId)
 
         if (user?.id !== oldComment?.commentatorInfo.userId) {
-            return null
+            return {statusCode: statusCode.bad}
         }
-
-        //todo: Обязательно ли при PUT запросе отправлять всю сущность для изменения (даже если изменено одно поле)?
 
         const updateCommentData: CommentUpdateType = {
             content: comment.content
         }
 
-        return await commentsRepository.put(commentId, updateCommentData)
+        const isCommentUpdated = await commentsRepository.updateComment(commentId, updateCommentData)
+
+        return {statusCode: isCommentUpdated ? statusCode.good : statusCode.bad}
     },
 }

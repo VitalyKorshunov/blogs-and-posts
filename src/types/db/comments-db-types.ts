@@ -7,7 +7,7 @@ export type CommentDbType = {
         userId: ObjectId
         userLogin: string
     }
-    createdAt: string
+    createdAt: Date
 }
 
 export type CommentUpdateDbType = {

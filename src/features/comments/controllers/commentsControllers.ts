@@ -28,12 +28,12 @@ export const commentsControllers = {
     },
 
     async putComment(req: Request<ParamType, any, CommentInputModel>, res: Response) {
-        const isCommentEdited = await commentsService.put(req.user!.id, req.params.id, req.body)
+        const statusCode = await commentsService.updateComment(req.user!.id, req.params.id, req.body)
 
-        if (isCommentEdited) {
+        if (statusCode.statusCode === 1) {
             res.sendStatus(204)
             return
-        } else if (isCommentEdited === null) {
+        } else if (statusCode.statusCode === 0) {
             res.sendStatus(403)
             return
         } else {

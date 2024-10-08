@@ -14,7 +14,7 @@ export type CommentViewModel = {
     createdAt: string
 }
 
-export type CommentServiceType = {
+export type CommentServiceModel = {
     id: string
     content: string
     postId: string
@@ -22,7 +22,7 @@ export type CommentServiceType = {
         userId: string
         userLogin: string
     }
-    createdAt: string
+    createdAt: Date
 }
 
 export type CommentsSortViewModel = {
@@ -40,7 +40,7 @@ export type CommentCreateType = {
         userId: string
         userLogin: string
     }
-    createdAt: string
+    createdAt: Date
 }
 
 export type CommentUpdateType = {

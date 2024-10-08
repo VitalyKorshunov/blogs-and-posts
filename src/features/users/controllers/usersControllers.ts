@@ -1,12 +1,14 @@
 import {Request, Response} from 'express';
-import {Errors, usersService} from '../domain/users-service';
+import {usersService} from '../domain/users-service';
 import {usersQueryRepository} from '../repositories/usersQueryRepository';
 import {UserInputModel, UsersSortViewModel, UserViewModel} from '../../../types/entities/users-types';
 import {ParamType} from '../../../types/request-response/request-types';
+import {ErrorsType} from '../../../types/output-errors-type';
 
 export const usersControllers = {
-    async createUser(req: Request<any, any, UserInputModel>, res: Response<UserViewModel | Errors>) {
-        const newUserId = await usersService.create(req.body)
+    async createUser(req: Request<any, any, UserInputModel>, res: Response<UserViewModel | ErrorsType>) {
+        const {login, email, password}: UserInputModel = req.body
+        const newUserId = await usersService.create({login, email, password})
         if (typeof newUserId === 'string') {
             const newUser = await usersQueryRepository.findAndMap(newUserId)
             res

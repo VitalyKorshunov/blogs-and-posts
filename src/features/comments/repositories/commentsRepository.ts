@@ -1,4 +1,4 @@
-import {PostId, PostViewModel} from '../../../types/entities/posts-types'
+import {PostId, PostServiceModel} from '../../../types/entities/posts-types'
 import {PostDbType} from '../../../types/db/post-db-types'
 import {commentCollection, postCollection, userCollection} from '../../../db/mongo-db';
 import {ObjectId, WithId} from 'mongodb';
@@ -8,7 +8,7 @@ import {UserDbType} from '../../../types/db/user-db-types';
 import {
     CommentCreateType,
     CommentId,
-    CommentServiceType,
+    CommentServiceModel,
     CommentUpdateType
 } from '../../../types/entities/comments-types';
 import {CommentDbType} from '../../../types/db/comments-db-types';
@@ -17,7 +17,7 @@ export const commentsRepository = {
     _toIdQuery(id: PostId): IdQueryDbType {
         return {_id: new ObjectId(id)}
     },
-    _mapToPostWithCorrectId(post: WithId<PostDbType>): PostViewModel {
+    _mapToPostWithCorrectId(post: WithId<PostDbType>): PostServiceModel {
         const {_id, blogId, ...rest} = post
         return {
             id: _id.toString(),
@@ -32,7 +32,7 @@ export const commentsRepository = {
             ...rest
         }
     },
-    _mapToCommentWithCorrectId(comment: WithId<CommentDbType>): CommentServiceType {
+    _mapToCommentWithCorrectId(comment: WithId<CommentDbType>): CommentServiceModel {
         const {_id, postId, commentatorInfo, ...rest} = comment;
         return {
             ...rest,
@@ -66,12 +66,12 @@ export const commentsRepository = {
 
         return comment.deletedCount === 1
     },
-    async put(commentId: CommentId, updateCommentData: CommentUpdateType): Promise<boolean> {
+    async updateComment(commentId: CommentId, updateCommentData: CommentUpdateType): Promise<boolean> {
         const commentUpdated = await commentCollection.updateOne(this._toIdQuery(commentId), {$set: updateCommentData})
 
         return commentUpdated.matchedCount === 1
     },
-    async findPostById(postId: PostId): Promise<PostViewModel | null> {
+    async findPostById(postId: PostId): Promise<PostServiceModel | null> {
         const post: WithId<PostDbType> | null = await postCollection.findOne(this._toIdQuery(postId));
 
         return post ? this._mapToPostWithCorrectId(post) : null
@@ -81,7 +81,7 @@ export const commentsRepository = {
 
         return user ? this._mapToUserWithCorrectId(user) : null
     },
-    async findCommentById(commentId: CommentId): Promise<CommentServiceType | null> {
+    async findCommentById(commentId: CommentId): Promise<CommentServiceModel | null> {
         const comment: WithId<CommentDbType> | null = await commentCollection.findOne(this._toIdQuery(commentId));
 
         return comment ? this._mapToCommentWithCorrectId(comment) : null

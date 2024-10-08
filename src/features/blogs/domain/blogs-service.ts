@@ -1,7 +1,8 @@
 import {BlogCreateType, BlogId, BlogInputModel, BlogUpdateType} from '../../../types/entities/blogs-types';
 import {blogsRepository} from '../repositories/blogsRepository';
-import {BlogPostInputModel, PostId} from '../../../types/entities/posts-types';
+import {BlogPostInputModel} from '../../../types/entities/posts-types';
 import {postsService} from '../../posts/domain/posts-service';
+import {ExecutionStatus} from '../../../common/utils/errorsAndStatusCodes.utils';
 
 
 export const blogsService = {
@@ -10,7 +11,7 @@ export const blogsService = {
             name: blog.name,
             description: blog.description,
             websiteUrl: blog.websiteUrl,
-            createdAt: new Date().toISOString(),
+            createdAt: new Date(),
             isMembership: false
         }
         return await blogsRepository.create(newBlog)
@@ -18,7 +19,7 @@ export const blogsService = {
     async del(id: BlogId): Promise<number> {
         return await blogsRepository.del(id)
     },
-    async put(blog: BlogInputModel, id: BlogId): Promise<number> {
+    async update(blog: BlogInputModel, id: BlogId): Promise<number> {
         const updatedBlog: BlogUpdateType = {
             name: blog.name,
             description: blog.description,
@@ -27,7 +28,7 @@ export const blogsService = {
 
         return await blogsRepository.put(updatedBlog, id)
     },
-    async createPostForBlog(blogId: BlogId, post: BlogPostInputModel): Promise<PostId> {
+    async createPostForBlog(blogId: BlogId, post: BlogPostInputModel): Promise<ExecutionStatus> {
         return await postsService.create({blogId: blogId, ...post})
     },
 }

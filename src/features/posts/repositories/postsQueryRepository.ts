@@ -9,17 +9,16 @@ export const postsQueryRepository = {
     _toIdQuery(id: PostId): IdQueryDbType {
         return {_id: new ObjectId(id)}
     },
-    _mapToPostViewModel(post: WithId<PostDbType>) {
-        const postForOutput: PostViewModel = {
+    _mapToPostViewModel(post: WithId<PostDbType>): PostViewModel {
+        return {
             id: post._id.toString(),
             title: post.title,
             shortDescription: post.shortDescription,
             content: post.content,
             blogId: post.blogId.toString(),
             blogName: post.blogName,
-            createdAt: post.createdAt
+            createdAt: post.createdAt.toISOString()
         }
-        return postForOutput
     },
 
     async isPostFound(id: PostId): Promise<boolean> {
@@ -40,8 +39,6 @@ export const postsQueryRepository = {
         return await this.sortPosts(query)
     },
     async sortPosts(query: any, blogId?: BlogId): Promise<PostsSortViewModel> {
-        //todo: оставить универсальный метод для использования в blogsQueryRepository или продублировать его там же?
-        // Универсальность достигнута с помощью необязательного blogId
         const blogObjectId: ObjectId | null = blogId ? this._toIdQuery(blogId)._id : null
         const findFilter = blogObjectId ? {blogId: blogObjectId} : {}
 

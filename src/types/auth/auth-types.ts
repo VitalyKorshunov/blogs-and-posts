@@ -1,3 +1,5 @@
+export type EmailConfirmationCodeInputModel = string
+
 export type AuthInputModel = {
     loginOrEmail: string
     password: string

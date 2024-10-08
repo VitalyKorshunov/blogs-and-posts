@@ -106,7 +106,7 @@ export const testHelpers = {
             name: blog.name,
             description: blog.description,
             websiteUrl: blog.websiteUrl,
-            createdAt: blog.createdAt,
+            createdAt: blog.createdAt.toISOString(),
             isMembership: blog.isMembership
         };
     },
@@ -122,7 +122,7 @@ export const testHelpers = {
             content: post.content,
             shortDescription: post.shortDescription,
             title: post.title,
-            createdAt: post.createdAt
+            createdAt: post.createdAt.toISOString()
         };
     },
 
@@ -134,7 +134,7 @@ export const testHelpers = {
             id: user._id.toString(),
             login: user.login,
             email: user.email,
-            createdAt: user.createdAt
+            createdAt: user.createdAt.toISOString()
         };
     },
 

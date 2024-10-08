@@ -17,6 +17,16 @@ export type PostViewModel = {
     createdAt: string
 }
 
+export type PostServiceModel = {
+    id: string
+    title: string
+    shortDescription: string
+    content: string
+    blogId: string
+    blogName: string
+    createdAt: Date
+}
+
 export type PostsSortViewModel = {
     pagesCount: number
     page: number
@@ -37,7 +47,7 @@ export type PostCreateType = {
     content: string
     blogId: string
     blogName: string
-    createdAt: string
+    createdAt: Date
 }
 
 export type PostUpdateType = {

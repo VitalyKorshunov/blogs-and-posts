@@ -16,15 +16,18 @@ export const blogsControllers = {
     },
 
     async createPostInBlog(req: Request<ParamType, {}, BlogPostInputModel>, res: Response<PostViewModel>) {
-        const postId: PostId = await blogsService.createPostForBlog(req.params.id, req.body)
+        const result = await blogsService.createPostForBlog(req.params.id, req.body)
+        const postId: PostId = result.data
+        console.log(result.data)
+
         const post: PostViewModel = await postsQueryRepository.findAndMap(postId)
         res
             .status(201)
             .json(post)
     },
 
-    async putBlog(req: Request<ParamType, any, BlogInputModel>, res: Response) {
-        await blogsService.put(req.body, req.params.id)
+    async updateBlog(req: Request<ParamType, any, BlogInputModel>, res: Response) {
+        await blogsService.update(req.body, req.params.id)
         res.sendStatus(204)
     },
 
