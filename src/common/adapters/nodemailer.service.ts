@@ -17,7 +17,12 @@ export const nodemailerService = {
             from: `Account verification <${SETTINGS.MAIL_LOGIN}>`,
             to: email,
             subject: 'Account verification',
-            html: `<p>https://some-front.com/confirm-registration?code=${confirmationCode}</p>`
+            html: `
+<h1>Thanks for your registration</h1>
+<p>To finish registration please follow the link below:
+<a href='https://somesite.com/confirm-email?code=${confirmationCode}'>complete registration</a>
+</p>
+`
         }
 
         const info = await transporter.sendMail(message)
