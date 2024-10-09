@@ -5,7 +5,9 @@ import {routersPaths} from '../../common/path/paths';
 export const testingRouter = Router()
 
 testingRouter.delete(routersPaths.testing.allData, async (req, res) => {
-    await blogCollection.drop()
-
+    await blogCollection.deleteMany({})
+    await postCollection.deleteMany({})
+    await userCollection.deleteMany({})
+    await commentCollection.deleteMany({})
     res.status(204).json({})
 })
