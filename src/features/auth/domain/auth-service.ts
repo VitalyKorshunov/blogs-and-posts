@@ -65,7 +65,6 @@ export const authService = {
                 isConfirmed: false
             }
         }
-        console.log(newUser.emailConfirmation.confirmationCode)
         const userId: UserId = await usersRepository.createUser(newUser)
 
         const user: UserServiceModel | null = await authRepository.findUserById(userId)
@@ -85,15 +84,17 @@ export const authService = {
     },
 
     async verifyEmail(code: EmailConfirmationCodeInputModel): Promise<ExecutionStatus> {
+        const error = { errorsMessages: [{ message: 'code error', field: "code" }] }
+
         const isCodeConfirmationFound = await authRepository.isCodeConfirmationFound(code)
 
-        if (!isCodeConfirmationFound) return new ExecutionStatus(StatusCode.NotFound)
+        if (!isCodeConfirmationFound) return new ExecutionStatus(StatusCode.NotFound, error)
 
         const user: UserServiceModel | null = await authRepository.findUserByEmailConfirmationCode(code)
         console.log(user)
         if (!user) return new ExecutionStatus(StatusCode.NotFound)
-        if (user.emailConfirmation.isConfirmed) return new ExecutionStatus(StatusCode.NotFound)
-        if (user.emailConfirmation.expirationDate < new Date()) return new ExecutionStatus(StatusCode.BadRequest)
+        if (user.emailConfirmation.isConfirmed) return new ExecutionStatus(StatusCode.NotFound, error)
+        if (user.emailConfirmation.expirationDate < new Date()) return new ExecutionStatus(StatusCode.BadRequest, error)
 
         const updateEmailConfirmation: EmailConfirmation = {
             expirationDate: user.emailConfirmation.expirationDate,

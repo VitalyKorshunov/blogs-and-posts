@@ -47,7 +47,7 @@ export const authControllers = {
         if (status.statusCode === StatusCode.Success) {
             res.sendStatus(204)
         } else {
-            res.sendStatus(400)
+            res.status(400).json(status.data)
         }
     },
 
