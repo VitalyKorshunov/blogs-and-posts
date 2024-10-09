@@ -9,7 +9,7 @@ import {commentsQueryRepository} from '../../comments/repositories/commentsQuery
 
 export const postsControllers = {
     async createPost(req: Request<any, any, PostInputModel>, res: Response<PostViewModel>) {
-        const newPostId = await postsService.create(req.body)
+        const newPostId = await postsService.createPost(req.body)
         const newPost = await postsQueryRepository.findAndMap(newPostId.data)
         res
             .status(201)
@@ -17,7 +17,7 @@ export const postsControllers = {
     },
 
     async delPost(req: Request<ParamType>, res: Response) {
-        await postsService.del(req.params.id)
+        await postsService.deletePost(req.params.id)
         res
             .sendStatus(204)
     },
@@ -35,8 +35,8 @@ export const postsControllers = {
             .status(200)
             .json(posts)
     },
-    async putPost(req: Request<ParamType, any, PostInputModel>, res: Response) {
-        await postsService.put(req.body, req.params.id)
+    async updatePost(req: Request<ParamType, any, PostInputModel>, res: Response) {
+        await postsService.updatePost(req.body, req.params.id)
         res
             .sendStatus(204)
     },
@@ -46,8 +46,7 @@ export const postsControllers = {
         res.status(200).json(comments)
     },
     async createCommentInPost(req: Request<ParamType, {}, CommentInputModel>, res: Response<CommentViewModel>) {
-        console.log(req.body)
-        const commentId = await commentsService.create(req.params.id, req.user!.id, req.body)
+        const commentId = await commentsService.createComment(req.params.id, req.user!.id, req.body)
 
         if (commentId === null) {
             res.sendStatus(404)

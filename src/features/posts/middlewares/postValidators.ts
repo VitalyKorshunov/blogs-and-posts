@@ -63,7 +63,7 @@ const sortDirectionValidator = query('sortDirection').default('desc')
         return (['desc', 'asc'].includes(sortDirection)) ? sortDirection : 'desc'
     })
 
-export const postValidators = [
+export const createPostValidators = [
     adminMiddleware,
 
     titleValidator,
@@ -74,11 +74,13 @@ export const postValidators = [
     inputCheckErrorsMiddleware,
 ]
 
-export const sortPostsValidators = [
+export const getPostsValidators = [
     pageNumberValidator,
     pageSizeValidator,
     sortByValidator,
     sortDirectionValidator,
+
+    inputCheckErrorsMiddleware,
 ]
 
 export const createCommentInPostValidator = [

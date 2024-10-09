@@ -1,10 +1,24 @@
 import {Router} from 'express'
-import {commentsValidators, findCommentValidator} from './middlewares/commentsValidators'
+import {
+    deleteCommentsValidators,
+    findCommentValidators,
+    updateCommentsValidators
+} from './middlewares/commentsValidators'
 import {commentsControllers} from './controllers/commentsControllers';
-import {authMiddleware} from '../../global-middlewares/auth-middleware';
 
 export const commentsRouter = Router()
 
-commentsRouter.get('/:id', findCommentValidator, commentsControllers.findComment)
-commentsRouter.delete('/:id', authMiddleware, findCommentValidator, commentsControllers.delComment)
-commentsRouter.put('/:id', ...commentsValidators, commentsControllers.putComment)
+commentsRouter.get(
+    '/:id',
+    ...findCommentValidators,
+    commentsControllers.findComment)
+
+commentsRouter.delete(
+    '/:id',
+    ...deleteCommentsValidators,
+    commentsControllers.deleteComment)
+
+commentsRouter.put(
+    '/:id',
+    ...updateCommentsValidators,
+    commentsControllers.updateComment)

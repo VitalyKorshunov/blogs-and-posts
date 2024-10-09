@@ -66,7 +66,7 @@ export const authService = {
             }
         }
         console.log(newUser.emailConfirmation.confirmationCode)
-        const userId: UserId = await usersRepository.create(newUser)
+        const userId: UserId = await usersRepository.createUser(newUser)
 
         const user: UserServiceModel | null = await authRepository.findUserById(userId)
 
@@ -76,7 +76,7 @@ export const authService = {
             await nodemailerService.sendEmailConfirmation(user.email, user.emailConfirmation.confirmationCode)
         } catch (error) {
             console.error(error)
-            await usersRepository.del(user.id)
+            await usersRepository.deleteUser(user.id)
 
             return new ExecutionStatus(StatusCode.ErrorSendEmail)
         }
@@ -108,7 +108,8 @@ export const authService = {
     async resendRegistrationEmail(email: string): Promise<ExecutionStatus> {
         const isEmailFound = await authRepository.isEmailFound(email)
 
-        if (!isEmailFound) return new ExecutionStatus(StatusCode.NotFound)
+        if (!isEmailFound) return new ExecutionStatus(StatusCode.NotFound,
+            { errorsMessages: [{ message: 'email not found', field: "email" }] })
 
         const user = await authRepository.findUserByEmail(email)
 

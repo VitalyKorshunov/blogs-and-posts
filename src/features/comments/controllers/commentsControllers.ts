@@ -5,8 +5,8 @@ import {ParamType} from '../../../types/request-response/request-types';
 import {CommentInputModel, CommentViewModel} from '../../../types/entities/comments-types';
 
 export const commentsControllers = {
-    async delComment(req: Request<ParamType>, res: Response) {
-        const isCommentDeleted = await commentsService.del(req.user!.id, req.params.id)
+    async deleteComment(req: Request<ParamType>, res: Response) {
+        const isCommentDeleted = await commentsService.deleteComment(req.user!.id, req.params.id)
 
         if (isCommentDeleted) {
             res.sendStatus(204)
@@ -27,7 +27,7 @@ export const commentsControllers = {
             .json(comment)
     },
 
-    async putComment(req: Request<ParamType, any, CommentInputModel>, res: Response) {
+    async updateComment(req: Request<ParamType, any, CommentInputModel>, res: Response) {
         const statusCode = await commentsService.updateComment(req.user!.id, req.params.id, req.body)
 
         if (statusCode.statusCode === 1) {

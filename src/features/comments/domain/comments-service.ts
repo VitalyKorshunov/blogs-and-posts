@@ -19,7 +19,7 @@ enum statusCode {
 }
 
 export const commentsService = {
-    async create(postId: PostId, userId: UserId, comment: CommentInputModel): Promise<CommentId | null> {
+    async createComment(postId: PostId, userId: UserId, comment: CommentInputModel): Promise<CommentId | null> {
         const post: PostServiceModel | null = await commentsRepository.findPostById(postId)
         const user: UserServiceModel | null = await commentsRepository.findUserById(userId)
 
@@ -36,12 +36,12 @@ export const commentsService = {
                 createdAt: new Date()
             }
 
-            return await commentsRepository.create(newComment)
+            return await commentsRepository.createComment(newComment)
         } else {
             throw new NotFoundError('Blog not found (postsService.create)')
         }
     },
-    async del(userId: UserId, commentId: CommentId): Promise<boolean | null> {
+    async deleteComment(userId: UserId, commentId: CommentId): Promise<boolean | null> {
         const user = await commentsRepository.findUserById(userId);
         const comment = await commentsRepository.findCommentById(commentId)
 
@@ -49,7 +49,7 @@ export const commentsService = {
             return null
         }
 
-        return commentsRepository.del(commentId)
+        return commentsRepository.deleteComment(commentId)
     },
     async updateComment(userId: UserId, commentId: CommentId, comment: CommentUpdateType,): Promise<{
         statusCode: number

@@ -17,17 +17,17 @@ export const blogsRepository = {
     },
 
 
-    async create(newBlog: BlogCreateType): Promise<BlogId> {
+    async createBlog(newBlog: BlogCreateType): Promise<BlogId> {
         const _id = await blogCollection.insertOne(newBlog)
 
         return _id.insertedId.toString()
     },
-    async del(id: BlogId): Promise<number> {
+    async deleteBlog(id: BlogId): Promise<number> {
         const blog = await blogCollection.deleteOne(this._toIdQuery(id))
 
         return blog.deletedCount
     },
-    async put(blog: BlogUpdateType, id: BlogId): Promise<number> {
+    async updateBlog(blog: BlogUpdateType, id: BlogId): Promise<number> {
         const updatedBlog = await blogCollection.updateOne(this._toIdQuery(id), {$set: blog})
 
         return updatedBlog.modifiedCount

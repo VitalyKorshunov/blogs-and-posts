@@ -8,7 +8,7 @@ import {ParamType} from '../../../types/request-response/request-types';
 
 export const blogsControllers = {
     async createBlog(req: Request<any, any, BlogInputModel>, res: Response<BlogViewModel>) {
-        const newBlogId = await blogsService.create(req.body)
+        const newBlogId = await blogsService.createBlog(req.body)
         const newBlog = await blogsQueryRepository.findAndMap(newBlogId)
         res
             .status(201)
@@ -27,12 +27,12 @@ export const blogsControllers = {
     },
 
     async updateBlog(req: Request<ParamType, any, BlogInputModel>, res: Response) {
-        await blogsService.update(req.body, req.params.id)
+        await blogsService.updateBlog(req.body, req.params.id)
         res.sendStatus(204)
     },
 
     async delBlog(req: Request<ParamType>, res: Response) {
-        await blogsService.del(req.params.id)
+        await blogsService.deleteBlog(req.params.id)
         res.sendStatus(204)
     },
 

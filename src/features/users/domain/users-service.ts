@@ -39,9 +39,9 @@ export const usersService = {
             }
         }
 
-        return await usersRepository.create(newUser)
+        return await usersRepository.createUser(newUser)
     },
-    async del(id: UserId): Promise<number> {
-        return usersRepository.del(id)
+    async deleteUser(id: UserId): Promise<number> {
+        return usersRepository.deleteUser(id)
     },
 }

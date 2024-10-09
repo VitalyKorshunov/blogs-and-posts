@@ -46,7 +46,7 @@ export const commentsRepository = {
     },
 
 
-    async create(comment: CommentCreateType): Promise<CommentId> {
+    async createComment(comment: CommentCreateType): Promise<CommentId> {
         const commentToDb: CommentDbType = {
             content: comment.content,
             postId: new ObjectId(comment.postId),
@@ -61,7 +61,7 @@ export const commentsRepository = {
 
         return _id.insertedId.toString()
     },
-    async del(commentId: CommentId): Promise<boolean> {
+    async deleteComment(commentId: CommentId): Promise<boolean> {
         const comment = await commentCollection.deleteOne(this._toIdQuery(commentId))
 
         return comment.deletedCount === 1

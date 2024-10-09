@@ -16,7 +16,7 @@ export const usersRepository = {
         }
     },
 
-    async create(user: UserDbType): Promise<UserId> {
+    async createUser(user: UserDbType): Promise<UserId> {
         const _id = await userCollection.insertOne(user)
 
         return _id.insertedId.toString()
@@ -31,7 +31,7 @@ export const usersRepository = {
         const user: WithId<UserDbType> | null = await userCollection.findOne(queryToDb)
         return user ? this._mapToUserServiceModel(user) : null
     },
-    async del(userId: UserId): Promise<number> {
+    async deleteUser(userId: UserId): Promise<number> {
         const user = await userCollection.deleteOne(this._toIdQuery(userId))
 
         return user.deletedCount

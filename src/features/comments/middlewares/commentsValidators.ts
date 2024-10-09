@@ -44,11 +44,26 @@ const sortDirectionValidator = query('sortDirection').default('desc')
         return (['desc', 'asc'].includes(sortDirection)) ? sortDirection : 'desc'
     })
 
-export const commentsValidators = [
+export const updateCommentsValidators = [
     authMiddleware,
 
     findCommentValidator,
     commentContentValidator,
 
     inputCheckErrorsMiddleware,
+]
+
+
+export const findCommentValidators = [
+    findCommentValidator,
+
+    inputCheckErrorsMiddleware
+]
+
+export const deleteCommentsValidators = [
+    authMiddleware,
+
+    findCommentValidator,
+
+    inputCheckErrorsMiddleware
 ]

@@ -21,8 +21,8 @@ export const usersControllers = {
         }
     },
 
-    async delUser(req: Request<ParamType>, res: Response) {
-        await usersService.del(req.params.id)
+    async deleteUser(req: Request<ParamType>, res: Response) {
+        await usersService.deleteUser(req.params.id)
         res
             .sendStatus(204)
     },

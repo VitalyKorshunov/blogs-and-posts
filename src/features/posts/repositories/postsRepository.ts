@@ -27,7 +27,7 @@ export const postsRepository = {
     },
 
 
-    async create(post: PostCreateType): Promise<PostId> {
+    async createPost(post: PostCreateType): Promise<PostId> {
         const postToDb: PostDbType = {
             ...post,
             blogId: new ObjectId(post.blogId)
@@ -36,12 +36,12 @@ export const postsRepository = {
 
         return _id.insertedId.toString()
     },
-    async del(postId: PostId): Promise<number> {
+    async deletePost(postId: PostId): Promise<number> {
         const post = await postCollection.deleteOne(this._toIdQuery(postId))
 
         return post.deletedCount
     },
-    async put(post: PostUpdateType, postId: PostId): Promise<number> {
+    async updatePost(post: PostUpdateType, postId: PostId): Promise<number> {
         const blogId: ObjectId = this._toIdQuery(post.blogId)._id
         const updatedPost: PostUpdateDbType = {...post, blogId: blogId}
 
@@ -50,7 +50,7 @@ export const postsRepository = {
         return postUpdated.modifiedCount
     },
 
-    async findBlog(id: BlogId): Promise<BlogServiceModel | null> {
+    async findBlogById(id: BlogId): Promise<BlogServiceModel | null> {
         const blog: WithId<BlogDbType> | null = await blogCollection.findOne(this._toIdQuery(id));
 
         return blog ? this._mapToBlogWithCorrectId(blog) : null

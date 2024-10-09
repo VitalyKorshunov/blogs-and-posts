@@ -5,6 +5,17 @@ import {usersControllers} from './controllers/usersControllers';
 
 export const usersRouter = Router()
 
-usersRouter.post('/', ...usersValidators, usersControllers.createUser)
-usersRouter.get('/', adminMiddleware, ...sortUsersValidators, usersControllers.getUsers)
-usersRouter.delete('/:id', adminMiddleware, findUserValidator, usersControllers.delUser)
+usersRouter.post(
+    '/',
+    ...usersValidators,
+    usersControllers.createUser)
+
+usersRouter.get(
+    '/',
+    adminMiddleware, ...sortUsersValidators,
+    usersControllers.getUsers)
+
+usersRouter.delete(
+    '/:id',
+    adminMiddleware, findUserValidator,
+    usersControllers.deleteUser)

@@ -307,7 +307,6 @@ describe('/users', () => {
             .set({'Authorization': 'Basic ' + codedAuth})
             .expect(404)
 
-        console.log(res.body)
 
         await req
             .delete(SETTINGS.PATH.USERS + '/' + createdUser.id + '1')
