@@ -107,15 +107,15 @@ export const authService = {
         return (isUpdatedEmailConfirmation) ? new ExecutionStatus(StatusCode.Success) : new ExecutionStatus(StatusCode.NotFound)
     },
     async resendRegistrationEmail(email: string): Promise<ExecutionStatus> {
+        const error = { errorsMessages: [{ message: 'email not found', field: "email" }] }
         const isEmailFound = await authRepository.isEmailFound(email)
 
-        if (!isEmailFound) return new ExecutionStatus(StatusCode.NotFound,
-            { errorsMessages: [{ message: 'email not found', field: "email" }] })
+        if (!isEmailFound) return new ExecutionStatus(StatusCode.NotFound, error)
 
         const user = await authRepository.findUserByEmail(email)
 
         if (!user) return new ExecutionStatus(StatusCode.NotFound)
-        if (user.emailConfirmation.isConfirmed) return new ExecutionStatus(StatusCode.BadRequest)
+        if (user.emailConfirmation.isConfirmed) return new ExecutionStatus(StatusCode.BadRequest, error)
 
         const updateEmailConfirmation: EmailConfirmation = {
             expirationDate: add(new Date(), {
