@@ -7,15 +7,18 @@ import {postsRouter} from './features/posts'
 import {usersRouter} from './features/users';
 import {authRouter} from './features/auth';
 import {commentsRouter} from './features/comments';
+import cookieParser from 'cookie-parser';
 
 export const app = express()
 
 app.use(cors())
 app.use(express.json())
+app.use(cookieParser('secret'))
 
 app.get('/', (req, res) => {
     res.status(200).json({version: '1.7.0'})
 })
+
 
 app.use(SETTINGS.PATH.AUTH, authRouter)
 app.use(SETTINGS.PATH.BLOGS, blogsRouter)

@@ -1,6 +1,8 @@
 import {body} from 'express-validator'
 import {inputCheckErrorsMiddleware} from '../../../global-middlewares/inputCheckErrorsMiddleware'
 import {emailValidator, loginValidator} from '../../users/middlewares/usersValidators';
+import {refreshTokenGuardMiddleware} from '../../../global-middlewares/refreshTokenGuard-middleware';
+import {accessTokenGuardMiddleware} from '../../../global-middlewares/accessTokenGuard-middleware';
 
 export const loginOrEmailValidator = body('loginOrEmail').isString().withMessage('Field must be a string').trim()
     .custom((loginOrEmail, {req}) => {
@@ -45,4 +47,16 @@ export const resendRegistrationEmailValidators = [
     emailValidator,
 
     inputCheckErrorsMiddleware
+]
+
+export const refreshTokenValidators = [
+    refreshTokenGuardMiddleware
+]
+
+export const getUserInfoValidators = [
+    accessTokenGuardMiddleware
+]
+
+export const logoutUserValidators = [
+    refreshTokenGuardMiddleware
 ]

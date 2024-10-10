@@ -10,3 +10,8 @@ export type UserInfoViewModel = {
     login: string
     userId: string
 }
+
+export type AuthTokensType = {
+    accessToken: string
+    refreshToken: string
+}

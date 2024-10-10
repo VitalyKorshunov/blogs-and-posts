@@ -1,11 +1,14 @@
 import {Router} from 'express';
 import {
     authenticateUserValidators,
-    verifyEmailValidators,
-    registerUserValidators, resendRegistrationEmailValidators
+    getUserInfoValidators,
+    logoutUserValidators,
+    refreshTokenValidators,
+    registerUserValidators,
+    resendRegistrationEmailValidators,
+    verifyEmailValidators
 } from './middlewares/authValidators';
 import {authControllers} from './controllers/authControllers';
-import {authMiddleware} from '../../global-middlewares/auth-middleware';
 import {routersPaths} from '../../common/path/paths';
 
 
@@ -14,12 +17,12 @@ export const authRouter = Router()
 authRouter.post(
     routersPaths.auth.login,
     ...authenticateUserValidators,
-    authControllers.authenticateUser
+    authControllers.loginUser
 )
 
 authRouter.get(
     routersPaths.auth.me,
-    authMiddleware,
+    ...getUserInfoValidators,
     authControllers.getUserInfo
 )
 
@@ -39,5 +42,17 @@ authRouter.post(
     routersPaths.auth.registrationEmailResending,
     ...resendRegistrationEmailValidators,
     authControllers.resendRegistrationEmail
+)
+
+authRouter.post(
+    routersPaths.auth.refreshToken,
+    ...refreshTokenValidators,
+    authControllers.updateTokens
+)
+
+authRouter.post(
+    routersPaths.auth.logout,
+    ...logoutUserValidators,
+    authControllers.logoutUser
 )
 

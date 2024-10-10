@@ -1,16 +1,34 @@
 import {Request, Response} from 'express';
-import {AuthInputModel} from '../../../types/auth/auth-types';
+import {AuthInputModel, AuthTokensType} from '../../../types/auth/auth-types';
 import {authService} from '../domain/auth-service';
 import {authQueryRepository} from '../repositories/authQueryRepository';
 import {UserInputModel} from '../../../types/entities/users-types';
 import {StatusCode} from '../../../common/utils/errorsAndStatusCodes.utils';
 
 export const authControllers = {
-    async authenticateUser(req: Request<{}, {}, AuthInputModel>, res: Response) {
-        const accessToken = await authService.loginUser(req.body.loginOrEmail, req.body.password);
+    async loginUser(req: Request<{}, {}, AuthInputModel>, res: Response) {
+        const {loginOrEmail, password}: AuthInputModel = req.body
 
-        if (accessToken) {
+        const status = await authService.loginUser(loginOrEmail, password);
+
+        if (status.statusCode === StatusCode.Success) {
+            const {accessToken, refreshToken}: AuthTokensType = status.data
+
+            res.cookie('refreshToken', refreshToken, {
+                httpOnly: true,
+                secure: true,
+            })
             res.status(200).json({accessToken: accessToken})
+        } else {
+            res.sendStatus(401)
+        }
+    },
+
+    async logoutUser(req: Request, res: Response) {
+        const status = await authService.logoutUser(req.user!.id, req.cookies.refreshToken)
+
+        if (status.statusCode === StatusCode.Success) {
+            res.sendStatus(204)
         } else {
             res.sendStatus(401)
         }
@@ -59,5 +77,21 @@ export const authControllers = {
         } else {
             res.status(400).json(status.data)
         }
-    }
+    },
+
+    async updateTokens(req: Request, res: Response) {
+        const status = await authService.updateTokens(req.user!.id, req.cookies.refreshToken)
+
+        if (status.statusCode === StatusCode.Success) {
+            const {accessToken, refreshToken}: AuthTokensType = status.data
+
+            res.cookie('refreshToken', refreshToken, {
+                httpOnly: true,
+                secure: true
+            })
+            res.status(200).json({accessToken: accessToken})
+        } else {
+            res.sendStatus(401)
+        }
+    },
 }

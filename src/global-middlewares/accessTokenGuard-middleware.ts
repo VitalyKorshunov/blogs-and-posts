@@ -1,7 +1,7 @@
-import {Request, Response, NextFunction} from 'express';
+import {NextFunction, Request, Response} from 'express';
 import {jwtService} from '../common/adapters/jwt.service';
 
-export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
+export const accessTokenGuardMiddleware = async (req: Request, res: Response, next: NextFunction) => {
     const auth = req.headers.authorization as string
     if (!auth) {
         res.sendStatus(401)
@@ -14,12 +14,12 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
     }
 
     const token = auth.split(' ')[1]
-    const payload = await jwtService.verifyToken(token)
+    const payload = await jwtService.verifyAccessToken(token)
 
     if (payload) {
         const {id} = payload
 
-        req.user = {id: id} as {id: string}
+        req.user = {id: id} as { id: string }
         next()
     } else {
         res.sendStatus(401)

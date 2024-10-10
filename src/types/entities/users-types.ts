@@ -19,6 +19,7 @@ export type UserServiceModel = {
     email: string
     passHash: string
     createdAt: Date
+    refreshToken: string
     emailConfirmation: EmailConfirmation
 }
 

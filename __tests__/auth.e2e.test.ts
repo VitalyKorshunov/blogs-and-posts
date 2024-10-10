@@ -2,6 +2,8 @@ import {req, testHelpers} from './helpers/test-helpers'
 import {SETTINGS} from '../src/settings'
 import {AuthInputModel} from '../src/types/auth/auth-types';
 import {jwtService} from '../src/common/adapters/jwt.service';
+import ms from 'ms'
+import {differenceInMilliseconds} from 'date-fns';
 
 describe('/auth', () => {
     beforeAll(async () => {
@@ -27,7 +29,11 @@ describe('/auth', () => {
             .send(sendBody1)
             .expect(200)
 
-        const payloadRes1 = await jwtService.verifyToken(res1.body.accessToken)
+        const jwtExpirationDate = res1.headers['set-cookie'][0].split('; ')[3].split('=')[1]
+        const resCurrDate = new Date(res1.headers['date'])
+console.log(res1.xhr)
+expect(differenceInMilliseconds(jwtExpirationDate, resCurrDate)).toBe(ms(SETTINGS.RT_LIFE_TIME))
+        const payloadRes1 = await jwtService.verifyAccessToken(res1.body.accessToken)
         expect(payloadRes1).not.toEqual(null)
 
 

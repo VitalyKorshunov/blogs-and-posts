@@ -1,6 +1,5 @@
 import {usersRepository} from '../../users/repositories/usersRepository';
 import {hashPassService} from '../../../common/adapters/hashPass.service';
-import {jwtService} from '../../../common/adapters/jwt.service';
 import {EmailConfirmation, UserId, UserInputModel, UserServiceModel} from '../../../types/entities/users-types';
 import {authRepository} from '../repositories/authRepository';
 import {ExecutionStatus, StatusCode} from '../../../common/utils/errorsAndStatusCodes.utils';
@@ -8,8 +7,10 @@ import {UserDbType} from '../../../types/db/user-db-types';
 import {v7 as uuidv7} from 'uuid';
 import {add} from 'date-fns';
 import {ErrorsType} from '../../../types/output-errors-type';
-import {EmailConfirmationCodeInputModel} from '../../../types/auth/auth-types';
+import {AuthTokensType, EmailConfirmationCodeInputModel} from '../../../types/auth/auth-types';
 import {nodemailerService} from '../../../common/adapters/nodemailer.service';
+import {jwtService} from '../../../common/adapters/jwt.service';
+import {JwtVerifyViewModel} from '../../../types/auth/jwt-types';
 
 export const authService = {
     async _findUserByLoginOrEmail(loginOrEmail: string): Promise<UserServiceModel | null> {
@@ -33,16 +34,68 @@ export const authService = {
 
         return errors.errorsMessages.length ? errors : null
     },
+    async _createAccessAndRefreshTokens(userId: UserId): Promise<AuthTokensType | null> {
+        const newAccessToken: string | null = await jwtService.createAccessToken(userId)
+        const newRefreshToken: string | null = await jwtService.createRefreshToken(userId)
 
+        if (!newAccessToken || !newRefreshToken) {
+            return null
+        }
 
-    async loginUser(loginOrEmail: string, password: string): Promise<string | null> {
+        return {
+            accessToken: newAccessToken,
+            refreshToken: newRefreshToken
+        }
+    },
+
+    async loginUser(loginOrEmail: string, password: string): Promise<ExecutionStatus> {
         const user = await this._findUserByLoginOrEmail(loginOrEmail)
-        if (!user) return null
+        if (!user) {
+            return new ExecutionStatus(StatusCode.NotFound)
+        }
 
-        const checkPassword: boolean = await hashPassService.checkPassword(password, user.passHash)
-        if (!checkPassword) return null
+        const isPasswordValid: boolean = await hashPassService.validatePassword(password, user.passHash)
+        if (!isPasswordValid) {
+            return new ExecutionStatus(StatusCode.NotFound)
+        }
 
-        return jwtService.createToken(user.id)
+        const tokens: AuthTokensType | null = await this._createAccessAndRefreshTokens(user.id)
+        if (!tokens) {
+            return new ExecutionStatus(StatusCode.NotFound)
+        }
+
+        const isUserRefreshTokenUpdated: boolean = await authRepository.updateUserRefreshToken(user.id, tokens.refreshToken)
+        if (!isUserRefreshTokenUpdated) {
+            return new ExecutionStatus(StatusCode.NotFound)
+        }
+
+        return new ExecutionStatus(StatusCode.Success, tokens)
+    },
+
+    async logoutUser(userId: UserId, refreshToken: string): Promise<ExecutionStatus> {
+        const refreshTokenPayload: JwtVerifyViewModel | null = await jwtService.verifyRefreshToken(refreshToken)
+
+        if (!refreshTokenPayload) {
+            return new ExecutionStatus(StatusCode.NotFound)
+        }
+
+        const user: UserServiceModel | null = await authRepository.findUserById(userId)
+
+        if (!user) {
+            return new ExecutionStatus(StatusCode.NotFound)
+        }
+
+        if (user.refreshToken !== refreshToken || user.id !== refreshTokenPayload.id) {
+            return new ExecutionStatus(StatusCode.NotFound)
+        }
+
+        const isUserRefreshTokenUpdated: boolean = await authRepository.updateUserRefreshToken(userId, '')
+
+        if (!isUserRefreshTokenUpdated) {
+            return new ExecutionStatus(StatusCode.NotFound)
+        }
+
+        return new ExecutionStatus(StatusCode.Success)
     },
 
     async registrationUser({login, email, password}: UserInputModel): Promise<ExecutionStatus> {
@@ -57,6 +110,7 @@ export const authService = {
             email,
             passHash,
             createdAt: new Date(),
+            refreshToken: '',
             emailConfirmation: {
                 expirationDate: add(new Date(), {
                     minutes: 10,
@@ -84,14 +138,14 @@ export const authService = {
     },
 
     async verifyEmail(code: EmailConfirmationCodeInputModel): Promise<ExecutionStatus> {
-        const error = { errorsMessages: [{ message: 'code error', field: "code" }] }
+        const error = {errorsMessages: [{message: 'code error', field: 'code'}]}
 
         const isCodeConfirmationFound = await authRepository.isCodeConfirmationFound(code)
 
         if (!isCodeConfirmationFound) return new ExecutionStatus(StatusCode.NotFound, error)
 
         const user: UserServiceModel | null = await authRepository.findUserByEmailConfirmationCode(code)
-        console.log(user)
+
         if (!user) return new ExecutionStatus(StatusCode.NotFound)
         if (user.emailConfirmation.isConfirmed) return new ExecutionStatus(StatusCode.NotFound, error)
         if (user.emailConfirmation.expirationDate < new Date()) return new ExecutionStatus(StatusCode.BadRequest, error)
@@ -107,12 +161,12 @@ export const authService = {
         return (isUpdatedEmailConfirmation) ? new ExecutionStatus(StatusCode.Success) : new ExecutionStatus(StatusCode.NotFound)
     },
     async resendRegistrationEmail(email: string): Promise<ExecutionStatus> {
-        const error = { errorsMessages: [{ message: 'email not found', field: "email" }] }
+        const error = {errorsMessages: [{message: 'email not found', field: 'email'}]}
         const isEmailFound = await authRepository.isEmailFound(email)
 
         if (!isEmailFound) return new ExecutionStatus(StatusCode.NotFound, error)
 
-        const user = await authRepository.findUserByEmail(email)
+        const user: UserServiceModel | null = await authRepository.findUserByEmail(email)
 
         if (!user) return new ExecutionStatus(StatusCode.NotFound)
         if (user.emailConfirmation.isConfirmed) return new ExecutionStatus(StatusCode.BadRequest, error)
@@ -137,5 +191,37 @@ export const authService = {
         }
 
         return new ExecutionStatus(StatusCode.Success)
+    },
+
+    async updateTokens(userId: UserId, refreshToken: string): Promise<ExecutionStatus> {
+        const refreshTokenPayload: JwtVerifyViewModel | null = await jwtService.verifyRefreshToken(refreshToken)
+
+        if (!refreshTokenPayload) {
+            return new ExecutionStatus(StatusCode.NotFound)
+        }
+
+        const user: UserServiceModel | null = await authRepository.findUserById(userId)
+
+        if (!user) {
+            return new ExecutionStatus(StatusCode.NotFound)
+        }
+
+        if (user.refreshToken !== refreshToken || user.id !== refreshTokenPayload.id) {
+            return new ExecutionStatus(StatusCode.NotFound)
+        }
+
+        const tokens: AuthTokensType | null = await this._createAccessAndRefreshTokens(userId)
+
+        if (!tokens) {
+            return new ExecutionStatus(StatusCode.NotFound)
+        }
+
+        const isUserRefreshTokenUpdated: boolean = await authRepository.updateUserRefreshToken(userId, tokens.refreshToken)
+
+        if (!isUserRefreshTokenUpdated) {
+            return new ExecutionStatus(StatusCode.NotFound)
+        }
+
+        return new ExecutionStatus(StatusCode.Success, tokens)
     }
 }

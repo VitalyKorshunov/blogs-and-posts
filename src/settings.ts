@@ -21,8 +21,10 @@ export const SETTINGS = {
     USER_COLLECTION_NAME: process.env.USER_COLLECTION_NAME as string,
     COMMENT_COLLECTION_NAME: process.env.COMMENT_COLLECTION_NAME as string,
 
-    SECRET_KEY: process.env.SECRET_KEY as string,
-    LIFE_TIME_JWT: process.env.LIFE_TIME_JWT as string,
+    AT_SECRET_KEY: process.env.AT_SECRET_KEY as string,
+    AT_LIFE_TIME: process.env.AT_LIFE_TIME as string,
+    RT_SECRET_KEY: process.env.RT_SECRET_KEY as string,
+    RT_LIFE_TIME: process.env.RT_LIFE_TIME as string,
 
     MAIL_LOGIN: process.env.MAIL_LOGIN as string,
     MAIL_PASS: process.env.MAIL_PASS as string,

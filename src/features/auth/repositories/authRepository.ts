@@ -38,7 +38,7 @@ export const authRepository = {
 
         return user ? this._mapToUserServiceModel(user) : null
     },
-    async updateUserEmailConfirmation(id: UserId, update: EmailConfirmation) {
+    async updateUserEmailConfirmation(id: UserId, update: EmailConfirmation): Promise<boolean> {
         const isUserUpdated = await userCollection.updateOne(this._toIdQuery(id), {$set: {emailConfirmation: update}})
 
         return !!isUserUpdated.matchedCount
@@ -48,9 +48,14 @@ export const authRepository = {
 
         return !!isEmailFound
     },
-    async findUserByEmail(email: string) : Promise<UserServiceModel | null> {
+    async findUserByEmail(email: string): Promise<UserServiceModel | null> {
         const user: WithId<UserDbType> | null = await userCollection.findOne({email: email})
 
         return user ? this._mapToUserServiceModel(user) : null
+    },
+    async updateUserRefreshToken(userId: UserId, refreshToken: string): Promise<boolean> {
+        const isUserRefreshTokenUpdated = await userCollection.updateOne(this._toIdQuery(userId), {$set: {refreshToken: refreshToken}})
+
+        return !!isUserRefreshTokenUpdated.matchedCount
     }
 }

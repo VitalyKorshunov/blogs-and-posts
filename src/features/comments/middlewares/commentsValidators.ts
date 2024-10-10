@@ -3,7 +3,7 @@ import {inputCheckErrorsMiddleware} from '../../../global-middlewares/inputCheck
 import {NextFunction, Request, Response} from 'express'
 import {ObjectId} from 'mongodb';
 import {commentsQueryRepository} from '../repositories/commentsQueryRepository';
-import {authMiddleware} from '../../../global-middlewares/auth-middleware';
+import {accessTokenGuardMiddleware} from '../../../global-middlewares/accessTokenGuard-middleware';
 
 
 export const commentContentValidator = body('content').isString().withMessage('not string').trim()
@@ -45,7 +45,7 @@ const sortDirectionValidator = query('sortDirection').default('desc')
     })
 
 export const updateCommentsValidators = [
-    authMiddleware,
+    accessTokenGuardMiddleware,
 
     findCommentValidator,
     commentContentValidator,
@@ -61,7 +61,7 @@ export const findCommentValidators = [
 ]
 
 export const deleteCommentsValidators = [
-    authMiddleware,
+    accessTokenGuardMiddleware,
 
     findCommentValidator,
 

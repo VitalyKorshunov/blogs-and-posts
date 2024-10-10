@@ -5,7 +5,7 @@ import {adminMiddleware} from '../../../global-middlewares/admin-middleware'
 import {ObjectId} from 'mongodb';
 import {blogsQueryRepository} from '../../blogs/repositories/blogsQueryRepository';
 import {postsQueryRepository} from '../repositories/postsQueryRepository';
-import {authMiddleware} from '../../../global-middlewares/auth-middleware';
+import {accessTokenGuardMiddleware} from '../../../global-middlewares/accessTokenGuard-middleware';
 
 export const commentContentValidator = body('content').isString().withMessage('not string').trim()
     .isLength({min: 20, max: 300}).withMessage('more than 300 or less than 20')
@@ -84,7 +84,7 @@ export const getPostsValidators = [
 ]
 
 export const createCommentInPostValidator = [
-    authMiddleware,
+    accessTokenGuardMiddleware,
 
     findPostValidator,
     commentContentValidator,
