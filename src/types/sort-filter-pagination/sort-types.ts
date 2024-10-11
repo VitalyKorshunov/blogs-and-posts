@@ -6,9 +6,10 @@ export type SortInputQueryType = {
 }
 
 export type SortOutputQueryType = {
-    countSkips: number
+    pageNumber: number
     pageSize: number
     sortBy: string
     sortDirection: 'asc' | 'desc'
+    countSkips: number
 }
 
