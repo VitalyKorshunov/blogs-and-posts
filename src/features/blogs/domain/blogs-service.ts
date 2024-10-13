@@ -1,8 +1,5 @@
 import {BlogCreateType, BlogId, BlogInputModel, BlogUpdateType} from '../../../types/entities/blogs-types';
 import {blogsRepository} from '../repositories/blogsRepository';
-import {BlogPostInputModel} from '../../../types/entities/posts-types';
-import {postsService} from '../../posts/domain/posts-service';
-import {ExecutionStatus} from '../../../common/utils/errorsAndStatusCodes.utils';
 
 
 export const blogsService = {
@@ -27,8 +24,5 @@ export const blogsService = {
         }
 
         return await blogsRepository.updateBlog(updatedBlog, id)
-    },
-    async createPostForBlog(blogId: BlogId, post: BlogPostInputModel): Promise<ExecutionStatus> {
-        return await postsService.createPost({blogId: blogId, ...post})
     },
 }

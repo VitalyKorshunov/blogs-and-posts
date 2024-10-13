@@ -13,3 +13,11 @@ export type BlogsQueryDBType = {
     sortBy: string
     sortDirection: 'asc' | 'desc'
 }
+
+export type PostsForBlogQueryDbType = {
+    pageNumber: number
+    countSkips: number
+    pageSize: number
+    sortBy: string
+    sortDirection: 'asc' | 'desc'
+}

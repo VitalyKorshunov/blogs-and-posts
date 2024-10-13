@@ -1,3 +1,5 @@
+import {PostViewModel} from './posts-types';
+
 export type BlogId = string
 
 export type BlogInputModel = {
@@ -30,6 +32,14 @@ export type BlogsSortViewModel = {
     pageSize: number
     totalCount: number
     items: BlogViewModel[]
+}
+
+export type PostsForBlogSortViewModel = {
+    pagesCount: number
+    page: number
+    pageSize: number
+    totalCount: number
+    items: PostViewModel[]
 }
 
 export type BlogCreateType = {

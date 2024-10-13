@@ -3,16 +3,16 @@ import {AuthInputModel, AuthTokensType} from '../../../types/auth/auth-types';
 import {authService} from '../domain/auth-service';
 import {authQueryRepository} from '../repositories/authQueryRepository';
 import {UserInputModel} from '../../../types/entities/users-types';
-import {StatusCode} from '../../../common/utils/errorsAndStatusCodes.utils';
+import {handleResult, StatusesCode} from '../../../common/utils/errorsAndStatusCodes.utils';
 
 export const authControllers = {
     async loginUser(req: Request<{}, {}, AuthInputModel>, res: Response) {
         const {loginOrEmail, password}: AuthInputModel = req.body
 
-        const status = await authService.loginUser(loginOrEmail, password);
+        const result = await authService.loginUser(loginOrEmail, password);
 
-        if (status.statusCode === StatusCode.Success) {
-            const {accessToken, refreshToken}: AuthTokensType = status.data
+        if (result.statusCode === StatusesCode.Success) {
+            const {accessToken, refreshToken}: AuthTokensType = result.data
 
             res.cookie('refreshToken', refreshToken, {
                 httpOnly: true,
@@ -20,17 +20,17 @@ export const authControllers = {
             })
             res.status(200).json({accessToken: accessToken})
         } else {
-            res.sendStatus(401)
+            handleResult(result, res)
         }
     },
 
     async logoutUser(req: Request, res: Response) {
-        const status = await authService.logoutUser(req.user!.id, req.cookies.refreshToken)
+        const result = await authService.logoutUser(req.user!.id, req.cookies.refreshToken)
 
-        if (status.statusCode === StatusCode.Success) {
+        if (result.statusCode === StatusesCode.Success) {
             res.sendStatus(204)
         } else {
-            res.sendStatus(401)
+            handleResult(result, res)
         }
     },
 
@@ -46,44 +46,40 @@ export const authControllers = {
 
     async registerUser(req: Request, res: Response) {
         const {login, email, password}: UserInputModel = req.body
-        const status = await authService.registrationUser({login, email, password})
+        const result = await authService.registrationUser({login, email, password})
 
-        if (status.statusCode === StatusCode.ErrorSendEmail) {
-            res.sendStatus(400)
-        }
-        if (status.statusCode === StatusCode.NotFound) {
-            res.status(400).json(status.data)
-        }
-        if (status.statusCode === StatusCode.Success) {
+        if (result.statusCode === StatusesCode.Success) {
             res.sendStatus(204)
+        } else {
+            handleResult(result, res)
         }
     },
 
     async verifyEmail(req: Request, res: Response) {
-        const status = await authService.verifyEmail(req.body.code)
+        const result = await authService.verifyEmail(req.body.code)
 
-        if (status.statusCode === StatusCode.Success) {
+        if (result.statusCode === StatusesCode.Success) {
             res.sendStatus(204)
         } else {
-            res.status(400).json(status.data)
+            handleResult(result, res)
         }
     },
 
     async resendRegistrationEmail(req: Request, res: Response) {
-        const status = await authService.resendRegistrationEmail(req.body.email)
+        const result = await authService.resendRegistrationEmail(req.body.email)
 
-        if (status.statusCode === StatusCode.Success) {
+        if (result.statusCode === StatusesCode.Success) {
             res.sendStatus(204)
         } else {
-            res.status(400).json(status.data)
+            handleResult(result, res)
         }
     },
 
     async updateTokens(req: Request, res: Response) {
-        const status = await authService.updateTokens(req.user!.id, req.cookies.refreshToken)
+        const result = await authService.updateTokens(req.user!.id, req.cookies.refreshToken)
 
-        if (status.statusCode === StatusCode.Success) {
-            const {accessToken, refreshToken}: AuthTokensType = status.data
+        if (result.statusCode === StatusesCode.Success) {
+            const {accessToken, refreshToken}: AuthTokensType = result.data
 
             res.cookie('refreshToken', refreshToken, {
                 httpOnly: true,
@@ -91,7 +87,7 @@ export const authControllers = {
             })
             res.status(200).json({accessToken: accessToken})
         } else {
-            res.sendStatus(401)
+            handleResult(result, res)
         }
     },
 }

@@ -1,12 +1,19 @@
-import {blogCollection} from '../../../db/mongo-db';
+import {blogCollection, postCollection} from '../../../db/mongo-db';
 import {ObjectId, WithId} from 'mongodb';
 import {IdQueryDbType} from '../../../types/db/query-db-types';
-import {BlogId, BlogsSortViewModel, BlogViewModel} from '../../../types/entities/blogs-types';
-import {postsQueryRepository} from '../../posts/repositories/postsQueryRepository';
-import {PostsSortViewModel} from '../../../types/entities/posts-types';
-import {BlogDbType, BlogsQueryDBType} from '../../../types/db/blog-db-types';
+import {
+    BlogId,
+    BlogsSortViewModel,
+    BlogViewModel,
+    PostsForBlogSortViewModel
+} from '../../../types/entities/blogs-types';
+import {PostViewModel} from '../../../types/entities/posts-types';
+import {BlogDbType, BlogsQueryDBType, PostsForBlogQueryDbType} from '../../../types/db/blog-db-types';
 import {sortQueryFieldsUtils} from '../../../common/utils/sortQueryFields.utils';
 import {SortOutputQueryType} from '../../../types/sort-filter-pagination/sort-types';
+import {PostDbType} from '../../../types/db/post-db-types';
+import {result, ResultType} from '../../../common/utils/errorsAndStatusCodes.utils';
+
 
 export const blogsQueryRepository = {
     _toIdQuery(id: string): IdQueryDbType {
@@ -22,23 +29,34 @@ export const blogsQueryRepository = {
             isMembership: blog.isMembership
         }
     },
+    _mapToPostViewModel(post: WithId<PostDbType>): PostViewModel {
+        return {
+            id: post._id.toString(),
+            title: post.title,
+            shortDescription: post.shortDescription,
+            content: post.content,
+            blogId: post.blogId.toString(),
+            blogName: post.blogName,
+            createdAt: post.createdAt.toISOString()
+        }
+    },
 
 
-    async isBlogFound(id: BlogId): Promise<boolean> {
-        const blog: number = await blogCollection.countDocuments(this._toIdQuery(id));
+    async isBlogFound(blogId: BlogId): Promise<boolean> {
+        const blog: number = await blogCollection.countDocuments(this._toIdQuery(blogId));
 
         return !!blog
     },
-    async findAndMap(id: BlogId): Promise<BlogViewModel> {
+    async findAndMap(id: BlogId): Promise<ResultType<BlogViewModel>> {
         const blog: WithId<BlogDbType> | null = await blogCollection.findOne(this._toIdQuery(id))
 
         if (blog) {
-            return this._mapToBlogViewModel(blog)
+            return result.success(this._mapToBlogViewModel(blog))
         } else {
-            throw new Error('blog not found (blogsQueryRepository.findAndMap)')
+            return result.notFound('blog not found')
         }
     },
-    async getAll(query: any): Promise<BlogsSortViewModel> {
+    async getAllSortedBlogs(query: any): Promise<BlogsSortViewModel> {
         const sortQueryFields: SortOutputQueryType = sortQueryFieldsUtils(query)
         const filter: BlogsQueryDBType = {
             ...sortQueryFields,
@@ -62,7 +80,41 @@ export const blogsQueryRepository = {
             items: blogs.map(blog => this._mapToBlogViewModel(blog))
         }
     },
-    async sortPostsInBlog(blogId: BlogId, query: any): Promise<PostsSortViewModel> {
-        return postsQueryRepository.sortPosts(query, blogId)
+    // async sortPostsInBlog(blogId: BlogId, query: any): Promise<PostsSortViewModel> {
+    //     return postsQueryRepository.sortPosts(query, blogId)
+    // },
+
+    async getSortedPostsInBlog(blogId: BlogId, query: any): Promise<ResultType<PostsForBlogSortViewModel>> {
+        const blogObjectId: ObjectId | null = new ObjectId(blogId)
+        const isBlogFound = await this.isBlogFound(blogId)
+
+        if (!isBlogFound) return result.notFound('blog not found')
+
+        const queryFindAllPostsForBlog = {blogId: blogObjectId}
+
+        const sortedQueryFields: SortOutputQueryType = sortQueryFieldsUtils(query)
+        const filter: PostsForBlogQueryDbType = {
+            ...sortedQueryFields,
+        }
+
+        const posts = await postCollection
+            .find(queryFindAllPostsForBlog)
+            .sort(filter.sortBy, filter.sortDirection)
+            .skip(filter.countSkips)
+            .limit(filter.pageSize)
+            .toArray()
+
+        const totalPostsCount = await postCollection.countDocuments(queryFindAllPostsForBlog)
+        const pagesCount = Math.ceil(totalPostsCount / filter.pageSize)
+
+        const data: PostsForBlogSortViewModel = {
+            pagesCount: pagesCount,
+            page: filter.pageNumber,
+            pageSize: filter.pageSize,
+            totalCount: totalPostsCount,
+            items: posts.map(post => this._mapToPostViewModel(post))
+        }
+
+        return result.success(data)
     },
 }

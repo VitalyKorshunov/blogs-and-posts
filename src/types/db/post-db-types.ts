@@ -18,6 +18,7 @@ export type PostUpdateDbType = {
 }
 
 export type PostsQueryDbType = {
+    pageNumber: number
     countSkips: number
     pageSize: number
     sortBy: string

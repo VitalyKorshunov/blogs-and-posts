@@ -6,14 +6,21 @@ import {ParamType} from '../../../types/request-response/request-types';
 import {CommentInputModel, CommentsSortViewModel, CommentViewModel} from '../../../types/entities/comments-types';
 import {commentsService} from '../../comments/domain/comments-service';
 import {commentsQueryRepository} from '../../comments/repositories/commentsQueryRepository';
+import {StatusesCode} from '../../../common/utils/errorsAndStatusCodes.utils';
 
 export const postsControllers = {
     async createPost(req: Request<any, any, PostInputModel>, res: Response<PostViewModel>) {
-        const newPostId = await postsService.createPost(req.body)
-        const newPost = await postsQueryRepository.findAndMap(newPostId.data)
-        res
-            .status(201)
-            .json(newPost)
+        const newPostId = await postsService.createPostInBlog(req.body)
+
+        if (newPostId.statusCode === StatusesCode.Success) {
+            const newPost = await postsQueryRepository.findAndMap(newPostId.data)
+            res
+                .status(201)
+                .json(newPost)
+        } else {
+            res.sendStatus(400)
+        }
+
     },
 
     async delPost(req: Request<ParamType>, res: Response) {
@@ -30,7 +37,7 @@ export const postsControllers = {
     },
 
     async getPosts(req: Request, res: Response<PostsSortViewModel>) {
-        const posts = await postsQueryRepository.getAll(req.query);
+        const posts = await postsQueryRepository.getAllSortedPosts(req.query);
         res
             .status(200)
             .json(posts)

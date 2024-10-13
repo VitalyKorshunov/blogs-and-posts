@@ -1,4 +1,5 @@
 import {Response} from 'express';
+import {ErrorsType} from '../../types/output-errors-type';
 
 export class ExecutionStatus {
     constructor(public statusCode: StatusCode, public data?: any) {
@@ -17,7 +18,10 @@ export enum StatusesCode {
     Success,
     NotFound,
     InvalidCredentials,
-    InvalidToken,
+    TokenError,
+    LoginOrEmailError,
+    EmailError,
+
 }
 
 type ResultSuccess<T> = {
@@ -27,6 +31,7 @@ type ResultSuccess<T> = {
 type ResultNotFound = {
     statusCode: StatusesCode.NotFound
     errorMessage: string
+    data?: ErrorsType
 }
 
 type ResultInvalidCredentials = {
@@ -34,13 +39,31 @@ type ResultInvalidCredentials = {
     errorMessage: string
 }
 
-type ResultInvalidToken = {
-    statusCode: StatusesCode.InvalidToken
+type ResultTokenError = {
+    statusCode: StatusesCode.TokenError
     errorMessage: string
 }
 
+type ResultLoginOrEmailError = {
+    statusCode: StatusesCode.LoginOrEmailError
+    message: string
+    date?: ErrorsType
+}
 
-export type ResultType<T> = ResultSuccess<T> | ResultNotFound | ResultInvalidCredentials | ResultInvalidToken
+type ResultEmailError = {
+    statusCode: StatusesCode.EmailError
+    errorMessage: string
+    data?: ErrorsType
+}
+
+
+export type ResultType<T> =
+    ResultSuccess<T>
+    | ResultNotFound
+    | ResultInvalidCredentials
+    | ResultTokenError
+    | ResultLoginOrEmailError
+    | ResultEmailError
 
 export const result = {
     success<T>(data: T): ResultSuccess<T> {
@@ -49,10 +72,11 @@ export const result = {
             data
         }
     },
-    notFound(errorMessage: string): ResultNotFound {
+    notFound(errorMessage: string, data?: ErrorsType): ResultNotFound {
         return {
             statusCode: StatusesCode.NotFound,
-            errorMessage
+            errorMessage,
+            data
         }
     },
     invalidCredentials(errorMessage: string): ResultInvalidCredentials {
@@ -61,25 +85,49 @@ export const result = {
             errorMessage
         }
     },
-    invalidToken(errorMessage: string): ResultInvalidToken {
+    tokenError(errorMessage: string): ResultTokenError {
         return {
-            statusCode: StatusesCode.InvalidToken,
+            statusCode: StatusesCode.TokenError,
             errorMessage
         }
     },
+    loginOrEmailWithError(message: string, date: ErrorsType): ResultLoginOrEmailError {
+        return {
+            statusCode: StatusesCode.LoginOrEmailError,
+            message,
+            date
+        }
+    },
+    emailError(errorMessage: string, data?: ErrorsType): ResultEmailError {
+        return {
+            statusCode: StatusesCode.EmailError,
+            errorMessage,
+            data
+        }
+    }
 }
 
-export const handleResult = <T>(result: ResultType<T>, res: Response) => {
+export const handleResult = (result: ResultType<unknown>, res: Response) => {
     switch (result.statusCode) {
         case StatusesCode.NotFound: {
             console.error(result.errorMessage)
-            res.sendStatus(404)
+            res.status(400).json(result.data ?? {})
             break
         }
         case StatusesCode.InvalidCredentials
-        || StatusesCode.InvalidToken: {
+        || StatusesCode.TokenError: {
             console.error(result.errorMessage)
             res.sendStatus(401)
+            break
+        }
+        case StatusesCode.LoginOrEmailError: {
+            console.log(result.message)
+            res.status(400).json(result.date)
+            break
+        }
+        case StatusesCode.EmailError: {
+            console.error(result.errorMessage)
+            res.status(400).json(result.data ?? {})
             break
         }
         default: {

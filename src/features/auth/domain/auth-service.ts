@@ -2,7 +2,7 @@ import {usersRepository} from '../../users/repositories/usersRepository';
 import {hashPassService} from '../../../common/adapters/hashPass.service';
 import {EmailConfirmation, UserId, UserInputModel, UserServiceModel} from '../../../types/entities/users-types';
 import {authRepository} from '../repositories/authRepository';
-import {ExecutionStatus, StatusCode} from '../../../common/utils/errorsAndStatusCodes.utils';
+import {result, ResultType} from '../../../common/utils/errorsAndStatusCodes.utils';
 import {UserDbType} from '../../../types/db/user-db-types';
 import {v7 as uuidv7} from 'uuid';
 import {add} from 'date-fns';
@@ -48,61 +48,63 @@ export const authService = {
         }
     },
 
-    async loginUser(loginOrEmail: string, password: string): Promise<ExecutionStatus> {
-        const user = await this._findUserByLoginOrEmail(loginOrEmail)
+    async loginUser(loginOrEmail: string, password: string): Promise<ResultType<AuthTokensType>> {
+        const user: UserServiceModel | null = await this._findUserByLoginOrEmail(loginOrEmail)
         if (!user) {
-            return new ExecutionStatus(StatusCode.NotFound)
+            return result.invalidCredentials('user not found')
         }
 
         const isPasswordValid: boolean = await hashPassService.validatePassword(password, user.passHash)
         if (!isPasswordValid) {
-            return new ExecutionStatus(StatusCode.NotFound)
+            return result.invalidCredentials('password invalid')
         }
 
         const tokens: AuthTokensType | null = await this._createAccessAndRefreshTokens(user.id)
         if (!tokens) {
-            return new ExecutionStatus(StatusCode.NotFound)
+            return result.tokenError('error create access or refresh tokens')
         }
 
         const isUserRefreshTokenUpdated: boolean = await authRepository.updateUserRefreshToken(user.id, tokens.refreshToken)
         if (!isUserRefreshTokenUpdated) {
-            return new ExecutionStatus(StatusCode.NotFound)
+            return result.tokenError('error update refresh token')
         }
 
-        return new ExecutionStatus(StatusCode.Success, tokens)
+        return result.success(tokens)
     },
 
-    async logoutUser(userId: UserId, refreshToken: string): Promise<ExecutionStatus> {
+    async logoutUser(userId: UserId, refreshToken: string): Promise<ResultType<null>> {
         const refreshTokenPayload: JwtVerifyViewModel | null = await jwtService.verifyRefreshToken(refreshToken)
 
         if (!refreshTokenPayload) {
-            return new ExecutionStatus(StatusCode.NotFound)
+            return result.tokenError('error verify refresh token')
         }
 
         const user: UserServiceModel | null = await authRepository.findUserById(userId)
 
         if (!user) {
-            return new ExecutionStatus(StatusCode.NotFound)
+            return result.notFound('user not found')
         }
 
         if (user.refreshToken !== refreshToken || user.id !== refreshTokenPayload.id) {
-            return new ExecutionStatus(StatusCode.NotFound)
+            return result.tokenError('refresh token does not exist in user')
         }
 
         const isUserRefreshTokenUpdated: boolean = await authRepository.updateUserRefreshToken(userId, '')
 
         if (!isUserRefreshTokenUpdated) {
-            return new ExecutionStatus(StatusCode.NotFound)
+            return result.tokenError('refresh token not updated')
         }
 
-        return new ExecutionStatus(StatusCode.Success)
+        return result.success(null)
     },
 
-    async registrationUser({login, email, password}: UserInputModel): Promise<ExecutionStatus> {
+    async registrationUser({login, email, password}: UserInputModel): Promise<ResultType<null | ErrorsType>> {
 
         const loginOrEmailWithError = await this._validateLoginAndEmail(login, email)
 
-        if (loginOrEmailWithError) return new ExecutionStatus(StatusCode.NotFound, loginOrEmailWithError)
+        if (loginOrEmailWithError) {
+            return result.loginOrEmailWithError('login or email not unique', loginOrEmailWithError)
+        }
 
         const passHash = await hashPassService.generateHash(password)
         const newUser: UserDbType = {
@@ -123,7 +125,7 @@ export const authService = {
 
         const user: UserServiceModel | null = await authRepository.findUserById(userId)
 
-        if (!user) return new ExecutionStatus(StatusCode.NotFound, {})
+        if (!user) return result.notFound('user not found')
 
         try {
             await nodemailerService.sendEmailConfirmation(user.email, user.emailConfirmation.confirmationCode)
@@ -131,24 +133,24 @@ export const authService = {
             console.error(error)
             await usersRepository.deleteUser(user.id)
 
-            return new ExecutionStatus(StatusCode.ErrorSendEmail)
+            return result.emailError('error nodemailer send email ')
         }
 
-        return new ExecutionStatus(StatusCode.Success)
+        return result.success(null)
     },
 
-    async verifyEmail(code: EmailConfirmationCodeInputModel): Promise<ExecutionStatus> {
+    async verifyEmail(code: EmailConfirmationCodeInputModel): Promise<ResultType<null | ErrorsType>> {
         const error = {errorsMessages: [{message: 'code error', field: 'code'}]}
 
         const isCodeConfirmationFound = await authRepository.isCodeConfirmationFound(code)
 
-        if (!isCodeConfirmationFound) return new ExecutionStatus(StatusCode.NotFound, error)
+        if (!isCodeConfirmationFound) return result.notFound('code confirmation not found', error)
 
         const user: UserServiceModel | null = await authRepository.findUserByEmailConfirmationCode(code)
 
-        if (!user) return new ExecutionStatus(StatusCode.NotFound)
-        if (user.emailConfirmation.isConfirmed) return new ExecutionStatus(StatusCode.NotFound, error)
-        if (user.emailConfirmation.expirationDate < new Date()) return new ExecutionStatus(StatusCode.BadRequest, error)
+        if (!user) return result.notFound('user not found')
+        if (user.emailConfirmation.isConfirmed) return result.emailError('email already confirmed', error)
+        if (user.emailConfirmation.expirationDate < new Date()) return result.emailError('expired email code', error)
 
         const updateEmailConfirmation: EmailConfirmation = {
             expirationDate: user.emailConfirmation.expirationDate,
@@ -158,18 +160,20 @@ export const authService = {
 
         const isUpdatedEmailConfirmation = await authRepository.updateUserEmailConfirmation(user.id, updateEmailConfirmation)
 
-        return (isUpdatedEmailConfirmation) ? new ExecutionStatus(StatusCode.Success) : new ExecutionStatus(StatusCode.NotFound)
-    },
-    async resendRegistrationEmail(email: string): Promise<ExecutionStatus> {
-        const error = {errorsMessages: [{message: 'email not found', field: 'email'}]}
-        const isEmailFound = await authRepository.isEmailFound(email)
+        if (!isUpdatedEmailConfirmation) return result.emailError('email confirmation does not update')
 
-        if (!isEmailFound) return new ExecutionStatus(StatusCode.NotFound, error)
+        return result.success(null)
+    },
+    async resendRegistrationEmail(email: string): Promise<ResultType<null | ErrorsType>> {
+        const error = {errorsMessages: [{message: 'email not found', field: 'email'}]}
+
+        const isEmailFound = await authRepository.isEmailFound(email)
+        if (!isEmailFound) return result.emailError('email not found', error)
 
         const user: UserServiceModel | null = await authRepository.findUserByEmail(email)
+        if (!user) return result.notFound('user not found')
 
-        if (!user) return new ExecutionStatus(StatusCode.NotFound)
-        if (user.emailConfirmation.isConfirmed) return new ExecutionStatus(StatusCode.BadRequest, error)
+        if (user.emailConfirmation.isConfirmed) return result.emailError('email already confirmed', error)
 
         const updateEmailConfirmation: EmailConfirmation = {
             expirationDate: add(new Date(), {
@@ -181,47 +185,47 @@ export const authService = {
 
         const isUpdatedEmailConfirmation = await authRepository.updateUserEmailConfirmation(user.id, updateEmailConfirmation)
 
-        if (!isUpdatedEmailConfirmation) return new ExecutionStatus(StatusCode.NotFound)
+        if (!isUpdatedEmailConfirmation) return result.notFound('email confirmations not updated')
 
         try {
             await nodemailerService.sendEmailConfirmation(email, updateEmailConfirmation.confirmationCode)
         } catch (error) {
             console.error(error)
-            return new ExecutionStatus(StatusCode.ErrorSendEmail)
+            return result.emailError('error nodemailer send email')
         }
 
-        return new ExecutionStatus(StatusCode.Success)
+        return result.success(null)
     },
 
-    async updateTokens(userId: UserId, refreshToken: string): Promise<ExecutionStatus> {
+    async updateTokens(userId: UserId, refreshToken: string): Promise<ResultType<AuthTokensType>> {
         const refreshTokenPayload: JwtVerifyViewModel | null = await jwtService.verifyRefreshToken(refreshToken)
 
         if (!refreshTokenPayload) {
-            return new ExecutionStatus(StatusCode.NotFound)
+            return result.tokenError('refresh token invalid')
         }
 
         const user: UserServiceModel | null = await authRepository.findUserById(userId)
 
         if (!user) {
-            return new ExecutionStatus(StatusCode.NotFound)
+            return result.notFound('user not found')
         }
 
         if (user.refreshToken !== refreshToken || user.id !== refreshTokenPayload.id) {
-            return new ExecutionStatus(StatusCode.NotFound)
+            return result.tokenError('refresh token does not exist in user')
         }
 
         const tokens: AuthTokensType | null = await this._createAccessAndRefreshTokens(userId)
 
         if (!tokens) {
-            return new ExecutionStatus(StatusCode.NotFound)
+            return result.tokenError('error create access or refresh tokens')
         }
 
         const isUserRefreshTokenUpdated: boolean = await authRepository.updateUserRefreshToken(userId, tokens.refreshToken)
 
         if (!isUserRefreshTokenUpdated) {
-            return new ExecutionStatus(StatusCode.NotFound)
+            return result.tokenError('error update refresh token')
         }
 
-        return new ExecutionStatus(StatusCode.Success, tokens)
+        return result.success(tokens)
     }
 }
