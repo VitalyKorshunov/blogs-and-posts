@@ -3,7 +3,7 @@ import {usersService} from '../domain/users-service';
 import {usersQueryRepository} from '../repositories/usersQueryRepository';
 import {UserInputModel, UsersSortViewModel, UserViewModel} from '../../../types/entities/users-types';
 import {ParamType} from '../../../types/request-response/request-types';
-import {ErrorsType} from '../../../types/output-errors-type';
+import {ErrorsType} from '../../../types/utils/output-errors-type';
 
 export const usersControllers = {
     async createUser(req: Request<any, any, UserInputModel>, res: Response<UserViewModel | ErrorsType>) {

@@ -8,12 +8,15 @@ import {usersRouter} from './features/users';
 import {authRouter} from './features/auth';
 import {commentsRouter} from './features/comments';
 import cookieParser from 'cookie-parser';
+import {rateLimitRequestCounterMiddleware} from './global-middlewares/rateLimitRequestCounter-middleware';
 
 export const app = express()
-
+app.set('trust proxy', true)
+app.use(rateLimitRequestCounterMiddleware)
 app.use(cors())
 app.use(express.json())
-app.use(cookieParser('secret'))
+
+app.use(cookieParser())
 
 app.get('/', (req, res) => {
     res.status(200).json({version: '1.7.0'})

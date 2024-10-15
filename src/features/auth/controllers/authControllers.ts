@@ -55,8 +55,8 @@ export const authControllers = {
         }
     },
 
-    async verifyEmail(req: Request, res: Response) {
-        const result = await authService.verifyEmail(req.body.code)
+    async registrationConfirmationEmail(req: Request, res: Response) {
+        const result = await authService.registrationConfirmationEmail(req.body.code)
 
         if (result.statusCode === StatusesCode.Success) {
             res.sendStatus(204)

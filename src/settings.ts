@@ -13,13 +13,18 @@ export const SETTINGS = {
         TESTING: '/testing'
     },
 
+    DB: {
+        MONGO_URL: process.env.MONGO_URL as string,
+        DB_NAME: process.env.DB_NAME as string,
+        BLOG_COLLECTION_NAME: process.env.BLOG_COLLECTION_NAME as string,
+        POST_COLLECTION_NAME: process.env.POST_COLLECTION_NAME as string,
+        USER_COLLECTION_NAME: process.env.USER_COLLECTION_NAME as string,
+        COMMENT_COLLECTION_NAME: process.env.COMMENT_COLLECTION_NAME as string,
+        RATE_LIMIT_COLLECTION_NAME: process.env.RATE_LIMIT_COLLECTION_NAME as string,
+        SESSIONS_COLLECTION_NAME: process.env.SESSIONS_COLLECTION_NAME as string,
+    },
+
     ADMIN: process.env.ADMIN as string,
-    MONGO_URL: process.env.MONGO_URL as string,
-    DB_NAME: process.env.DB_NAME as string,
-    BLOG_COLLECTION_NAME: process.env.BLOG_COLLECTION_NAME as string,
-    POST_COLLECTION_NAME: process.env.POST_COLLECTION_NAME as string,
-    USER_COLLECTION_NAME: process.env.USER_COLLECTION_NAME as string,
-    COMMENT_COLLECTION_NAME: process.env.COMMENT_COLLECTION_NAME as string,
 
     AT_SECRET_KEY: process.env.AT_SECRET_KEY as string,
     AT_LIFE_TIME: process.env.AT_LIFE_TIME as string,

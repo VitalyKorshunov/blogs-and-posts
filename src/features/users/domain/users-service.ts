@@ -2,7 +2,7 @@ import {UserId, UserInputModel} from '../../../types/entities/users-types';
 import {usersRepository} from '../repositories/usersRepository';
 import {hashPassService} from '../../../common/adapters/hashPass.service';
 import {UserDbType} from '../../../types/db/user-db-types';
-import {ErrorsType} from '../../../types/output-errors-type';
+import {ErrorsType} from '../../../types/utils/output-errors-type';
 
 
 export const usersService = {

@@ -10,7 +10,7 @@ import {
 import {PostViewModel} from '../../../types/entities/posts-types';
 import {BlogDbType, BlogsQueryDBType, PostsForBlogQueryDbType} from '../../../types/db/blog-db-types';
 import {sortQueryFieldsUtils} from '../../../common/utils/sortQueryFields.utils';
-import {SortOutputQueryType} from '../../../types/sort-filter-pagination/sort-types';
+import {SortOutputQueryType} from '../../../types/utils/sort-types';
 import {PostDbType} from '../../../types/db/post-db-types';
 import {result, ResultType} from '../../../common/utils/errorsAndStatusCodes.utils';
 

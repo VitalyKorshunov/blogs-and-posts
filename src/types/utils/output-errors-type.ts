@@ -1,5 +1,5 @@
-import {BlogInputModel} from './entities/blogs-types'
-import {PostInputModel} from './entities/posts-types'
+import {BlogInputModel} from '../entities/blogs-types'
+import {PostInputModel} from '../entities/posts-types'
 
 export type FieldNamesType = keyof BlogInputModel | keyof PostInputModel
 // const f: FieldsType = 'some' // error

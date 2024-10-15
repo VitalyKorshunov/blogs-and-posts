@@ -1,4 +1,4 @@
-import {SortInputQueryType, SortOutputQueryType} from '../../types/sort-filter-pagination/sort-types';
+import {SortInputQueryType, SortOutputQueryType} from '../../types/utils/sort-types';
 
 
 export const sortQueryFieldsUtils = (query: SortInputQueryType): SortOutputQueryType => {

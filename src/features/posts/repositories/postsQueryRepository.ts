@@ -4,7 +4,7 @@ import {ObjectId, WithId} from 'mongodb';
 import {IdQueryDbType,} from '../../../types/db/query-db-types';
 import {PostId, PostsSortViewModel, PostViewModel} from '../../../types/entities/posts-types';
 import {sortQueryFieldsUtils} from '../../../common/utils/sortQueryFields.utils';
-import {SortOutputQueryType} from '../../../types/sort-filter-pagination/sort-types';
+import {SortOutputQueryType} from '../../../types/utils/sort-types';
 
 export const postsQueryRepository = {
     _toIdQuery(id: PostId): IdQueryDbType {

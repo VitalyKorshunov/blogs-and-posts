@@ -6,7 +6,7 @@ import {result, ResultType} from '../../../common/utils/errorsAndStatusCodes.uti
 import {UserDbType} from '../../../types/db/user-db-types';
 import {v7 as uuidv7} from 'uuid';
 import {add} from 'date-fns';
-import {ErrorsType} from '../../../types/output-errors-type';
+import {ErrorsType} from '../../../types/utils/output-errors-type';
 import {AuthTokensType, EmailConfirmationCodeInputModel} from '../../../types/auth/auth-types';
 import {nodemailerService} from '../../../common/adapters/nodemailer.service';
 import {jwtService} from '../../../common/adapters/jwt.service';
@@ -139,7 +139,7 @@ export const authService = {
         return result.success(null)
     },
 
-    async verifyEmail(code: EmailConfirmationCodeInputModel): Promise<ResultType<null | ErrorsType>> {
+    async registrationConfirmationEmail(code: EmailConfirmationCodeInputModel): Promise<ResultType<null | ErrorsType>> {
         const error = {errorsMessages: [{message: 'code error', field: 'code'}]}
 
         const isCodeConfirmationFound = await authRepository.isCodeConfirmationFound(code)

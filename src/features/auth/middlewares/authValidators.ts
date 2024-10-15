@@ -3,6 +3,7 @@ import {inputCheckErrorsMiddleware} from '../../../global-middlewares/inputCheck
 import {emailValidator, loginValidator} from '../../users/middlewares/usersValidators';
 import {refreshTokenGuardMiddleware} from '../../../global-middlewares/refreshTokenGuard-middleware';
 import {accessTokenGuardMiddleware} from '../../../global-middlewares/accessTokenGuard-middleware';
+import {rateLimitGuardMiddlewares} from '../../../global-middlewares/rateLimitGuard-middleware';
 
 export const loginOrEmailValidator = body('loginOrEmail').isString().withMessage('Field must be a string').trim()
     .custom((loginOrEmail, {req}) => {
@@ -22,7 +23,9 @@ export const emailConfirmationCodeValidator = body('code').isString().withMessag
     .isLength({min: 36, max: 36}).withMessage('invalid length')
 
 
-export const authenticateUserValidators = [
+export const loginUserValidators = [
+    rateLimitGuardMiddlewares,
+
     loginOrEmailValidator,
     passwordValidator,
 
@@ -30,6 +33,8 @@ export const authenticateUserValidators = [
 ]
 
 export const registerUserValidators = [
+    rateLimitGuardMiddlewares,
+
     loginValidator,
     emailValidator,
     passwordValidator,
@@ -37,13 +42,17 @@ export const registerUserValidators = [
     inputCheckErrorsMiddleware
 ]
 
-export const verifyEmailValidators = [
+export const registrationConfirmationEmailValidators = [
+    rateLimitGuardMiddlewares,
+
     emailConfirmationCodeValidator,
 
     inputCheckErrorsMiddleware
 ]
 
 export const resendRegistrationEmailValidators = [
+    rateLimitGuardMiddlewares,
+
     emailValidator,
 
     inputCheckErrorsMiddleware

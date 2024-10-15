@@ -1,5 +1,5 @@
 import {Response} from 'express';
-import {ErrorsType} from '../../types/output-errors-type';
+import {ErrorsType} from '../../types/utils/output-errors-type';
 
 export class ExecutionStatus {
     constructor(public statusCode: StatusCode, public data?: any) {

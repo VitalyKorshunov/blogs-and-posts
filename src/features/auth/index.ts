@@ -1,12 +1,12 @@
 import {Router} from 'express';
 import {
-    authenticateUserValidators,
+    loginUserValidators,
     getUserInfoValidators,
     logoutUserValidators,
     refreshTokenValidators,
     registerUserValidators,
     resendRegistrationEmailValidators,
-    verifyEmailValidators
+    registrationConfirmationEmailValidators
 } from './middlewares/authValidators';
 import {authControllers} from './controllers/authControllers';
 import {routersPaths} from '../../common/path/paths';
@@ -16,7 +16,7 @@ export const authRouter = Router()
 
 authRouter.post(
     routersPaths.auth.login,
-    ...authenticateUserValidators,
+    ...loginUserValidators,
     authControllers.loginUser
 )
 
@@ -34,8 +34,8 @@ authRouter.post(
 
 authRouter.post(
     routersPaths.auth.registrationConfirmation,
-    ...verifyEmailValidators,
-    authControllers.verifyEmail
+    ...registrationConfirmationEmailValidators,
+    authControllers.registrationConfirmationEmail
 )
 
 authRouter.post(
