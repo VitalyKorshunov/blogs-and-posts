@@ -17,7 +17,6 @@ export const securityRepository = {
 
     async deleteAllUserDevicesExceptCurrent(userId: UserId, deviceId: DeviceId): Promise<boolean> {
         const result = await securityCollection.deleteMany({userId: new ObjectId(userId), deviceId: {$ne: deviceId}})
-        console.log('from securityRepository: ', result.deletedCount)
 
         return !!result.deletedCount
     },
@@ -30,5 +29,11 @@ export const securityRepository = {
         const session: WithId<SecurityDbType> | null = await securityCollection.findOne({deviceId})
 
         return session ? this._mapToSecuritySessionServiceModel(session) : null
+    },
+
+    async isSessionByDeviceIdFound(deviceId: DeviceId): Promise<boolean> {
+        const session = await securityCollection.countDocuments({deviceId})
+
+        return !!session
     }
 }

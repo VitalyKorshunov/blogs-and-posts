@@ -16,8 +16,8 @@ export const securityService = {
             return result.notFound('not found session by deviceId')
         }
 
-        if(session.userId !== userId) {
-            return  result.permissionDeniedError('this user cannot delete sessions that are not his own')
+        if (session.userId !== userId) {
+            return result.permissionDeniedError('this user cannot delete sessions that are not his own')
         }
 
         await securityRepository.deleteUserDeviceByDeviceId(deviceId)

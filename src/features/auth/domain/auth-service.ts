@@ -10,7 +10,7 @@ import {ErrorsType} from '../../../types/utils/output-errors-type';
 import {AuthTokensType, EmailConfirmationCodeInputModel} from '../../../types/auth/auth-types';
 import {nodemailerService} from '../../../common/adapters/nodemailer.service';
 import {jwtService} from '../../../common/adapters/jwt.service';
-import {VerifyRefreshTokenViewModel} from '../../../types/auth/jwt-types';
+import {PayloadRefreshTokenInputType, VerifyRefreshTokenViewModel} from '../../../types/auth/jwt-types';
 import {
     DeviceId,
     DeviceName,
@@ -44,7 +44,7 @@ export const authService = {
         return errors.errorsMessages.length ? errors : null
     },
     async _createAccessAndRefreshTokens(userId: UserId, deviceId: DeviceId): Promise<AuthTokensType | null> {
-        const newAccessToken: string | null = await jwtService.createAccessToken(userId, deviceId)
+        const newAccessToken: string | null = await jwtService.createAccessToken(userId)
         const newRefreshToken: string | null = await jwtService.createRefreshToken(userId, deviceId)
 
         if (!newAccessToken || !newRefreshToken) {
@@ -226,7 +226,7 @@ export const authService = {
             return result.notFound('user not found')
         }
 
-        const {userId, deviceId} = oldRefreshTokenPayload
+        const {userId, deviceId}: PayloadRefreshTokenInputType = oldRefreshTokenPayload
         const lastActiveDate: Date = this._unixTimestampToDate(oldRefreshTokenPayload.iat)
         const securitySessionQuery: SecuritySessionSearchQueryType = {
             deviceId,

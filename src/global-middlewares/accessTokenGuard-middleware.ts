@@ -18,9 +18,9 @@ export const accessTokenGuardMiddleware = async (req: Request, res: Response, ne
     const payload: VerifyAccessTokenViewModel | null = await jwtService.verifyAccessToken(token)
 
     if (payload) {
-        const {userId, deviceId}: PayloadAccessTokenInputType = payload
+        const {userId}: PayloadAccessTokenInputType = payload
 
-        req.user = {id: userId, deviceId} as { id: string, deviceId: string}
+        req.user = {id: userId} as { id: string}
         next()
     } else {
         res.sendStatus(401)

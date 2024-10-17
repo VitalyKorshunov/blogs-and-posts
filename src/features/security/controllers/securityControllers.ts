@@ -1,5 +1,4 @@
 import {Request, Response} from 'express';
-import {UserId} from '../../../types/entities/users-types';
 import {securityQueryRepository} from '../repositories/securityQueryRepository';
 import {DeviceId, SecurityViewModel} from '../../../types/entities/security-types';
 import {ResultType, StatusesCode} from '../../../common/utils/errorsAndStatusCodes.utils';
@@ -7,9 +6,9 @@ import {securityService} from '../domain/securityService';
 
 export const securityControllers = {
     async getAllUserDevices(req: Request, res: Response) {
-        const userId: UserId = req.user!.id
+        const {id} = req.user!
 
-        const result: SecurityViewModel[] | null = await securityQueryRepository.getAllActiveSessionsByUser(userId)
+        const result: SecurityViewModel[] | null = await securityQueryRepository.getAllActiveSessionsByUser(id)
 
         if (result) {
             res.status(200).json(result)
@@ -22,7 +21,7 @@ export const securityControllers = {
         //TODO: Как типизировать req чтобы не писать ! после user
         const {id, deviceId} = req.user!
 
-        const result: ResultType<null> = await securityService.deleteAllUserDevicesExceptCurrent(id, deviceId)
+        const result: ResultType<null> = await securityService.deleteAllUserDevicesExceptCurrent(id, deviceId!)
 
         if (result.statusCode === StatusesCode.Success) {
             res.sendStatus(204)
@@ -34,9 +33,9 @@ export const securityControllers = {
 
     async deleteUserDeviceByDeviceId(req: Request<{ deviceId: DeviceId }>, res: Response) {
         const deviceId: DeviceId = req.params.deviceId
-        const userId: UserId = req.user!.id
+        const {id} = req.user!
 
-        const result: ResultType<null> = await securityService.deleteUserDeviceByDeviceId(userId, deviceId)
+        const result: ResultType<null> = await securityService.deleteUserDeviceByDeviceId(id, deviceId)
 
         if (result.statusCode === StatusesCode.Success) {
             res.sendStatus(204)

@@ -126,8 +126,8 @@ export const handleError = (result: ResultType<unknown>, res: Response) => {
             res.status(400).json(result.data ?? {})
             break
         }
-        case StatusesCode.InvalidCredentials
-        || StatusesCode.TokenError: {
+        case StatusesCode.InvalidCredentials:
+        case StatusesCode.TokenError: {
             console.error(result.errorMessage)
             res.sendStatus(401)
             break
@@ -143,7 +143,7 @@ export const handleError = (result: ResultType<unknown>, res: Response) => {
             res.status(400).json(result.data ?? {})
             break
         }
-        case StatusesCode.PermissionDenied:{
+        case StatusesCode.PermissionDenied: {
             res.sendStatus(403)
             break
         }

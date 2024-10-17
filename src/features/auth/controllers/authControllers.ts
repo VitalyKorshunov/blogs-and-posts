@@ -79,7 +79,9 @@ export const authControllers = {
     },
 
     async updateTokens(req: Request, res: Response) {
-        const result = await authService.updateTokens(req.cookies.refreshToken)
+        const {refreshToken} = req.cookies
+
+        const result = await authService.updateTokens(refreshToken)
 
         if (result.statusCode === StatusesCode.Success) {
             const {accessToken, refreshToken}: AuthTokensType = result.data
