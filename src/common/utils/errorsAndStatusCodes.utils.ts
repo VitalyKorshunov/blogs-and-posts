@@ -21,7 +21,7 @@ export enum StatusesCode {
     TokenError,
     LoginOrEmailError,
     EmailError,
-
+    PermissionDenied
 }
 
 type ResultSuccess<T> = {
@@ -56,6 +56,11 @@ type ResultEmailError = {
     data?: ErrorsType
 }
 
+type PermissionDeniedError = {
+    statusCode: StatusesCode.PermissionDenied
+    errorMessage: string
+}
+
 
 export type ResultType<T> =
     ResultSuccess<T>
@@ -64,6 +69,7 @@ export type ResultType<T> =
     | ResultTokenError
     | ResultLoginOrEmailError
     | ResultEmailError
+    | PermissionDeniedError
 
 export const result = {
     success<T>(data: T): ResultSuccess<T> {
@@ -104,6 +110,12 @@ export const result = {
             errorMessage,
             data
         }
+    },
+    permissionDeniedError(errorMessage: string): PermissionDeniedError {
+        return {
+            statusCode: StatusesCode.PermissionDenied,
+            errorMessage
+        }
     }
 }
 
@@ -129,6 +141,10 @@ export const handleError = (result: ResultType<unknown>, res: Response) => {
         case StatusesCode.EmailError: {
             console.error(result.errorMessage)
             res.status(400).json(result.data ?? {})
+            break
+        }
+        case StatusesCode.PermissionDenied:{
+            res.sendStatus(403)
             break
         }
         default: {

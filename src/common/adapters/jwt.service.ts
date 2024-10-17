@@ -10,9 +10,10 @@ import {UserId} from '../../types/entities/users-types';
 import {DeviceId} from '../../types/entities/security-types';
 
 export const jwtService = {
-    async createAccessToken(userId: string): Promise<string | null> {
+    async createAccessToken(userId: UserId, deviceId: DeviceId): Promise<string | null> {
         const accessTokenPayload: PayloadAccessTokenInputType = {
-            userId
+            userId,
+            deviceId
         }
         try {
             return jwt.sign(accessTokenPayload, SETTINGS.AT_SECRET_KEY, {

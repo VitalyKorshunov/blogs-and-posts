@@ -44,7 +44,7 @@ export const authService = {
         return errors.errorsMessages.length ? errors : null
     },
     async _createAccessAndRefreshTokens(userId: UserId, deviceId: DeviceId): Promise<AuthTokensType | null> {
-        const newAccessToken: string | null = await jwtService.createAccessToken(userId)
+        const newAccessToken: string | null = await jwtService.createAccessToken(userId, deviceId)
         const newRefreshToken: string | null = await jwtService.createRefreshToken(userId, deviceId)
 
         if (!newAccessToken || !newRefreshToken) {

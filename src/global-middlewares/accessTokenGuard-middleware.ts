@@ -1,5 +1,6 @@
 import {NextFunction, Request, Response} from 'express';
 import {jwtService} from '../common/adapters/jwt.service';
+import {PayloadAccessTokenInputType, VerifyAccessTokenViewModel} from '../types/auth/jwt-types';
 
 export const accessTokenGuardMiddleware = async (req: Request, res: Response, next: NextFunction) => {
     const auth = req.headers.authorization as string
@@ -14,12 +15,12 @@ export const accessTokenGuardMiddleware = async (req: Request, res: Response, ne
     }
 
     const token = auth.split(' ')[1]
-    const payload = await jwtService.verifyAccessToken(token)
+    const payload: VerifyAccessTokenViewModel | null = await jwtService.verifyAccessToken(token)
 
     if (payload) {
-        const {userId} = payload
+        const {userId, deviceId}: PayloadAccessTokenInputType = payload
 
-        req.user = {id: userId} as { id: string }
+        req.user = {id: userId, deviceId} as { id: string, deviceId: string}
         next()
     } else {
         res.sendStatus(401)

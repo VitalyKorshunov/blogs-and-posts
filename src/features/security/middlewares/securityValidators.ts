@@ -1,13 +1,13 @@
-import {refreshTokenGuardMiddleware} from '../../../global-middlewares/refreshTokenGuard-middleware';
+import {accessTokenGuardMiddleware} from '../../../global-middlewares/accessTokenGuard-middleware';
 
 export const getAllUserDevices = [
-    refreshTokenGuardMiddleware
+    accessTokenGuardMiddleware
 ]
 
 export const deleteAllUserDevicesExceptCurrent = [
-    refreshTokenGuardMiddleware
+    accessTokenGuardMiddleware
 ]
 
 export const deleteUserDeviceByDeviceId = [
-    refreshTokenGuardMiddleware
+    accessTokenGuardMiddleware
 ]
