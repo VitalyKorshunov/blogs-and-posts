@@ -12,9 +12,9 @@ export const refreshTokenGuardMiddleware = async (req: Request, res: Response, n
     const payload = await jwtService.verifyRefreshToken(refreshToken)
 
     if (payload) {
-        const {id} = payload
+        const {userId} = payload
 
-        req.user = {id: id} as { id: string }
+        req.user = {id: userId} as { id: string }
         next()
     } else {
         res.sendStatus(401)

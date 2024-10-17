@@ -72,11 +72,11 @@ export const result = {
             data
         }
     },
-    notFound(errorMessage: string, data?: ErrorsType): ResultNotFound {
+    notFound(errorMessage: string, error?: ErrorsType): ResultNotFound {
         return {
             statusCode: StatusesCode.NotFound,
             errorMessage,
-            data
+            data: error
         }
     },
     invalidCredentials(errorMessage: string): ResultInvalidCredentials {
@@ -107,7 +107,7 @@ export const result = {
     }
 }
 
-export const handleResult = (result: ResultType<unknown>, res: Response) => {
+export const handleError = (result: ResultType<unknown>, res: Response) => {
     switch (result.statusCode) {
         case StatusesCode.NotFound: {
             console.error(result.errorMessage)
@@ -120,9 +120,10 @@ export const handleResult = (result: ResultType<unknown>, res: Response) => {
             res.sendStatus(401)
             break
         }
+
         case StatusesCode.LoginOrEmailError: {
             console.log(result.message)
-            res.status(400).json(result.date)
+            res.status(400).json(result.date || {})
             break
         }
         case StatusesCode.EmailError: {

@@ -32,7 +32,6 @@ export const usersService = {
             email,
             passHash,
             createdAt: new Date(),
-            refreshToken: '',
             emailConfirmation: {
                 expirationDate: new Date(),
                 confirmationCode: '',

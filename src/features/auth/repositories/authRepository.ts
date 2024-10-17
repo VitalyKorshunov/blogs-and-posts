@@ -1,9 +1,17 @@
-import {userCollection} from '../../../db/mongo-db';
+import {securityCollection, userCollection} from '../../../db/mongo-db';
 import {EmailConfirmationCodeInputModel} from '../../../types/auth/auth-types';
 import {EmailConfirmation, UserId, UserServiceModel} from '../../../types/entities/users-types';
 import {IdQueryDbType} from '../../../types/db/query-db-types';
 import {ObjectId, WithId} from 'mongodb';
 import {UserDbType} from '../../../types/db/user-db-types';
+import {
+    DeviceId,
+    SecurityInputModel,
+    SecurityServiceModel,
+    SecuritySessionSearchQueryType,
+    SecurityUpdateType
+} from '../../../types/entities/security-types';
+import {SecurityDbType} from '../../../types/db/security-db-types';
 
 
 export const authRepository = {
@@ -14,6 +22,15 @@ export const authRepository = {
         const {_id, ...rest} = user
         return {
             id: _id.toString(),
+            ...rest
+        }
+    },
+    _mapToSecuritySessionServiceModel(securitySession: WithId<SecurityDbType>): SecurityServiceModel {
+        const {_id, userId, ...rest} = securitySession
+
+        return {
+            id: _id.toString(),
+            userId: userId.toString(),
             ...rest
         }
     },
@@ -53,9 +70,30 @@ export const authRepository = {
 
         return user ? this._mapToUserServiceModel(user) : null
     },
-    async updateUserRefreshToken(userId: UserId, refreshToken: string): Promise<boolean> {
-        const isUserRefreshTokenUpdated = await userCollection.updateOne(this._toIdQuery(userId), {$set: {refreshToken: refreshToken}})
+    async setSecuritySessionData(sessionData: SecurityInputModel): Promise<boolean> {
+        const {userId, ...rest} = sessionData
+        const mappedSessionData: SecurityDbType = {
+            userId: new ObjectId(userId),
+            ...rest
+        }
 
-        return !!isUserRefreshTokenUpdated.matchedCount
+        const isSecuritySessionSet = await securityCollection.insertOne(mappedSessionData)
+
+        return !!isSecuritySessionSet.insertedId
+    },
+    async getSecuritySession(securitySessionQuery : SecuritySessionSearchQueryType): Promise<SecurityServiceModel | null> {
+        const securitySession: WithId<SecurityDbType> | null = await securityCollection.findOne(securitySessionQuery)
+
+        return securitySession ? this._mapToSecuritySessionServiceModel(securitySession) : null
+    },
+    async deleteSecuritySessionData(deviceId: DeviceId, lastActiveDate: Date): Promise<boolean> {
+        const result = await securityCollection.deleteOne({deviceId, lastActiveDate})
+
+        return !!result.deletedCount
+    },
+    async updateSecuritySessionData(securitySessionQuery : SecuritySessionSearchQueryType, securitySessionUpdateData: SecurityUpdateType): Promise<boolean> {
+        const result = await securityCollection.updateOne(securitySessionQuery, {$set: securitySessionUpdateData})
+
+        return !!result.matchedCount
     }
 }

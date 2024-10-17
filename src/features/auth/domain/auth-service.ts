@@ -10,7 +10,16 @@ import {ErrorsType} from '../../../types/utils/output-errors-type';
 import {AuthTokensType, EmailConfirmationCodeInputModel} from '../../../types/auth/auth-types';
 import {nodemailerService} from '../../../common/adapters/nodemailer.service';
 import {jwtService} from '../../../common/adapters/jwt.service';
-import {JwtVerifyViewModel} from '../../../types/auth/jwt-types';
+import {VerifyRefreshTokenViewModel} from '../../../types/auth/jwt-types';
+import {
+    DeviceId,
+    DeviceName,
+    IP,
+    SecurityInputModel,
+    SecurityServiceModel,
+    SecuritySessionSearchQueryType,
+    SecurityUpdateType
+} from '../../../types/entities/security-types';
 
 export const authService = {
     async _findUserByLoginOrEmail(loginOrEmail: string): Promise<UserServiceModel | null> {
@@ -34,9 +43,9 @@ export const authService = {
 
         return errors.errorsMessages.length ? errors : null
     },
-    async _createAccessAndRefreshTokens(userId: UserId): Promise<AuthTokensType | null> {
+    async _createAccessAndRefreshTokens(userId: UserId, deviceId: DeviceId): Promise<AuthTokensType | null> {
         const newAccessToken: string | null = await jwtService.createAccessToken(userId)
-        const newRefreshToken: string | null = await jwtService.createRefreshToken(userId)
+        const newRefreshToken: string | null = await jwtService.createRefreshToken(userId, deviceId)
 
         if (!newAccessToken || !newRefreshToken) {
             return null
@@ -47,8 +56,12 @@ export const authService = {
             refreshToken: newRefreshToken
         }
     },
+    _unixTimestampToDate(unixTimestamp: number): Date {
+        return new Date(unixTimestamp * 1000)
 
-    async loginUser(loginOrEmail: string, password: string): Promise<ResultType<AuthTokensType>> {
+    },
+
+    async loginUser(loginOrEmail: string, password: string, deviceName: DeviceName, ip: IP): Promise<ResultType<AuthTokensType>> {
         const user: UserServiceModel | null = await this._findUserByLoginOrEmail(loginOrEmail)
         if (!user) {
             return result.invalidCredentials('user not found')
@@ -59,39 +72,45 @@ export const authService = {
             return result.invalidCredentials('password invalid')
         }
 
-        const tokens: AuthTokensType | null = await this._createAccessAndRefreshTokens(user.id)
+        const deviceId: DeviceId = uuidv7()
+        const tokens: AuthTokensType | null = await this._createAccessAndRefreshTokens(user.id, deviceId)
         if (!tokens) {
             return result.tokenError('error create access or refresh tokens')
         }
 
-        const isUserRefreshTokenUpdated: boolean = await authRepository.updateUserRefreshToken(user.id, tokens.refreshToken)
-        if (!isUserRefreshTokenUpdated) {
-            return result.tokenError('error update refresh token')
+        const refreshTokenPayload: VerifyRefreshTokenViewModel | null = await jwtService.verifyRefreshToken(tokens.refreshToken)
+        if (!refreshTokenPayload) {
+            return result.tokenError('error verify refresh token')
+        }
+
+        const securitySessionData: SecurityInputModel = {
+            deviceId,
+            deviceName,
+            ip,
+            userId: user.id,
+            lastActiveDate: this._unixTimestampToDate(refreshTokenPayload.iat),
+            expireDate: this._unixTimestampToDate(refreshTokenPayload.exp),
+        }
+
+        const isSecuritySessionSet: boolean = await authRepository.setSecuritySessionData(securitySessionData)
+        if (!isSecuritySessionSet) {
+            return result.tokenError('failed to set security session data')
         }
 
         return result.success(tokens)
     },
 
-    async logoutUser(userId: UserId, refreshToken: string): Promise<ResultType<null>> {
-        const refreshTokenPayload: JwtVerifyViewModel | null = await jwtService.verifyRefreshToken(refreshToken)
-
+    async logoutUser(refreshToken: string): Promise<ResultType<null>> {
+        const refreshTokenPayload: VerifyRefreshTokenViewModel | null = await jwtService.verifyRefreshToken(refreshToken)
         if (!refreshTokenPayload) {
             return result.tokenError('error verify refresh token')
         }
 
-        const user: UserServiceModel | null = await authRepository.findUserById(userId)
+        const {deviceId, iat} = refreshTokenPayload
+        const lastActiveDate: Date = this._unixTimestampToDate(iat)
 
-        if (!user) {
-            return result.notFound('user not found')
-        }
-
-        if (user.refreshToken !== refreshToken || user.id !== refreshTokenPayload.id) {
-            return result.tokenError('refresh token does not exist in user')
-        }
-
-        const isUserRefreshTokenUpdated: boolean = await authRepository.updateUserRefreshToken(userId, '')
-
-        if (!isUserRefreshTokenUpdated) {
+        const isSecuritySessionDataDeleted: boolean = await authRepository.deleteSecuritySessionData(deviceId, lastActiveDate)
+        if (!isSecuritySessionDataDeleted) {
             return result.tokenError('refresh token not updated')
         }
 
@@ -112,7 +131,6 @@ export const authService = {
             email,
             passHash,
             createdAt: new Date(),
-            refreshToken: '',
             emailConfirmation: {
                 expirationDate: add(new Date(), {
                     minutes: 10,
@@ -123,15 +141,12 @@ export const authService = {
         }
         const userId: UserId = await usersRepository.createUser(newUser)
 
-        const user: UserServiceModel | null = await authRepository.findUserById(userId)
-
-        if (!user) return result.notFound('user not found')
-
         try {
-            await nodemailerService.sendEmailConfirmation(user.email, user.emailConfirmation.confirmationCode)
+            nodemailerService.sendEmailConfirmation(newUser.email, newUser.emailConfirmation.confirmationCode).catch(() => {
+            })
         } catch (error) {
             console.error(error)
-            await usersRepository.deleteUser(user.id)
+            await usersRepository.deleteUser(userId)
 
             return result.emailError('error nodemailer send email ')
         }
@@ -142,7 +157,7 @@ export const authService = {
     async registrationConfirmationEmail(code: EmailConfirmationCodeInputModel): Promise<ResultType<null | ErrorsType>> {
         const error = {errorsMessages: [{message: 'code error', field: 'code'}]}
 
-        const isCodeConfirmationFound = await authRepository.isCodeConfirmationFound(code)
+        const isCodeConfirmationFound: boolean = await authRepository.isCodeConfirmationFound(code)
 
         if (!isCodeConfirmationFound) return result.notFound('code confirmation not found', error)
 
@@ -158,7 +173,7 @@ export const authService = {
             isConfirmed: true
         }
 
-        const isUpdatedEmailConfirmation = await authRepository.updateUserEmailConfirmation(user.id, updateEmailConfirmation)
+        const isUpdatedEmailConfirmation: boolean = await authRepository.updateUserEmailConfirmation(user.id, updateEmailConfirmation)
 
         if (!isUpdatedEmailConfirmation) return result.emailError('email confirmation does not update')
 
@@ -167,7 +182,7 @@ export const authService = {
     async resendRegistrationEmail(email: string): Promise<ResultType<null | ErrorsType>> {
         const error = {errorsMessages: [{message: 'email not found', field: 'email'}]}
 
-        const isEmailFound = await authRepository.isEmailFound(email)
+        const isEmailFound: boolean = await authRepository.isEmailFound(email)
         if (!isEmailFound) return result.emailError('email not found', error)
 
         const user: UserServiceModel | null = await authRepository.findUserByEmail(email)
@@ -183,12 +198,13 @@ export const authService = {
             isConfirmed: false
         }
 
-        const isUpdatedEmailConfirmation = await authRepository.updateUserEmailConfirmation(user.id, updateEmailConfirmation)
+        const isUpdatedEmailConfirmation: boolean = await authRepository.updateUserEmailConfirmation(user.id, updateEmailConfirmation)
 
         if (!isUpdatedEmailConfirmation) return result.notFound('email confirmations not updated')
 
         try {
-            await nodemailerService.sendEmailConfirmation(email, updateEmailConfirmation.confirmationCode)
+            nodemailerService.sendEmailConfirmation(email, updateEmailConfirmation.confirmationCode).catch(() => {
+            })
         } catch (error) {
             console.error(error)
             return result.emailError('error nodemailer send email')
@@ -197,35 +213,58 @@ export const authService = {
         return result.success(null)
     },
 
-    async updateTokens(userId: UserId, refreshToken: string): Promise<ResultType<AuthTokensType>> {
-        const refreshTokenPayload: JwtVerifyViewModel | null = await jwtService.verifyRefreshToken(refreshToken)
+    async updateTokens(refreshToken: string): Promise<ResultType<AuthTokensType>> {
+        const oldRefreshTokenPayload: VerifyRefreshTokenViewModel | null = await jwtService.verifyRefreshToken(refreshToken)
 
-        if (!refreshTokenPayload) {
+        if (!oldRefreshTokenPayload) {
             return result.tokenError('refresh token invalid')
         }
 
-        const user: UserServiceModel | null = await authRepository.findUserById(userId)
+        const isUserFound: boolean = await authRepository.isUserFound(oldRefreshTokenPayload.userId)
 
-        if (!user) {
+        if (!isUserFound) {
             return result.notFound('user not found')
         }
 
-        if (user.refreshToken !== refreshToken || user.id !== refreshTokenPayload.id) {
-            return result.tokenError('refresh token does not exist in user')
+        const {userId, deviceId} = oldRefreshTokenPayload
+        const lastActiveDate: Date = this._unixTimestampToDate(oldRefreshTokenPayload.iat)
+        const securitySessionQuery: SecuritySessionSearchQueryType = {
+            deviceId,
+            lastActiveDate
         }
 
-        const tokens: AuthTokensType | null = await this._createAccessAndRefreshTokens(userId)
+        const securitySession: SecurityServiceModel | null = await authRepository.getSecuritySession(securitySessionQuery)
+        if (!securitySession) {
+            return result.tokenError('session does not exist with current data')
+        }
+
+        if (oldRefreshTokenPayload.userId !== securitySession.userId) {
+            return result.tokenError('userId does not match current user')
+        }
+
+        const tokens: AuthTokensType | null = await this._createAccessAndRefreshTokens(userId, deviceId)
 
         if (!tokens) {
             return result.tokenError('error create access or refresh tokens')
         }
 
-        const isUserRefreshTokenUpdated: boolean = await authRepository.updateUserRefreshToken(userId, tokens.refreshToken)
+        const newRefreshTokenPayload: VerifyRefreshTokenViewModel | null = await jwtService.verifyRefreshToken(tokens.refreshToken)
+        if (!newRefreshTokenPayload) {
+            return result.tokenError('error verify refresh token')
+        }
 
-        if (!isUserRefreshTokenUpdated) {
-            return result.tokenError('error update refresh token')
+        const securitySessionUpdateData: SecurityUpdateType = {
+            deviceId,
+            lastActiveDate: this._unixTimestampToDate(newRefreshTokenPayload.iat),
+            expireDate: this._unixTimestampToDate(newRefreshTokenPayload.exp),
+        }
+
+        const isSecuritySessionUpdated: boolean = await authRepository.updateSecuritySessionData(securitySessionQuery, securitySessionUpdateData)
+        if (!isSecuritySessionUpdated) {
+            return result.tokenError('failed to update security session data')
         }
 
         return result.success(tokens)
-    }
+    },
+
 }

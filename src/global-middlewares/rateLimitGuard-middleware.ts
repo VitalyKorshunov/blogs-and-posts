@@ -15,7 +15,7 @@ export const rateLimitGuardMiddlewares = async (req: Request, res: Response, nex
             })
         }
     }
-console.log(req.ip)
+
     const requestsCount = await rateLimitCollection.countDocuments(filter)
 
     if (requestsCount > retryCount) {

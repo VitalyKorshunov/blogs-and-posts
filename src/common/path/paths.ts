@@ -16,5 +16,8 @@ export const routersPaths = {
         registration: '/registration',
         registrationConfirmation: '/registration-confirmation',
         registrationEmailResending: '/registration-email-resending'
+    },
+    security: {
+        devices: '/devices',
     }
 }

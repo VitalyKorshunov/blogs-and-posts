@@ -4,7 +4,7 @@ import {RateLimitDBType} from '../types/db/rateLimit-db-types';
 
 export const rateLimitRequestCounterMiddleware = async (req: Request, res: Response, next: NextFunction) => {
     const url = req.originalUrl
-    const ip = req.ip ?? 'error'
+    const ip = req.ip ?? 'ip not defined'
     const date = new Date()
 
     const data: RateLimitDBType = {

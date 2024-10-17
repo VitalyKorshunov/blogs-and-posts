@@ -3,13 +3,16 @@ import {AuthInputModel, AuthTokensType} from '../../../types/auth/auth-types';
 import {authService} from '../domain/auth-service';
 import {authQueryRepository} from '../repositories/authQueryRepository';
 import {UserInputModel} from '../../../types/entities/users-types';
-import {handleResult, StatusesCode} from '../../../common/utils/errorsAndStatusCodes.utils';
+import {handleError, StatusesCode} from '../../../common/utils/errorsAndStatusCodes.utils';
+import {DeviceName, IP} from '../../../types/entities/security-types';
 
 export const authControllers = {
     async loginUser(req: Request<{}, {}, AuthInputModel>, res: Response) {
         const {loginOrEmail, password}: AuthInputModel = req.body
+        const deviceName: DeviceName = req.headers['user-agent'] ?? 'anonymous device'
+        const ip: IP = req.ip ?? 'ip not defined'
 
-        const result = await authService.loginUser(loginOrEmail, password);
+        const result = await authService.loginUser(loginOrEmail, password, deviceName, ip);
 
         if (result.statusCode === StatusesCode.Success) {
             const {accessToken, refreshToken}: AuthTokensType = result.data
@@ -20,17 +23,17 @@ export const authControllers = {
             })
             res.status(200).json({accessToken: accessToken})
         } else {
-            handleResult(result, res)
+            handleError(result, res)
         }
     },
 
     async logoutUser(req: Request, res: Response) {
-        const result = await authService.logoutUser(req.user!.id, req.cookies.refreshToken)
+        const result = await authService.logoutUser(req.cookies.refreshToken)
 
         if (result.statusCode === StatusesCode.Success) {
             res.sendStatus(204)
         } else {
-            handleResult(result, res)
+            handleError(result, res)
         }
     },
 
@@ -51,7 +54,7 @@ export const authControllers = {
         if (result.statusCode === StatusesCode.Success) {
             res.sendStatus(204)
         } else {
-            handleResult(result, res)
+            handleError(result, res)
         }
     },
 
@@ -61,7 +64,7 @@ export const authControllers = {
         if (result.statusCode === StatusesCode.Success) {
             res.sendStatus(204)
         } else {
-            handleResult(result, res)
+            handleError(result, res)
         }
     },
 
@@ -71,12 +74,12 @@ export const authControllers = {
         if (result.statusCode === StatusesCode.Success) {
             res.sendStatus(204)
         } else {
-            handleResult(result, res)
+            handleError(result, res)
         }
     },
 
     async updateTokens(req: Request, res: Response) {
-        const result = await authService.updateTokens(req.user!.id, req.cookies.refreshToken)
+        const result = await authService.updateTokens(req.cookies.refreshToken)
 
         if (result.statusCode === StatusesCode.Success) {
             const {accessToken, refreshToken}: AuthTokensType = result.data
@@ -87,7 +90,7 @@ export const authControllers = {
             })
             res.status(200).json({accessToken: accessToken})
         } else {
-            handleResult(result, res)
+            handleError(result, res)
         }
     },
 }
