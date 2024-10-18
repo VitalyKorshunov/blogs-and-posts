@@ -13,7 +13,7 @@ export const descriptionValidator = body('description').isString().withMessage('
     .trim().isLength({min: 1, max: 500}).withMessage('more then 500 or 0')
 
 export const websiteUrlValidator = body('websiteUrl').isString().withMessage('not string')
-    .trim().isURL().withMessage('not url')
+    .trim().matches('^https://([a-zA-Z0-9_-]+\.)+[a-zA-Z0-9_-]+(\/[a-zA-Z0-9_-]+)*\/?$').withMessage('not url')
     .isLength({min: 1, max: 100}).withMessage('more then 100 or 0')
 
 export const pageNumberValidator = query('pageNumber').default(1).toInt()

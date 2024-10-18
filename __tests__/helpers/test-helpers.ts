@@ -15,8 +15,18 @@ import {PostDbType} from '../../src/types/db/post-db-types';
 export const req = agent(app)
 
 export const testHelpers = {
+    generateString(count: number, symbol: string = 'x'): string {
+        let string = ''
+
+        for (let i = 1; i <= count; i++) {
+            string += symbol
+        }
+
+        return string
+    },
+
     connectToDbForTests: async () => {
-        if (!await connectToDB('mongodb://localhost:27017', SETTINGS.DB_NAME)) {
+        if (!await connectToDB('mongodb://localhost:27017', SETTINGS.DB.DB_NAME)) {
             console.log('not connect to db');
             process.exit(1);
         }
@@ -31,61 +41,61 @@ export const testHelpers = {
     },
 
     countBlogsInDb: async () => {
-        const blogs = await db.collection(SETTINGS.BLOG_COLLECTION_NAME).find({}).toArray()
+        const blogs = await db.collection(SETTINGS.DB.BLOG_COLLECTION_NAME).find({}).toArray()
 
         return blogs.length;
     },
 
     countPostsInDb: async () => {
-        const posts = await db.collection(SETTINGS.POST_COLLECTION_NAME).find({}).toArray()
+        const posts = await db.collection(SETTINGS.DB.POST_COLLECTION_NAME).find({}).toArray()
 
         return posts.length;
     },
 
     countUsersInDb: async () => {
-        const users = await db.collection(SETTINGS.USER_COLLECTION_NAME).find({}).toArray()
+        const users = await db.collection(SETTINGS.DB.USER_COLLECTION_NAME).find({}).toArray()
 
         return users.length;
     },
 
-    createBlogInDb: async (): Promise<BlogViewModel> => {
+    createBlogInDb: async (name: string = 'n1', description: string = 'd1', websiteUrl: string = 'https://some.com'): Promise<BlogViewModel> => {
         const newBlog: BlogInputModel = {
-            name: 'n1',
-            description: 'd1',
-            websiteUrl: 'http://some.com',
+            name,
+            description,
+            websiteUrl,
         };
 
         const res = await req
             .post(SETTINGS.PATH.BLOGS)
             .set({'Authorization': 'Basic ' + codedAuth})
-            .send(newBlog) // отправка данных
+            .send(newBlog)
             .expect(201);
 
-        return {...newBlog, id: res.body.id, createdAt: res.body.createdAt, isMembership: res.body.isMembership};
+        return res.body;
     },
 
-    createPostInDb: async (blogId: string): Promise<PostViewModel> => {
+    createPostInDb: async (blogId: string, title: string = 't1', shortDescription: string = 's1', content: string = 'c1'): Promise<PostViewModel> => {
         const newPost: PostInputModel = {
-            title: 't1',
-            shortDescription: 's1',
-            content: 'c1',
-            blogId: blogId,
+            title,
+            shortDescription,
+            content,
+            blogId,
         }
 
         const res = await req
             .post(SETTINGS.PATH.POSTS)
             .set({'Authorization': 'Basic ' + codedAuth})
-            .send(newPost) // отправка данных
+            .send(newPost)
             .expect(201)
 
-        return {...newPost, id: res.body.id, blogName: res.body.blogName, createdAt: res.body.createdAt}
+        return res.body
     },
 
     createUserInDb: async (login: string = '123', password: string = '123456'): Promise<UserViewModel> => {
         const newUser: UserInputModel = {
-            login: login,
+            login,
             email: `${login}@gmail.com`,
-            password: password
+            password
         };
 
         const res = await req
@@ -94,13 +104,13 @@ export const testHelpers = {
             .send(newUser)
             .expect(201);
 
-        return {login: newUser.login, email: newUser.email, id: res.body.id, createdAt: res.body.createdAt};
+        return res.body;
     },
 
     findAndMapBlog: async (id: string): Promise<BlogViewModel> => {
         const queryId: IdQueryDbType = {_id: new ObjectId(id)}
 
-        const blog: WithId<BlogDbType> = await db.collection(SETTINGS.BLOG_COLLECTION_NAME).findOne(queryId) as WithId<BlogDbType>
+        const blog: WithId<BlogDbType> = await db.collection(SETTINGS.DB.BLOG_COLLECTION_NAME).findOne(queryId) as WithId<BlogDbType>
         return {
             id: blog._id.toString(),
             name: blog.name,
@@ -114,7 +124,7 @@ export const testHelpers = {
     findAndMapPost: async (id: string): Promise<PostViewModel> => {
         const queryId: IdQueryDbType = {_id: new ObjectId(id)}
 
-        const post: WithId<PostDbType> = await db.collection(SETTINGS.POST_COLLECTION_NAME).findOne(queryId) as WithId<PostDbType>
+        const post: WithId<PostDbType> = await db.collection(SETTINGS.DB.POST_COLLECTION_NAME).findOne(queryId) as WithId<PostDbType>
         return {
             id: post._id.toString(),
             blogId: post.blogId.toString(),
@@ -129,7 +139,7 @@ export const testHelpers = {
     findAndMapUser: async (id: string): Promise<UserViewModel> => {
         const queryId: IdQueryDbType = {_id: new ObjectId(id)}
 
-        const user: WithId<UserDbType> = await db.collection(SETTINGS.USER_COLLECTION_NAME).findOne(queryId) as WithId<UserDbType>
+        const user: WithId<UserDbType> = await db.collection(SETTINGS.DB.USER_COLLECTION_NAME).findOne(queryId) as WithId<UserDbType>
         return {
             id: user._id.toString(),
             login: user.login,
@@ -138,11 +148,31 @@ export const testHelpers = {
         };
     },
 
-    createUsersAndGetAccessTokens(countUsers: number) {
+    async createMultipleBlogs(count: number, blogNameFirstSymbol: string = 'n', blogDescriptionFirstSymbol: string = 'd'): Promise<BlogViewModel[]> {
+        const blogs = []
+
+        for (let i = 1; i <= count; i++) {
+            blogs.push(await this.createBlogInDb(`${blogNameFirstSymbol}${i}`, `${blogDescriptionFirstSymbol}${i}`))
+        }
+        expect(blogs.length).toBe(count)
+        return blogs
+    },
+
+    async createMultiplePostsInBlog(count: number, blogId: string): Promise<PostViewModel[]> {
+        const posts = []
+
+        for (let i = 1; i <= count; i++) {
+            posts.push(await this.createPostInDb(blogId))
+        }
+        expect(posts.length).toBe(count)
+        return posts
+    },
+
+    async createUsersAndGetAccessTokens(countUsers: number) {
         const tokens = []
 
         for (let i = 1; i <= countUsers; i++) {
-            const user = this.createUserInDb(`user${i}`,)
+            const user: UserViewModel = await this.createUserInDb(`user${i}`)
         }
     }
 }
