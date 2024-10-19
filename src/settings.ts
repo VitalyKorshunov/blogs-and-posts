@@ -22,7 +22,7 @@ export const SETTINGS = {
         USER_COLLECTION_NAME: process.env.USER_COLLECTION_NAME as string,
         COMMENT_COLLECTION_NAME: process.env.COMMENT_COLLECTION_NAME as string,
         RATE_LIMIT_COLLECTION_NAME: process.env.RATE_LIMIT_COLLECTION_NAME as string,
-        SESSIONS_COLLECTION_NAME: process.env.SESSIONS_COLLECTION_NAME as string,
+        SESSION_COLLECTION_NAME: process.env.SESSION_COLLECTION_NAME as string,
     },
 
     ADMIN: process.env.ADMIN as string,

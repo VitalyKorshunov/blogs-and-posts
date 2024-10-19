@@ -29,7 +29,7 @@ export const connectToDB = async (MONGO_URL: string, DB_NAME: string) => {
     userCollection = db.collection<UserDbType>(SETTINGS.DB.USER_COLLECTION_NAME)
     commentCollection = db.collection<CommentDbType>(SETTINGS.DB.COMMENT_COLLECTION_NAME)
     rateLimitCollection = db.collection<RateLimitDBType>(SETTINGS.DB.RATE_LIMIT_COLLECTION_NAME)
-    securityCollection = db.collection<SecurityDbType>(SETTINGS.DB.SESSIONS_COLLECTION_NAME)
+    securityCollection = db.collection<SecurityDbType>(SETTINGS.DB.SESSION_COLLECTION_NAME)
 
     try {
         await client.connect()
