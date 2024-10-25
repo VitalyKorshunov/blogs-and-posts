@@ -1,8 +1,21 @@
-import {req} from './helpers/test-helpers';
+import {testHelpers} from './helpers/test-helpers';
+import {PostViewModel} from '../src/types/entities/posts-types';
 
 
 describe('some tests', () => {
-    it ('some test', () => {
-        // req.get()
+    beforeAll(async () => {
+        await testHelpers.connectToDbForTests()
     })
+    beforeEach(async () => { // очистка базы данных перед началом тестирования
+    })
+    afterAll(async () => { // очистка базы данных перед началом тестирования
+        await testHelpers.closeConnectToDbForTests()
+    })
+
+    it('some test', async () => {
+        const createdBlog = await testHelpers.createBlogInDb()
+        const posts: PostViewModel[] = await testHelpers.createMultiplePostsInBlog(200, createdBlog.id)
+        console.log(await testHelpers.countPostsInDb())
+
+    }, 1000 * 60 * 60)
 })

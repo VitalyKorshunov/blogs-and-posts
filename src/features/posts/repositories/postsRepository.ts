@@ -1,6 +1,6 @@
 import {PostCreateType, PostId, PostServiceModel, PostUpdateType} from '../../../types/entities/posts-types'
 import {PostDbType, PostUpdateDbType} from '../../../types/db/post-db-types'
-import {blogCollection, postCollection} from '../../../db/mongo-db';
+import {BlogModel, postCollection} from '../../../db/mongo-db';
 import {ObjectId, WithId} from 'mongodb';
 import {IdQueryDbType} from '../../../types/db/query-db-types';
 import {BlogId, BlogServiceModel} from '../../../types/entities/blogs-types';
@@ -51,7 +51,7 @@ export const postsRepository = {
     },
 
     async findBlogById(id: BlogId): Promise<BlogServiceModel | null> {
-        const blog: WithId<BlogDbType> | null = await blogCollection.findOne(this._toIdQuery(id));
+        const blog: WithId<BlogDbType> | null = await BlogModel.findById(id).lean();
 
         return blog ? this._mapToBlogWithCorrectId(blog) : null
     },

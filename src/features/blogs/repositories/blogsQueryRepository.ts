@@ -1,4 +1,4 @@
-import {blogCollection, postCollection} from '../../../db/mongo-db';
+import {BlogModel, postCollection} from '../../../db/mongo-db';
 import {ObjectId, WithId} from 'mongodb';
 import {IdQueryDbType} from '../../../types/db/query-db-types';
 import {
@@ -43,12 +43,12 @@ export const blogsQueryRepository = {
 
 
     async isBlogFound(blogId: BlogId): Promise<boolean> {
-        const blog: number = await blogCollection.countDocuments(this._toIdQuery(blogId));
+        const blog: number = await BlogModel.countDocuments(this._toIdQuery(blogId));
 
         return !!blog
     },
     async findAndMap(id: BlogId): Promise<ResultType<BlogViewModel>> {
-        const blog: WithId<BlogDbType> | null = await blogCollection.findOne(this._toIdQuery(id))
+        const blog: WithId<BlogDbType> | null = await BlogModel.findOne(this._toIdQuery(id))
 
         if (blog) {
             return result.success(this._mapToBlogViewModel(blog))
@@ -62,14 +62,14 @@ export const blogsQueryRepository = {
             ...sortQueryFields,
             searchNameTerm: query.searchNameTerm ? {name: {$regex: query.searchNameTerm, $options: 'i'}} : {},
         }
-        const blogs = await blogCollection
+        const blogs = await BlogModel
             .find(filter.searchNameTerm)
-            .sort(filter.sortBy, filter.sortDirection)
+            .sort({[filter.sortBy]: filter.sortDirection})
             .skip(filter.countSkips)
             .limit(filter.pageSize)
-            .toArray()
+            .lean()
 
-        const totalPosts = await blogCollection.countDocuments(filter.searchNameTerm)
+        const totalPosts = await BlogModel.countDocuments(filter.searchNameTerm)
         const pagesCount = Math.ceil(totalPosts / filter.pageSize)
 
         return {

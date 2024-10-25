@@ -33,7 +33,7 @@ describe('/posts', () => {
         const res = await req
             .post(SETTINGS.PATH.POSTS)
             .set({'Authorization': 'Basic ' + codedAuth})
-            .send(newPost) // отправка данных
+            .send(newPost)
             .expect(201)
 
         expect(res.body.title).toEqual(newPost.title)

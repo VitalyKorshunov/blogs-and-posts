@@ -1,6 +1,6 @@
 import {Router} from 'express'
 import {
-    blogCollection,
+    BlogModel,
     commentCollection,
     postCollection,
     rateLimitCollection,
@@ -12,7 +12,7 @@ import {routersPaths} from '../../common/path/paths';
 export const testingRouter = Router()
 
 testingRouter.delete(routersPaths.testing.allData, async (req, res) => {
-    await blogCollection.deleteMany({})
+    await BlogModel.deleteMany({})
     await postCollection.deleteMany({})
     await userCollection.deleteMany({})
     await commentCollection.deleteMany({})
