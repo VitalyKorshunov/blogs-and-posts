@@ -1,8 +1,8 @@
 import {UserInfoViewModel} from '../../../types/auth/auth-types';
 import {UserDbType} from '../../../types/db/user-db-types';
 import {UserId} from '../../../types/entities/users-types';
-import {userCollection} from '../../../db/mongo-db';
 import {ObjectId, WithId} from 'mongodb';
+import {UserModel} from '../../../db/mongo-db';
 
 export const authQueryRepository = {
     _mapToUserInfoModel(user: WithId<UserDbType>) {
@@ -15,7 +15,7 @@ export const authQueryRepository = {
     },
 
     async getUserById(id: UserId): Promise<UserInfoViewModel | null> {
-        const user = await userCollection.findOne({_id: new ObjectId(id)})
+        const user = await UserModel.findOne({_id: new ObjectId(id)})
         return user ? this._mapToUserInfoModel(user) : null
     }
 }

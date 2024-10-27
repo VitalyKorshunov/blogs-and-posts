@@ -1,4 +1,4 @@
-import {securityCollection, userCollection} from '../../../db/mongo-db';
+import {securityCollection, UserModel} from '../../../db/mongo-db';
 import {EmailConfirmationCodeInputModel} from '../../../types/auth/auth-types';
 import {EmailConfirmation, UserId, UserServiceModel} from '../../../types/entities/users-types';
 import {IdQueryDbType} from '../../../types/db/query-db-types';
@@ -36,37 +36,37 @@ export const authRepository = {
     },
 
     async isUserFound(id: UserId): Promise<boolean> {
-        const user: number = await userCollection.countDocuments(this._toIdQuery(id));
+        const user: number = await UserModel.countDocuments(this._toIdQuery(id));
 
         return !!user
     },
     async isCodeConfirmationFound(code: EmailConfirmationCodeInputModel): Promise<boolean> {
-        const isCodeFound: number = await userCollection.countDocuments({'emailConfirmation.confirmationCode': code});
+        const isCodeFound: number = await UserModel.countDocuments({'emailConfirmation.confirmationCode': code});
 
         return !!isCodeFound
     },
     async findUserById(userId: UserId): Promise<UserServiceModel | null> {
-        const user: WithId<UserDbType> | null = await userCollection.findOne(this._toIdQuery(userId))
+        const user: WithId<UserDbType> | null = await UserModel.findOne(this._toIdQuery(userId))
 
         return user ? this._mapToUserServiceModel(user) : null
     },
     async findUserByEmailConfirmationCode(code: EmailConfirmationCodeInputModel) {
-        const user: WithId<UserDbType> | null = await userCollection.findOne({'emailConfirmation.confirmationCode': code});
+        const user: WithId<UserDbType> | null = await UserModel.findOne({'emailConfirmation.confirmationCode': code});
 
         return user ? this._mapToUserServiceModel(user) : null
     },
     async updateUserEmailConfirmation(id: UserId, update: EmailConfirmation): Promise<boolean> {
-        const isUserUpdated = await userCollection.updateOne(this._toIdQuery(id), {$set: {emailConfirmation: update}})
+        const isUserUpdated = await UserModel.updateOne(this._toIdQuery(id), {$set: {emailConfirmation: update}})
 
         return !!isUserUpdated.matchedCount
     },
     async isEmailFound(email: string): Promise<boolean> {
-        const isEmailFound = await userCollection.countDocuments({email: email})
+        const isEmailFound = await UserModel.countDocuments({email: email})
 
         return !!isEmailFound
     },
     async findUserByEmail(email: string): Promise<UserServiceModel | null> {
-        const user: WithId<UserDbType> | null = await userCollection.findOne({email: email})
+        const user: WithId<UserDbType> | null = await UserModel.findOne({email: email})
 
         return user ? this._mapToUserServiceModel(user) : null
     },

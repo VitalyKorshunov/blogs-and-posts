@@ -1,8 +1,8 @@
-import {userCollection} from '../../../db/mongo-db';
 import {ObjectId, WithId} from 'mongodb';
 import {IdQueryDbType,} from '../../../types/db/query-db-types';
 import {UserDbType, UsersQueryDbType} from '../../../types/db/user-db-types';
 import {UserId, UsersSortViewModel, UserViewModel} from '../../../types/entities/users-types';
+import {UserModel} from '../../../db/mongo-db';
 
 export const usersQueryRepository = {
     _toIdQuery(id: UserId): IdQueryDbType {
@@ -20,12 +20,12 @@ export const usersQueryRepository = {
 
 
     async isUserFound(id: UserId): Promise<boolean> {
-        const user: number = await userCollection.countDocuments(this._toIdQuery(id));
+        const user: number = await UserModel.countDocuments(this._toIdQuery(id));
 
         return !!user
     },
     async findAndMap(userId: UserId): Promise<UserViewModel> {
-        const user: WithId<UserDbType> | null = await userCollection.findOne(this._toIdQuery(userId))
+        const user: WithId<UserDbType> | null = await UserModel.findOne(this._toIdQuery(userId))
 
         if (user) {
             return this._mapToUserViewModel(user)
@@ -58,16 +58,15 @@ export const usersQueryRepository = {
         if (findEmailFilter) findFilter.push(findEmailFilter);
         if (findFilter.length === 0) findFilter.push({});
 
-        const users = await userCollection
+        const users = await UserModel
             .find({
                 $or: findFilter
             })
-            .sort(filter.sortBy, filter.sortDirection)
+            .sort({[filter.sortBy]: filter.sortDirection})
             .skip(filter.countSkips)
             .limit(filter.pageSize)
-            .toArray()
 
-        const totalUsers = await userCollection.countDocuments({
+        const totalUsers = await UserModel.countDocuments({
             $or: findFilter
         })
         const pagesCount = Math.ceil(totalUsers / filter.pageSize)

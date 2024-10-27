@@ -1,10 +1,10 @@
 import {PostDbType, PostsQueryDbType} from '../../../types/db/post-db-types'
-import {postCollection} from '../../../db/mongo-db';
 import {ObjectId, WithId} from 'mongodb';
 import {IdQueryDbType,} from '../../../types/db/query-db-types';
 import {PostId, PostsSortViewModel, PostViewModel} from '../../../types/entities/posts-types';
 import {sortQueryFieldsUtils} from '../../../common/utils/sortQueryFields.utils';
 import {SortOutputQueryType} from '../../../types/utils/sort-types';
+import {PostModel} from '../../../db/mongo-db';
 
 export const postsQueryRepository = {
     _toIdQuery(id: PostId): IdQueryDbType {
@@ -23,12 +23,12 @@ export const postsQueryRepository = {
     },
 
     async isPostFound(id: PostId): Promise<boolean> {
-        const post: number = await postCollection.countDocuments(this._toIdQuery(id));
+        const post: number = await PostModel.countDocuments(this._toIdQuery(id));
 
         return !!post
     },
     async findAndMap(postId: PostId): Promise<PostViewModel> {
-        const post: WithId<PostDbType> | null = await postCollection.findOne(this._toIdQuery(postId))
+        const post: WithId<PostDbType> | null = await PostModel.findOne(this._toIdQuery(postId))
 
         if (post) {
             return this._mapToPostViewModel(post)
@@ -44,14 +44,13 @@ export const postsQueryRepository = {
             ...sortedQueryFields,
         }
 
-        const posts: WithId<PostDbType>[] = await postCollection
+        const posts: WithId<PostDbType>[] = await PostModel
             .find(queryFindAllPosts)
-            .sort(filter.sortBy, filter.sortDirection)
+            .sort({[filter.sortBy]: filter.sortDirection})
             .skip(filter.countSkips)
             .limit(filter.pageSize)
-            .toArray()
 
-        const totalPostsCount = await postCollection.countDocuments(queryFindAllPosts)
+        const totalPostsCount = await PostModel.countDocuments(queryFindAllPosts)
         const pagesCount = Math.ceil(totalPostsCount / filter.pageSize)
 
         return {

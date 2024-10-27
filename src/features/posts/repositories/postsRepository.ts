@@ -1,6 +1,6 @@
 import {PostCreateType, PostId, PostServiceModel, PostUpdateType} from '../../../types/entities/posts-types'
 import {PostDbType, PostUpdateDbType} from '../../../types/db/post-db-types'
-import {BlogModel, postCollection} from '../../../db/mongo-db';
+import {BlogModel, PostModel} from '../../../db/mongo-db';
 import {ObjectId, WithId} from 'mongodb';
 import {IdQueryDbType} from '../../../types/db/query-db-types';
 import {BlogId, BlogServiceModel} from '../../../types/entities/blogs-types';
@@ -32,12 +32,12 @@ export const postsRepository = {
             ...post,
             blogId: new ObjectId(post.blogId)
         }
-        const _id = await postCollection.insertOne(postToDb)
+        const _id = await PostModel.insertMany([postToDb])
 
-        return _id.insertedId.toString()
+        return _id[0]._id.toString()
     },
     async deletePost(postId: PostId): Promise<number> {
-        const post = await postCollection.deleteOne(this._toIdQuery(postId))
+        const post = await PostModel.deleteOne(this._toIdQuery(postId))
 
         return post.deletedCount
     },
@@ -45,7 +45,7 @@ export const postsRepository = {
         const blogId: ObjectId = this._toIdQuery(post.blogId)._id
         const updatedPost: PostUpdateDbType = {...post, blogId: blogId}
 
-        const postUpdated = await postCollection.updateOne(this._toIdQuery(postId), {$set: updatedPost})
+        const postUpdated = await PostModel.updateOne(this._toIdQuery(postId), {$set: updatedPost})
 
         return postUpdated.modifiedCount
     },

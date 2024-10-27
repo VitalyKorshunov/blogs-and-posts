@@ -1,4 +1,4 @@
-import {BlogModel, postCollection} from '../../../db/mongo-db';
+import {BlogModel, PostModel} from '../../../db/mongo-db';
 import {ObjectId, WithId} from 'mongodb';
 import {IdQueryDbType} from '../../../types/db/query-db-types';
 import {
@@ -97,14 +97,13 @@ export const blogsQueryRepository = {
             ...sortedQueryFields,
         }
 
-        const posts = await postCollection
+        const posts = await PostModel
             .find(queryFindAllPostsForBlog)
-            .sort(filter.sortBy, filter.sortDirection)
+            .sort({[filter.sortBy]: filter.sortDirection})
             .skip(filter.countSkips)
             .limit(filter.pageSize)
-            .toArray()
 
-        const totalPostsCount = await postCollection.countDocuments(queryFindAllPostsForBlog)
+        const totalPostsCount = await PostModel.countDocuments(queryFindAllPostsForBlog)
         const pagesCount = Math.ceil(totalPostsCount / filter.pageSize)
 
         const data: PostsForBlogSortViewModel = {

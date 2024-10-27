@@ -1,6 +1,6 @@
 import {PostId, PostServiceModel} from '../../../types/entities/posts-types'
 import {PostDbType} from '../../../types/db/post-db-types'
-import {commentCollection, postCollection, userCollection} from '../../../db/mongo-db';
+import {commentCollection, PostModel, UserModel} from '../../../db/mongo-db';
 import {ObjectId, WithId} from 'mongodb';
 import {IdQueryDbType} from '../../../types/db/query-db-types';
 import {UserId, UserServiceModel} from '../../../types/entities/users-types';
@@ -72,12 +72,12 @@ export const commentsRepository = {
         return commentUpdated.matchedCount === 1
     },
     async findPostById(postId: PostId): Promise<PostServiceModel | null> {
-        const post: WithId<PostDbType> | null = await postCollection.findOne(this._toIdQuery(postId));
+        const post: WithId<PostDbType> | null = await PostModel.findOne(this._toIdQuery(postId));
 
         return post ? this._mapToPostWithCorrectId(post) : null
     },
     async findUserById(userId: UserId): Promise<UserServiceModel | null> {
-        const user: WithId<UserDbType> | null = await userCollection.findOne(this._toIdQuery(userId));
+        const user: WithId<UserDbType> | null = await UserModel.findOne(this._toIdQuery(userId));
 
         return user ? this._mapToUserWithCorrectId(user) : null
     },
