@@ -8,7 +8,7 @@ import {RateLimitDBType} from '../types/db/rateLimit-db-types';
 import {SecurityDbType} from '../types/db/security-db-types';
 import * as mongoose from 'mongoose';
 import {Schema} from 'mongoose';
-import {EmailConfirmation} from '../types/entities/users-types';
+import {EmailConfirmationType, RecoveryPasswordType} from '../types/entities/users-types';
 
 let client: MongoClient = {} as MongoClient
 export let db: Db = {} as Db
@@ -30,10 +30,15 @@ const postSchema = new mongoose.Schema<WithId<PostDbType>>({
     createdAt: Date
 })
 
-const EmailConfirmationSchema = new mongoose.Schema<EmailConfirmation>({
+const EmailConfirmationSchema = new mongoose.Schema<EmailConfirmationType>({
     expirationDate: Date,
     confirmationCode: String,
     isConfirmed: Boolean
+})
+
+const RecoveryPasswordSchema = new mongoose.Schema<RecoveryPasswordType>({
+    expirationDate: Date,
+    recoveryCode: String
 })
 
 const userSchema = new mongoose.Schema<WithId<UserDbType>>({
@@ -41,6 +46,7 @@ const userSchema = new mongoose.Schema<WithId<UserDbType>>({
     email: String,
     passHash: String,
     createdAt: Date,
+    recoveryPassword: RecoveryPasswordSchema,
     emailConfirmation: EmailConfirmationSchema
 })
 
