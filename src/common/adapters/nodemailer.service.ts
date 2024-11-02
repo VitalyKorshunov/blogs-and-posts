@@ -28,5 +28,33 @@ export const nodemailerService = {
         const info = await transporter.sendMail(message)
 
         console.log(info)
+    },
+
+    async sendRecoveryPasswordCode(email: string, recoveryCode: string) {
+        let transporter = nodemailer.createTransport({
+            host: 'smtp.mail.ru',
+            port: 465,
+            secure: true,
+            auth: {
+                user: SETTINGS.MAIL_LOGIN,
+                pass: SETTINGS.MAIL_PASS
+            },
+
+        })
+        const message = {
+            from: `Account verification <${SETTINGS.MAIL_LOGIN}>`,
+            to: email,
+            subject: 'Recovery password',
+            html: `
+<h1>Password recovery</h1>
+<p>To finish password recovery please follow the link below:
+<a href='https://somesite.com/password-recovery?recoveryCode=${recoveryCode}'>recovery password</a>
+</p>
+`
+        }
+
+        const info = await transporter.sendMail(message)
+
+        console.log(info)
     }
 }
