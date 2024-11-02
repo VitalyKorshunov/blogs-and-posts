@@ -95,4 +95,24 @@ export const authControllers = {
             handleError(result, res)
         }
     },
+
+    async passwordRecovery(req: Request, res: Response) {
+        const {email} = req.body;
+
+        const result = await authService.passwordRecovery(email)
+
+        res.sendStatus(204)
+    },
+
+    async newPassword(req: Request, res: Response) {
+        const {password, recoveryCode} = req.body
+
+        const result = await authService.newPassword(password, recoveryCode)
+
+        if (result.statusCode === StatusesCode.Success) {
+            res.sendStatus(204)
+        } else {
+            res.sendStatus(400)
+        }
+    },
 }

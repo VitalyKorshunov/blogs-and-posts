@@ -1,6 +1,13 @@
 import {usersRepository} from '../../users/repositories/usersRepository';
 import {hashPassService} from '../../../common/adapters/hashPass.service';
-import {EmailConfirmation, UserId, UserInputModel, UserServiceModel} from '../../../types/entities/users-types';
+import {
+    EmailConfirmationType,
+    PasswordUpdateWithRecoveryType,
+    RecoveryPasswordType,
+    UserId,
+    UserInputModel,
+    UserServiceModel
+} from '../../../types/entities/users-types';
 import {authRepository} from '../repositories/authRepository';
 import {result, ResultType} from '../../../common/utils/errorsAndStatusCodes.utils';
 import {UserDbType} from '../../../types/db/user-db-types';
@@ -131,6 +138,10 @@ export const authService = {
             email,
             passHash,
             createdAt: new Date(),
+            recoveryPassword: {
+                expirationDate: new Date(),
+                recoveryCode: '',
+            },
             emailConfirmation: {
                 expirationDate: add(new Date(), {
                     minutes: 10,
@@ -167,7 +178,7 @@ export const authService = {
         if (user.emailConfirmation.isConfirmed) return result.emailError('email already confirmed', error)
         if (user.emailConfirmation.expirationDate < new Date()) return result.emailError('expired email code', error)
 
-        const updateEmailConfirmation: EmailConfirmation = {
+        const updateEmailConfirmation: EmailConfirmationType = {
             expirationDate: user.emailConfirmation.expirationDate,
             confirmationCode: '',
             isConfirmed: true
@@ -190,7 +201,7 @@ export const authService = {
 
         if (user.emailConfirmation.isConfirmed) return result.emailError('email already confirmed', error)
 
-        const updateEmailConfirmation: EmailConfirmation = {
+        const updateEmailConfirmation: EmailConfirmationType = {
             expirationDate: add(new Date(), {
                 minutes: 10
             }),
@@ -267,4 +278,64 @@ export const authService = {
         return result.success(tokens)
     },
 
+    async passwordRecovery(email: any): Promise<ResultType<null>> {
+        const user = await authRepository.findUserByEmail(email)
+        console.log(user)
+// console.log(email)
+        if (!user) {
+            return result.notFound('user with current email not found')
+        }
+
+        const recoveryPasswordData: RecoveryPasswordType = {
+            expirationDate: add(new Date(), {
+                minutes: 5
+            }),
+            recoveryCode: uuidv7()
+        }
+        console.log(recoveryPasswordData)
+        try {
+            nodemailerService.sendRecoveryPasswordCode(email, recoveryPasswordData.recoveryCode).catch((err) => console.log(err))
+        } catch (err) {
+            console.error(err)
+            return result.emailError('error send recovery password')
+        }
+
+        const isUserPasswordRecoveryUpdate = await authRepository.updateUserRecoveryPassword(email, recoveryPasswordData)
+        if (!isUserPasswordRecoveryUpdate) {
+            return result.passwordError('error update recovery password')
+        }
+
+        return result.success(null)
+    },
+    async newPassword(newPassword: string, recoveryCode: string): Promise<ResultType<null>> {
+        const user: UserServiceModel | null = await authRepository.findUserByRecoveryCode(recoveryCode)
+        const user2 = await authRepository.findUserByEmail('vitaliy.korshunov1994@gmail.com')
+        console.log(user2)
+// console.log(recoveryCode)
+        if (!user) {
+            return result.notFound('user with current recovery code not found')
+        }
+
+        if (user.recoveryPassword.expirationDate < new Date()) {
+            return result.passwordError('recovery code is expired')
+        }
+console.log(newPassword)
+        const newPassHash = await hashPassService.generateHash(newPassword)
+console.log(newPassHash)
+        const updatePasswordWithRecoveryPassword: PasswordUpdateWithRecoveryType = {
+            passHash: newPassHash,
+            recoveryPassword: {
+                expirationDate: new Date(),
+                recoveryCode: ''
+            }
+        }
+
+        const isPasswordWithRecoveryPasswordUpdated: boolean = await authRepository.updateUserPasswordWithRecoveryPassword(recoveryCode, updatePasswordWithRecoveryPassword)
+
+        if (!isPasswordWithRecoveryPasswordUpdated) {
+            return result.passwordError('password and recovery password does not updated')
+        }
+
+        return result.success(null)
+    }
 }

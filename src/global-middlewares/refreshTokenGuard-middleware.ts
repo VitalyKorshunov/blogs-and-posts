@@ -17,7 +17,6 @@ export const refreshTokenGuardMiddleware = async (req: Request, res: Response, n
 
     if (payload) {
         const {userId, deviceId} = payload
-        // TODO: Можно ли так проверять рефрешь токен или это надо делать в сервисах?
 
         const isSessionByDeviceIdFound = await securityRepository.isSessionByDeviceIdFound(payload.deviceId)
         if (!isSessionByDeviceIdFound) {

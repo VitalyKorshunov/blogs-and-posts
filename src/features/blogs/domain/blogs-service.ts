@@ -14,7 +14,7 @@ export const blogsService = {
         return await blogsRepository.createBlog(newBlog)
     },
     async deleteBlog(id: BlogId): Promise<number> {
-        return await blogsRepository.deleteBlog(id)
+        return await blogsRepository.deleteBlogById(id)
     },
     async updateBlog(blog: BlogInputModel, id: BlogId): Promise<number> {
         const updatedBlog: BlogUpdateType = {

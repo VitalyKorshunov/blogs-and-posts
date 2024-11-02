@@ -15,7 +15,9 @@ export const routersPaths = {
         refreshToken: '/refresh-token',
         registration: '/registration',
         registrationConfirmation: '/registration-confirmation',
-        registrationEmailResending: '/registration-email-resending'
+        registrationEmailResending: '/registration-email-resending',
+        passwordRecovery: '/password-recovery',
+        newPassword: '/new-password'
     },
     security: {
         devices: '/devices',

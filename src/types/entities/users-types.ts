@@ -19,10 +19,18 @@ export type UserServiceModel = {
     email: string
     passHash: string
     createdAt: Date
-    emailConfirmation: EmailConfirmation
+    recoveryPassword: RecoveryPasswordType
+    emailConfirmation: EmailConfirmationType
 }
 
-export type EmailConfirmation = {
+export type RecoveryPasswordType = {
+    expirationDate: Date
+    recoveryCode: string
+}
+
+export type PasswordUpdateWithRecoveryType = Pick<UserServiceModel, 'passHash' | 'recoveryPassword'>
+
+export type EmailConfirmationType = {
     expirationDate: Date
     confirmationCode: string
     isConfirmed: boolean

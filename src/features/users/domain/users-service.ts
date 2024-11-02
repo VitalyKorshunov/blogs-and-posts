@@ -32,6 +32,10 @@ export const usersService = {
             email,
             passHash,
             createdAt: new Date(),
+            recoveryPassword: {
+                expirationDate: new Date(),
+                recoveryCode: ''
+            },
             emailConfirmation: {
                 expirationDate: new Date(),
                 confirmationCode: '',

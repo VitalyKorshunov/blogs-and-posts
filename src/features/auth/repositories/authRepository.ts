@@ -1,6 +1,12 @@
 import {securityCollection, UserModel} from '../../../db/mongo-db';
 import {EmailConfirmationCodeInputModel} from '../../../types/auth/auth-types';
-import {EmailConfirmation, UserId, UserServiceModel} from '../../../types/entities/users-types';
+import {
+    EmailConfirmationType,
+    PasswordUpdateWithRecoveryType,
+    RecoveryPasswordType,
+    UserId,
+    UserServiceModel
+} from '../../../types/entities/users-types';
 import {IdQueryDbType} from '../../../types/db/query-db-types';
 import {ObjectId, WithId} from 'mongodb';
 import {UserDbType} from '../../../types/db/user-db-types';
@@ -55,7 +61,7 @@ export const authRepository = {
 
         return user ? this._mapToUserServiceModel(user) : null
     },
-    async updateUserEmailConfirmation(id: UserId, update: EmailConfirmation): Promise<boolean> {
+    async updateUserEmailConfirmation(id: UserId, update: EmailConfirmationType): Promise<boolean> {
         const isUserUpdated = await UserModel.updateOne(this._toIdQuery(id), {$set: {emailConfirmation: update}})
 
         return !!isUserUpdated.matchedCount
@@ -66,7 +72,7 @@ export const authRepository = {
         return !!isEmailFound
     },
     async findUserByEmail(email: string): Promise<UserServiceModel | null> {
-        const user: WithId<UserDbType> | null = await UserModel.findOne({email: email})
+        const user: WithId<UserDbType> | null = await UserModel.findOne({email: email}).lean()
 
         return user ? this._mapToUserServiceModel(user) : null
     },
@@ -95,5 +101,24 @@ export const authRepository = {
         const result = await securityCollection.updateOne(securitySessionQuery, {$set: securitySessionUpdateData})
 
         return !!result.matchedCount
+    },
+
+    async updateUserRecoveryPassword(email: string, recoveryPassword: RecoveryPasswordType): Promise <boolean> {
+        const isRecoveryPasswordUpdate = await UserModel.updateOne({email}, {$set: {recoveryPassword: recoveryPassword}})
+
+        return !!isRecoveryPasswordUpdate.matchedCount
+    },
+
+    async findUserByRecoveryCode(recoveryCode: string): Promise<UserServiceModel | null> {
+        const user: WithId<UserDbType> | null = await UserModel.findOne({'recoveryPassword.recoveryCode': recoveryCode}).lean()
+
+        return user ? this._mapToUserServiceModel(user) : null
+    },
+
+
+    async updateUserPasswordWithRecoveryPassword(recoveryCode: string, updatePasswordWithRecoveryPassword: PasswordUpdateWithRecoveryType): Promise<boolean> {
+        const isUserUpdated = await UserModel.updateOne({'recoveryPassword.recoveryCode': recoveryCode}, {$set: updatePasswordWithRecoveryPassword})
+
+        return !!isUserUpdated.matchedCount
     }
 }

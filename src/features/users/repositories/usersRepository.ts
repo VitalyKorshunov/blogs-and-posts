@@ -28,7 +28,7 @@ export const usersRepository = {
                 : {[field]: value}
         )
 
-        const user: WithId<UserDbType> | null = await UserModel.findOne(queryToDb)
+        const user: WithId<UserDbType> | null = await UserModel.findOne(queryToDb).lean()
         return user ? this._mapToUserServiceModel(user) : null
     },
     async deleteUser(userId: UserId): Promise<number> {

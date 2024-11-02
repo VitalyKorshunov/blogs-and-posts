@@ -32,9 +32,10 @@ export const postsRepository = {
             ...post,
             blogId: new ObjectId(post.blogId)
         }
-        const _id = await PostModel.insertMany([postToDb])
+        const createdPost = new PostModel(postToDb)
+        await createdPost.save()
 
-        return _id[0]._id.toString()
+        return createdPost._id.toString()
     },
     async deletePost(postId: PostId): Promise<number> {
         const post = await PostModel.deleteOne(this._toIdQuery(postId))

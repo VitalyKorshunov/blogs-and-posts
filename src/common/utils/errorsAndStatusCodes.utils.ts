@@ -21,7 +21,8 @@ export enum StatusesCode {
     TokenError,
     LoginOrEmailError,
     EmailError,
-    PermissionDenied
+    PermissionDenied,
+    PasswordError
 }
 
 type ResultSuccess<T> = {
@@ -61,6 +62,12 @@ type PermissionDeniedError = {
     errorMessage: string
 }
 
+type ResultPasswordError = {
+    statusCode: StatusesCode.PasswordError
+    errorMessage: string
+    data?: ErrorsType
+}
+
 
 export type ResultType<T> =
     ResultSuccess<T>
@@ -70,6 +77,7 @@ export type ResultType<T> =
     | ResultLoginOrEmailError
     | ResultEmailError
     | PermissionDeniedError
+    | ResultPasswordError
 
 export const result = {
     success<T>(data: T): ResultSuccess<T> {
@@ -115,6 +123,13 @@ export const result = {
         return {
             statusCode: StatusesCode.PermissionDenied,
             errorMessage
+        }
+    },
+    passwordError(errorMessage: string, data?: ErrorsType) : ResultPasswordError {
+        return {
+            statusCode: StatusesCode.PasswordError,
+            errorMessage,
+            data
         }
     }
 }

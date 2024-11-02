@@ -18,11 +18,12 @@ export const blogsRepository = {
 
 
     async createBlog(newBlog: BlogCreateType): Promise<BlogId> {
-        const _id = await BlogModel.insertMany([newBlog])
+        const createdBlog = new BlogModel(newBlog)
+        await createdBlog.save()
 
-        return _id[0].id
+        return createdBlog._id.toString()
     },
-    async deleteBlog(id: BlogId): Promise<number> {
+    async deleteBlogById(id: BlogId): Promise<number> {
         const blog = await BlogModel.deleteOne(this._toIdQuery(id))
 
         return blog.deletedCount
@@ -30,6 +31,6 @@ export const blogsRepository = {
     async updateBlog(blog: BlogUpdateType, id: BlogId): Promise<number> {
         const updatedBlog = await BlogModel.updateOne(this._toIdQuery(id), {$set: blog})
 
-        return updatedBlog.modifiedCount
+        return updatedBlog.matchedCount
     },
 }

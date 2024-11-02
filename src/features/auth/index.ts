@@ -1,12 +1,14 @@
 import {Router} from 'express';
 import {
-    loginUserValidators,
     getUserInfoValidators,
+    loginUserValidators,
     logoutUserValidators,
+    newPasswordValidators,
+    passwordRecoveryValidators,
     refreshTokenValidators,
     registerUserValidators,
-    resendRegistrationEmailValidators,
-    registrationConfirmationEmailValidators
+    registrationConfirmationEmailValidators,
+    resendRegistrationEmailValidators
 } from './middlewares/authValidators';
 import {authControllers} from './controllers/authControllers';
 import {routersPaths} from '../../common/path/paths';
@@ -54,5 +56,17 @@ authRouter.post(
     routersPaths.auth.logout,
     ...logoutUserValidators,
     authControllers.logoutUser
+)
+
+authRouter.post(
+    routersPaths.auth.passwordRecovery,
+    ...passwordRecoveryValidators,
+    authControllers.passwordRecovery
+)
+
+authRouter.post(
+    routersPaths.auth.newPassword,
+    ...newPasswordValidators,
+    authControllers.newPassword
 )
 

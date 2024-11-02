@@ -22,6 +22,9 @@ export const passwordValidator = body('password').isString().withMessage('not st
 export const emailConfirmationCodeValidator = body('code').isString().withMessage('not string').trim()
     .isLength({min: 36, max: 36}).withMessage('invalid length')
 
+export const recoveryCodeValidator = body('recoveryCode').isString().withMessage('not string').trim()
+    .isLength({min: 36, max: 36}).withMessage('invalid length')
+
 
 export const loginUserValidators = [
     rateLimitGuardMiddlewares,
@@ -68,4 +71,21 @@ export const getUserInfoValidators = [
 
 export const logoutUserValidators = [
     refreshTokenGuardMiddleware
+]
+
+export const passwordRecoveryValidators = [
+    rateLimitGuardMiddlewares,
+
+    emailValidator,
+
+    inputCheckErrorsMiddleware
+]
+
+export const newPasswordValidators = [
+    rateLimitGuardMiddlewares,
+
+    passwordValidator,
+    recoveryCodeValidator,
+
+    inputCheckErrorsMiddleware
 ]

@@ -30,24 +30,24 @@ const postSchema = new mongoose.Schema<WithId<PostDbType>>({
     createdAt: Date
 })
 
-const EmailConfirmationSchema = new mongoose.Schema<EmailConfirmationType>({
+const emailConfirmationSchema = new mongoose.Schema<EmailConfirmationType>({
     expirationDate: Date,
     confirmationCode: String,
     isConfirmed: Boolean
-})
+}, {_id: false})
 
-const RecoveryPasswordSchema = new mongoose.Schema<RecoveryPasswordType>({
+const recoveryPasswordSchema = new mongoose.Schema<RecoveryPasswordType>({
     expirationDate: Date,
     recoveryCode: String
-})
+}, {_id: false})
 
 const userSchema = new mongoose.Schema<WithId<UserDbType>>({
     login: String,
     email: String,
     passHash: String,
     createdAt: Date,
-    recoveryPassword: RecoveryPasswordSchema,
-    emailConfirmation: EmailConfirmationSchema
+    recoveryPassword: recoveryPasswordSchema,
+    emailConfirmation: emailConfirmationSchema
 })
 
 export const BlogModel = mongoose.model(SETTINGS.DB.BLOG_COLLECTION_NAME, blogSchema)

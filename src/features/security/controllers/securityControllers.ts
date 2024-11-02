@@ -18,7 +18,6 @@ export const securityControllers = {
     },
 
     async deleteAllUserDevicesExceptCurrent(req: Request, res: Response) {
-        //TODO: Как типизировать req чтобы не писать ! после user
         const {id, deviceId} = req.user!
 
         const result: ResultType<null> = await securityService.deleteAllUserDevicesExceptCurrent(id, deviceId!)

@@ -98,10 +98,11 @@ export const blogsQueryRepository = {
         }
 
         const posts = await PostModel
-            .find(queryFindAllPostsForBlog)
+            .find(queryFindAllPostsForBlog, {__v: 0})
             .sort({[filter.sortBy]: filter.sortDirection})
             .skip(filter.countSkips)
             .limit(filter.pageSize)
+            .lean()
 
         const totalPostsCount = await PostModel.countDocuments(queryFindAllPostsForBlog)
         const pagesCount = Math.ceil(totalPostsCount / filter.pageSize)
