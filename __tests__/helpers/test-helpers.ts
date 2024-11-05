@@ -1,6 +1,6 @@
 import {app} from '../../src/app'
 import {agent} from 'supertest'
-import {closeConnectToDB, connectToDB, db} from '../../src/db/mongo-db';
+import {closeConnectToDB, connectToDB, db, UserModel} from '../../src/db/mongo-db';
 import {SETTINGS} from '../../src/settings';
 import {BlogInputModel, BlogViewModel} from '../../src/types/entities/blogs-types';
 import {codedAuth} from './datasets';
@@ -11,10 +11,28 @@ import {UserInputModel, UserViewModel} from '../../src/types/entities/users-type
 import {UserDbType} from '../../src/types/db/user-db-types';
 import {BlogDbType} from '../../src/types/db/blog-db-types';
 import {PostDbType} from '../../src/types/db/post-db-types';
+import {routersPaths} from '../../src/common/path/paths';
+import {nodemailerService} from '../../src/common/adapters/nodemailer.service';
+
+export type EmailWithConfirmationCodeType = {
+    email: string
+    code: string
+}
 
 export const req = agent(app)
 
 export const testHelpers = {
+    mock: {
+        nodemailerService: {
+            sendEmailConfirmation() {
+                return jest.spyOn(nodemailerService, 'sendEmailConfirmation').mockResolvedValue()
+            }
+        },
+        restoreAllMocks() {
+            jest.restoreAllMocks()
+        }
+    },
+
     generateString(count: number, symbol: string = 'x'): string {
         let string = ''
 
@@ -31,7 +49,6 @@ export const testHelpers = {
             process.exit(1);
         }
     },
-
     closeConnectToDbForTests: async () => {
         await closeConnectToDB()
     },
@@ -45,20 +62,18 @@ export const testHelpers = {
 
         return blogs.length;
     },
-
     countPostsInDb: async () => {
         const posts = await db.collection(SETTINGS.DB.POST_COLLECTION_NAME).find({}).toArray()
 
         return posts.length;
     },
-
     countUsersInDb: async () => {
         const users = await db.collection(SETTINGS.DB.USER_COLLECTION_NAME).find({}).toArray()
 
         return users.length;
     },
 
-    createBlogInDb: async (name: string = 'n1', description: string = 'd1', websiteUrl: string = 'https://some.com'): Promise<BlogViewModel> => {
+    createBlogByAdmin: async (name: string = 'n1', description: string = 'd1', websiteUrl: string = 'https://some.com'): Promise<BlogViewModel> => {
         const newBlog: BlogInputModel = {
             name,
             description,
@@ -73,8 +88,7 @@ export const testHelpers = {
 
         return res.body;
     },
-
-    createPostInDb: async (blogId: string, title: string = 't1', shortDescription: string = 's1', content: string = 'c1'): Promise<PostViewModel> => {
+    createPostByAdmin: async (blogId: string, title: string = 't1', shortDescription: string = 's1', content: string = 'c1'): Promise<PostViewModel> => {
         const newPost: PostInputModel = {
             title,
             shortDescription,
@@ -90,8 +104,7 @@ export const testHelpers = {
 
         return res.body
     },
-
-    createUserInDb: async (login: string = '123', password: string = '123456'): Promise<UserViewModel> => {
+    createUserByAdmin: async (login: string = '123', password: string = '123456'): Promise<UserViewModel> => {
         const newUser: UserInputModel = {
             login,
             email: `${login}@gmail.com`,
@@ -105,6 +118,35 @@ export const testHelpers = {
             .expect(201);
 
         return res.body;
+    },
+    createUserByUser: async (login: string = '123', email: string = '123@gmail.com', password: string = '123456'): Promise<{
+        email: string,
+        code: string
+    }> => {
+        const mockedSendEmailConfirmation = testHelpers.mock.nodemailerService.sendEmailConfirmation()
+
+        const newUser: UserInputModel = {
+            login,
+            email,
+            password
+        };
+
+        await req
+            .post(SETTINGS.PATH.AUTH + routersPaths.auth.registration)
+            .send(newUser)
+            .expect(204);
+
+        const lastCall = mockedSendEmailConfirmation.mock.lastCall
+        if (!lastCall) {
+            throw new Error('last call undefined')
+        }
+
+        const [emailFromMock, codeFromMock] = lastCall
+
+        return {
+            email: emailFromMock,
+            code: codeFromMock
+        }
     },
 
     findAndMapBlog: async (id: string): Promise<BlogViewModel> => {
@@ -120,7 +162,6 @@ export const testHelpers = {
             isMembership: blog.isMembership
         };
     },
-
     findAndMapPost: async (id: string): Promise<PostViewModel> => {
         const queryId: IdQueryDbType = {_id: new ObjectId(id)}
 
@@ -135,44 +176,61 @@ export const testHelpers = {
             createdAt: post.createdAt.toISOString()
         };
     },
+    findAndMapUserByIndex: async (index: number): Promise<WithId<UserDbType>> => {
+        const users: WithId<UserDbType>[] = await UserModel.find({}, {__v: 0}).lean()
 
-    findAndMapUser: async (id: string): Promise<UserViewModel> => {
-        const queryId: IdQueryDbType = {_id: new ObjectId(id)}
+        return users[index];
+    },
 
-        const user: WithId<UserDbType> = await db.collection(SETTINGS.DB.USER_COLLECTION_NAME).findOne(queryId) as WithId<UserDbType>
-        return {
-            id: user._id.toString(),
-            login: user.login,
-            email: user.email,
-            createdAt: user.createdAt.toISOString()
-        };
+    async confirmRegistrationByCode(code: string) {
+        await req
+            .post(SETTINGS.PATH.AUTH + routersPaths.auth.registrationConfirmation)
+            .send({code})
+            .expect(204)
     },
 
     async createMultipleBlogs(count: number, blogNameFirstSymbol: string = 'n', blogDescriptionFirstSymbol: string = 'd'): Promise<BlogViewModel[]> {
         const blogs = []
 
         for (let i = 1; i <= count; i++) {
-            blogs.push(await this.createBlogInDb(`${blogNameFirstSymbol}${i}`, `${blogDescriptionFirstSymbol}${i}`))
+            blogs.push(await this.createBlogByAdmin(`${blogNameFirstSymbol}${i}`, `${blogDescriptionFirstSymbol}${i}`))
         }
         expect(blogs.length).toBe(count)
         return blogs
     },
 
-    async createMultiplePostsInBlog(count: number, blogId: string): Promise<PostViewModel[]> {
+    async createMultiplePostsInBlog(count: number, blogId?: string): Promise<PostViewModel[]> {
+        if (!blogId) {
+            const blog = await this.createBlogByAdmin()
+            blogId = blog.id
+        }
+
         const posts = []
 
         for (let i = 1; i <= count; i++) {
-            posts.push(await this.createPostInDb(blogId))
+            posts.push(await this.createPostByAdmin(blogId))
         }
         expect(posts.length).toBe(count)
         return posts
     },
 
-    async createUsersAndGetAccessTokens(countUsers: number) {
-        const tokens = []
+    async createMultiplyUsersWithUnconfirmedEmail(countUsers: number): Promise<EmailWithConfirmationCodeType[]> {
+        const usersEmailsAndEmailConfirmationCodes = []
 
         for (let i = 1; i <= countUsers; i++) {
-            const user: UserViewModel = await this.createUserInDb(`user${i}`)
+            usersEmailsAndEmailConfirmationCodes.push(await this.createUserByUser('user' + i, 'user' + i + '@gmail.com'))
+        }
+
+        expect(usersEmailsAndEmailConfirmationCodes.length).toBe(countUsers)
+
+        return usersEmailsAndEmailConfirmationCodes
+    },
+
+    async createMultiplyUsersWithConfirmedEmail(countUsers: number) {
+        const usersCode: EmailWithConfirmationCodeType[] = await this.createMultiplyUsersWithUnconfirmedEmail(countUsers)
+
+        for (let i = 1; i <= countUsers; i++) {
+            await this.confirmRegistrationByCode(usersCode[i - 1].code)
         }
     }
 }
