@@ -4,8 +4,8 @@ import {UserId} from '../../../types/entities/users-types';
 import {ObjectId, WithId} from 'mongodb';
 import {SecurityDbType} from '../../../types/db/security-db-types';
 
-export const securityRepository = {
-    _mapToSecuritySessionServiceModel(securitySession: WithId<SecurityDbType>): SecurityServiceModel {
+class SecurityRepository {
+    private mapToSecuritySessionServiceModel(securitySession: WithId<SecurityDbType>): SecurityServiceModel {
         const {_id, userId, ...rest} = securitySession
 
         return {
@@ -13,23 +13,25 @@ export const securityRepository = {
             userId: userId.toString(),
             ...rest
         }
-    },
+    }
 
     async deleteAllUserDevicesExceptCurrent(userId: UserId, deviceId: DeviceId): Promise<boolean> {
         const result = await securityCollection.deleteMany({userId: new ObjectId(userId), deviceId: {$ne: deviceId}})
 
         return !!result.deletedCount
-    },
+    }
+
     async deleteUserDeviceByDeviceId(deviceId: DeviceId): Promise<boolean> {
         const result = await securityCollection.deleteOne({deviceId})
 
         return !!result.deletedCount
-    },
+    }
+
     async findUserSessionByDeviceId(deviceId: DeviceId): Promise<SecurityServiceModel | null> {
         const session: WithId<SecurityDbType> | null = await securityCollection.findOne({deviceId})
 
-        return session ? this._mapToSecuritySessionServiceModel(session) : null
-    },
+        return session ? this.mapToSecuritySessionServiceModel(session) : null
+    }
 
     async isSessionByDeviceIdFound(deviceId: DeviceId): Promise<boolean> {
         const session = await securityCollection.countDocuments({deviceId})
@@ -37,3 +39,5 @@ export const securityRepository = {
         return !!session
     }
 }
+
+export const securityRepository = new SecurityRepository()

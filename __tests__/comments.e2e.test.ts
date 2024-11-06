@@ -12,5 +12,7 @@ describe('/comments', () => {
         await testHelpers.closeConnectToDbForTests()
     })
 
-    // it('[/comments] should create comment in post by user, 20')
+    it('[/comments] should create comment in post by user, 20', async () => {
+
+    })
 })

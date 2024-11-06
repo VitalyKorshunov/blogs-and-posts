@@ -17,7 +17,7 @@ enum statusCode {
     good = 1,
     bad = 0
 }
-
+// TODO зарефакторить и переписать на классы
 export const commentsService = {
     async createComment(postId: PostId, userId: UserId, comment: CommentInputModel): Promise<CommentId | null> {
         const post: PostServiceModel | null = await commentsRepository.findPostById(postId)

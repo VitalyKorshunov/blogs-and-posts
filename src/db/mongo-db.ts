@@ -93,8 +93,7 @@ export const connectToDB = async (MONGO_URL: string, DB_NAME: string) => {
 }
 
 export const closeConnectToDB = async () => {
+    await mongoose.disconnect()
     await client.close()
     console.log('connect to db is closed')
-
-
 }

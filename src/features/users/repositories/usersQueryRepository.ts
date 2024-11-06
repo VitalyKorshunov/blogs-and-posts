@@ -4,11 +4,12 @@ import {UserDbType, UsersQueryDbType} from '../../../types/db/user-db-types';
 import {UserId, UsersSortViewModel, UserViewModel} from '../../../types/entities/users-types';
 import {UserModel} from '../../../db/mongo-db';
 
-export const usersQueryRepository = {
-    _toIdQuery(id: UserId): IdQueryDbType {
+class UsersQueryRepository {
+    private toIdQuery(id: UserId): IdQueryDbType {
         return {_id: new ObjectId(id)}
-    },
-    _mapToUserViewModel(user: WithId<UserDbType>) {
+    }
+
+    private mapToUserViewModel(user: WithId<UserDbType>) {
         const userForOutput: UserViewModel = {
             id: user._id.toString(),
             login: user.login,
@@ -16,26 +17,28 @@ export const usersQueryRepository = {
             createdAt: user.createdAt.toISOString()
         }
         return userForOutput
-    },
-
+    }
 
     async isUserFound(id: UserId): Promise<boolean> {
-        const user: number = await UserModel.countDocuments(this._toIdQuery(id));
+        const user: number = await UserModel.countDocuments(this.toIdQuery(id));
 
         return !!user
-    },
+    }
+
     async findAndMap(userId: UserId): Promise<UserViewModel> {
-        const user: WithId<UserDbType> | null = await UserModel.findOne(this._toIdQuery(userId))
+        const user: WithId<UserDbType> | null = await UserModel.findOne(this.toIdQuery(userId))
 
         if (user) {
-            return this._mapToUserViewModel(user)
+            return this.mapToUserViewModel(user)
         } else {
             throw new Error('user not found (usersQueryRepository.findAndMap)')
         }
-    },
+    }
+
     async getAll(query: any): Promise<UsersSortViewModel> {
         return await this.sortUsers(query)
-    },
+    }
+
     async sortUsers(query: any): Promise<UsersSortViewModel> {
         const filter: UsersQueryDbType = {
             sortBy: query.sortBy ? query.sortBy : 'createdAt',
@@ -76,7 +79,9 @@ export const usersQueryRepository = {
             page: query.pageNumber,
             pageSize: filter.pageSize,
             totalCount: totalUsers,
-            items: users.map(user => this._mapToUserViewModel(user))
+            items: users.map(user => this.mapToUserViewModel(user))
         }
-    },
+    }
 }
+
+export const usersQueryRepository = new UsersQueryRepository()

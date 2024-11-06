@@ -3,12 +3,12 @@ import {result, ResultType} from '../../../common/utils/errorsAndStatusCodes.uti
 import {DeviceId, SecurityServiceModel} from '../../../types/entities/security-types';
 import {securityRepository} from '../repositories/securityRepository';
 
-export const securityService = {
+class SecurityService {
     async deleteAllUserDevicesExceptCurrent(userId: UserId, deviceId: DeviceId): Promise<ResultType<null>> {
         await securityRepository.deleteAllUserDevicesExceptCurrent(userId, deviceId)
 
         return result.success(null)
-    },
+    }
 
     async deleteUserDeviceByDeviceId(userId: UserId, deviceId: DeviceId): Promise<ResultType<null>> {
         const session: SecurityServiceModel | null = await securityRepository.findUserSessionByDeviceId(deviceId)
@@ -25,3 +25,5 @@ export const securityService = {
         return result.success(null)
     }
 }
+
+export const securityService = new SecurityService()

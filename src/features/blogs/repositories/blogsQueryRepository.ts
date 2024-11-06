@@ -14,12 +14,12 @@ import {SortOutputQueryType} from '../../../types/utils/sort-types';
 import {PostDbType} from '../../../types/db/post-db-types';
 import {result, ResultType} from '../../../common/utils/errorsAndStatusCodes.utils';
 
-
-export const blogsQueryRepository = {
-    _toIdQuery(id: string): IdQueryDbType {
+class BlogsQueryRepository {
+    private toIdQuery(id: string): IdQueryDbType {
         return {_id: new ObjectId(id)}
-    },
-    _mapToBlogViewModel(blog: WithId<BlogDbType>): BlogViewModel {
+    }
+
+    private mapToBlogViewModel(blog: WithId<BlogDbType>): BlogViewModel {
         return {
             id: blog._id.toString(),
             description: blog.description,
@@ -28,8 +28,9 @@ export const blogsQueryRepository = {
             createdAt: blog.createdAt.toISOString(),
             isMembership: blog.isMembership
         }
-    },
-    _mapToPostViewModel(post: WithId<PostDbType>): PostViewModel {
+    }
+
+    private mapToPostViewModel(post: WithId<PostDbType>): PostViewModel {
         return {
             id: post._id.toString(),
             title: post.title,
@@ -39,23 +40,24 @@ export const blogsQueryRepository = {
             blogName: post.blogName,
             createdAt: post.createdAt.toISOString()
         }
-    },
-
+    }
 
     async isBlogFound(blogId: BlogId): Promise<boolean> {
-        const blog: number = await BlogModel.countDocuments(this._toIdQuery(blogId));
+        const blog: number = await BlogModel.countDocuments(this.toIdQuery(blogId));
 
         return !!blog
-    },
+    }
+
     async findAndMap(id: BlogId): Promise<ResultType<BlogViewModel>> {
-        const blog: WithId<BlogDbType> | null = await BlogModel.findOne(this._toIdQuery(id))
+        const blog: WithId<BlogDbType> | null = await BlogModel.findOne(this.toIdQuery(id))
 
         if (blog) {
-            return result.success(this._mapToBlogViewModel(blog))
+            return result.success(this.mapToBlogViewModel(blog))
         } else {
             return result.notFound('blog not found')
         }
-    },
+    }
+
     async getAllSortedBlogs(query: any): Promise<BlogsSortViewModel> {
         const sortQueryFields: SortOutputQueryType = sortQueryFieldsUtils(query)
         const filter: BlogsQueryDBType = {
@@ -77,9 +79,10 @@ export const blogsQueryRepository = {
             page: query.pageNumber,
             pageSize: filter.pageSize,
             totalCount: totalPosts,
-            items: blogs.map(blog => this._mapToBlogViewModel(blog))
+            items: blogs.map(blog => this.mapToBlogViewModel(blog))
         }
-    },
+    }
+
     // async sortPostsInBlog(blogId: BlogId, query: any): Promise<PostsSortViewModel> {
     //     return postsQueryRepository.sortPosts(query, blogId)
     // },
@@ -112,9 +115,11 @@ export const blogsQueryRepository = {
             page: filter.pageNumber,
             pageSize: filter.pageSize,
             totalCount: totalPostsCount,
-            items: posts.map(post => this._mapToPostViewModel(post))
+            items: posts.map(post => this.mapToPostViewModel(post))
         }
 
         return result.success(data)
-    },
+    }
 }
+
+export const blogsQueryRepository = new BlogsQueryRepository()

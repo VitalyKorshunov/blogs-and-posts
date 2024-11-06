@@ -6,11 +6,12 @@ import {sortQueryFieldsUtils} from '../../../common/utils/sortQueryFields.utils'
 import {SortOutputQueryType} from '../../../types/utils/sort-types';
 import {PostModel} from '../../../db/mongo-db';
 
-export const postsQueryRepository = {
-    _toIdQuery(id: PostId): IdQueryDbType {
+class PostsQueryRepository {
+    private toIdQuery(id: PostId): IdQueryDbType {
         return {_id: new ObjectId(id)}
-    },
-    _mapToPostViewModel(post: WithId<PostDbType>): PostViewModel {
+    }
+
+    private mapToPostViewModel(post: WithId<PostDbType>): PostViewModel {
         return {
             id: post._id.toString(),
             title: post.title,
@@ -20,22 +21,24 @@ export const postsQueryRepository = {
             blogName: post.blogName,
             createdAt: post.createdAt.toISOString()
         }
-    },
+    }
 
     async isPostFound(id: PostId): Promise<boolean> {
-        const post: number = await PostModel.countDocuments(this._toIdQuery(id));
+        const post: number = await PostModel.countDocuments(this.toIdQuery(id));
 
         return !!post
-    },
+    }
+
     async findAndMap(postId: PostId): Promise<PostViewModel> {
-        const post: WithId<PostDbType> | null = await PostModel.findOne(this._toIdQuery(postId))
+        const post: WithId<PostDbType> | null = await PostModel.findOne(this.toIdQuery(postId))
 
         if (post) {
-            return this._mapToPostViewModel(post)
+            return this.mapToPostViewModel(post)
         } else {
             throw new Error('post not found (postsQueryRepository.findAndMap)')
         }
-    },
+    }
+
     async getAllSortedPosts(query: any): Promise<PostsSortViewModel> {
         const queryFindAllPosts = {}
 
@@ -58,9 +61,9 @@ export const postsQueryRepository = {
             page: filter.pageNumber,
             pageSize: filter.pageSize,
             totalCount: totalPostsCount,
-            items: posts.map(post => this._mapToPostViewModel(post))
+            items: posts.map(post => this.mapToPostViewModel(post))
         }
-    },
+    }
 
 
     // async sortPosts(query: any, blogId?: BlogId): Promise<PostsSortViewModel> {
@@ -92,3 +95,5 @@ export const postsQueryRepository = {
     //     }
     // },
 }
+
+export const postsQueryRepository = new PostsQueryRepository()

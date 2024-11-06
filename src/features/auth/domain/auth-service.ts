@@ -28,29 +28,32 @@ import {
     SecurityUpdateType
 } from '../../../types/entities/security-types';
 
-export const authService = {
-    async _findUserByLoginOrEmail(loginOrEmail: string): Promise<UserServiceModel | null> {
+class AuthService {
+    private async findUserByLoginOrEmail(loginOrEmail: string): Promise<UserServiceModel | null> {
         const field = loginOrEmail.includes('@') ? 'email' : 'login'
 
         return await usersRepository.findUserByFieldAndValue(field, loginOrEmail)
-    },
-    async _checkExistValueInField(field: string, value: string): Promise<boolean> {
+    }
+
+    private async checkExistValueInField(field: string, value: string): Promise<boolean> {
         const isExist = await usersRepository.findUserByFieldAndValue(field, value)
 
         return !!isExist
-    },
-    async _validateLoginAndEmail(login: string, email: string) {
+    }
+
+    private async validateLoginAndEmail(login: string, email: string) {
         const errors: ErrorsType = {
             errorsMessages: []
         }
-        const isLoginExist = await this._checkExistValueInField('login', login)
-        const isEmailExist = await this._checkExistValueInField('email', email)
+        const isLoginExist = await this.checkExistValueInField('login', login)
+        const isEmailExist = await this.checkExistValueInField('email', email)
         if (isLoginExist) errors.errorsMessages.push({field: 'login', message: 'login should be unique'})
         if (isEmailExist) errors.errorsMessages.push({field: 'email', message: 'email should be unique'})
 
         return errors.errorsMessages.length ? errors : null
-    },
-    async _createAccessAndRefreshTokens(userId: UserId, deviceId: DeviceId): Promise<AuthTokensType | null> {
+    }
+
+    private async createAccessAndRefreshTokens(userId: UserId, deviceId: DeviceId): Promise<AuthTokensType | null> {
         const newAccessToken: string | null = await jwtService.createAccessToken(userId)
         const newRefreshToken: string | null = await jwtService.createRefreshToken(userId, deviceId)
 
@@ -62,14 +65,15 @@ export const authService = {
             accessToken: newAccessToken,
             refreshToken: newRefreshToken
         }
-    },
-    _unixTimestampToDate(unixTimestamp: number): Date {
+    }
+
+    private unixTimestampToDate(unixTimestamp: number): Date {
         return new Date(unixTimestamp * 1000)
 
-    },
+    }
 
     async loginUser(loginOrEmail: string, password: string, deviceName: DeviceName, ip: IP): Promise<ResultType<AuthTokensType>> {
-        const user: UserServiceModel | null = await this._findUserByLoginOrEmail(loginOrEmail)
+        const user: UserServiceModel | null = await this.findUserByLoginOrEmail(loginOrEmail)
         if (!user) {
             return result.invalidCredentials('user not found')
         }
@@ -80,7 +84,7 @@ export const authService = {
         }
 
         const deviceId: DeviceId = uuidv7()
-        const tokens: AuthTokensType | null = await this._createAccessAndRefreshTokens(user.id, deviceId)
+        const tokens: AuthTokensType | null = await this.createAccessAndRefreshTokens(user.id, deviceId)
         if (!tokens) {
             return result.tokenError('error create access or refresh tokens')
         }
@@ -95,8 +99,8 @@ export const authService = {
             deviceName,
             ip,
             userId: user.id,
-            lastActiveDate: this._unixTimestampToDate(refreshTokenPayload.iat),
-            expireDate: this._unixTimestampToDate(refreshTokenPayload.exp),
+            lastActiveDate: this.unixTimestampToDate(refreshTokenPayload.iat),
+            expireDate: this.unixTimestampToDate(refreshTokenPayload.exp),
         }
 
         const isSecuritySessionSet: boolean = await authRepository.setSecuritySessionData(securitySessionData)
@@ -105,7 +109,7 @@ export const authService = {
         }
 
         return result.success(tokens)
-    },
+    }
 
     async logoutUser(refreshToken: string): Promise<ResultType<null>> {
         const refreshTokenPayload: VerifyRefreshTokenViewModel | null = await jwtService.verifyRefreshToken(refreshToken)
@@ -114,7 +118,7 @@ export const authService = {
         }
 
         const {deviceId, iat} = refreshTokenPayload
-        const lastActiveDate: Date = this._unixTimestampToDate(iat)
+        const lastActiveDate: Date = this.unixTimestampToDate(iat)
 
         const isSecuritySessionDataDeleted: boolean = await authRepository.deleteSecuritySessionData(deviceId, lastActiveDate)
         if (!isSecuritySessionDataDeleted) {
@@ -122,11 +126,11 @@ export const authService = {
         }
 
         return result.success(null)
-    },
+    }
 
     async registrationUser({login, email, password}: UserInputModel): Promise<ResultType<null | ErrorsType>> {
 
-        const loginOrEmailWithError = await this._validateLoginAndEmail(login, email)
+        const loginOrEmailWithError = await this.validateLoginAndEmail(login, email)
 
         if (loginOrEmailWithError) {
             return result.loginOrEmailWithError('login or email not unique', loginOrEmailWithError)
@@ -158,7 +162,7 @@ export const authService = {
 
 
         return result.success(null)
-    },
+    }
 
     async registrationConfirmationEmail(code: EmailConfirmationCodeInputModel): Promise<ResultType<null | ErrorsType>> {
         const error = {errorsMessages: [{message: 'code not found', field: 'code'}]}
@@ -184,7 +188,8 @@ export const authService = {
         if (!isUpdatedEmailConfirmation) return result.emailError('email confirmation does not update')
 
         return result.success(null)
-    },
+    }
+
     async resendRegistrationEmail(email: string): Promise<ResultType<null | ErrorsType>> {
         const error = {errorsMessages: [{message: 'email not found', field: 'email'}]}
 
@@ -217,7 +222,7 @@ export const authService = {
         }
 
         return result.success(null)
-    },
+    }
 
     async updateTokens(refreshToken: string): Promise<ResultType<AuthTokensType>> {
         const oldRefreshTokenPayload: VerifyRefreshTokenViewModel | null = await jwtService.verifyRefreshToken(refreshToken)
@@ -233,7 +238,7 @@ export const authService = {
         }
 
         const {userId, deviceId}: PayloadRefreshTokenInputType = oldRefreshTokenPayload
-        const lastActiveDate: Date = this._unixTimestampToDate(oldRefreshTokenPayload.iat)
+        const lastActiveDate: Date = this.unixTimestampToDate(oldRefreshTokenPayload.iat)
         const securitySessionQuery: SecuritySessionSearchQueryType = {
             deviceId,
             lastActiveDate
@@ -248,7 +253,7 @@ export const authService = {
             return result.tokenError('userId does not match current user')
         }
 
-        const tokens: AuthTokensType | null = await this._createAccessAndRefreshTokens(userId, deviceId)
+        const tokens: AuthTokensType | null = await this.createAccessAndRefreshTokens(userId, deviceId)
 
         if (!tokens) {
             return result.tokenError('error create access or refresh tokens')
@@ -261,8 +266,8 @@ export const authService = {
 
         const securitySessionUpdateData: SecurityUpdateType = {
             deviceId,
-            lastActiveDate: this._unixTimestampToDate(newRefreshTokenPayload.iat),
-            expireDate: this._unixTimestampToDate(newRefreshTokenPayload.exp),
+            lastActiveDate: this.unixTimestampToDate(newRefreshTokenPayload.iat),
+            expireDate: this.unixTimestampToDate(newRefreshTokenPayload.exp),
         }
 
         const isSecuritySessionUpdated: boolean = await authRepository.updateSecuritySessionData(securitySessionQuery, securitySessionUpdateData)
@@ -271,12 +276,11 @@ export const authService = {
         }
 
         return result.success(tokens)
-    },
+    }
 
     async passwordRecovery(email: any): Promise<ResultType<null>> {
         const user = await authRepository.findUserByEmail(email)
-        console.log(user)
-// console.log(email)
+
         if (!user) {
             return result.notFound('user with current email not found')
         }
@@ -301,7 +305,8 @@ export const authService = {
         }
 
         return result.success(null)
-    },
+    }
+
     async newPassword(newPassword: string, recoveryCode: string): Promise<ResultType<null>> {
         const user: UserServiceModel | null = await authRepository.findUserByRecoveryCode(recoveryCode)
 
@@ -332,3 +337,5 @@ export const authService = {
         return result.success(null)
     }
 }
+
+export const authService = new AuthService()

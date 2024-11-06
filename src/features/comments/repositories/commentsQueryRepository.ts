@@ -5,11 +5,12 @@ import {PostId} from '../../../types/entities/posts-types';
 import {CommentId, CommentsSortViewModel, CommentViewModel} from '../../../types/entities/comments-types';
 import {CommentDbType, CommentsQueryDbType} from '../../../types/db/comments-db-types';
 
-export const commentsQueryRepository = {
-    _toIdQuery(id: PostId): IdQueryDbType {
+class CommentsQueryRepository {
+    private toIdQuery(id: PostId): IdQueryDbType {
         return {_id: new ObjectId(id)}
-    },
-    _mapToCommentViewModel(comment: WithId<CommentDbType>): CommentViewModel {
+    }
+
+    private mapToCommentViewModel(comment: WithId<CommentDbType>): CommentViewModel {
         return {
             id: comment._id.toString(),
             content: comment.content,
@@ -19,27 +20,30 @@ export const commentsQueryRepository = {
             },
             createdAt: comment.createdAt.toISOString()
         }
-    },
+    }
 
     async isCommentFound(id: CommentId): Promise<boolean> {
-        const comment: number = await commentCollection.countDocuments(this._toIdQuery(id));
+        const comment: number = await commentCollection.countDocuments(this.toIdQuery(id));
 
         return !!comment
-    },
+    }
+
     async findAndMap(commentId: CommentId): Promise<CommentViewModel> {
-        const comment: WithId<CommentDbType> | null = await commentCollection.findOne(this._toIdQuery(commentId))
+        const comment: WithId<CommentDbType> | null = await commentCollection.findOne(this.toIdQuery(commentId))
 
         if (comment) {
-            return this._mapToCommentViewModel(comment)
+            return this.mapToCommentViewModel(comment)
         } else {
             throw new Error('comment not found (commentsQueryRepository.findAndMap)')
         }
-    },
+    }
+
     async getAll(postId: PostId, query: any,): Promise<CommentsSortViewModel> {
         return await this.sortComments(postId, query)
-    },
+    }
+
     async sortComments(postId: PostId, query: any,): Promise<CommentsSortViewModel> {
-        const postObjectId: ObjectId = this._toIdQuery(postId)._id
+        const postObjectId: ObjectId = this.toIdQuery(postId)._id
         const findFilter = {postId: postObjectId}
 
         const filter: CommentsQueryDbType = {
@@ -63,7 +67,9 @@ export const commentsQueryRepository = {
             page: query.pageNumber,
             pageSize: filter.pageSize,
             totalCount: totalComments,
-            items: comments.map(comment => this._mapToCommentViewModel(comment))
+            items: comments.map(comment => this.mapToCommentViewModel(comment))
         }
-    },
+    }
 }
+
+export const commentsQueryRepository = new CommentsQueryRepository()

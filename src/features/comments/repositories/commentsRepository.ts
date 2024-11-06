@@ -13,26 +13,29 @@ import {
 } from '../../../types/entities/comments-types';
 import {CommentDbType} from '../../../types/db/comments-db-types';
 
-export const commentsRepository = {
-    _toIdQuery(id: PostId): IdQueryDbType {
+class CommentsRepository {
+    private toIdQuery(id: PostId): IdQueryDbType {
         return {_id: new ObjectId(id)}
-    },
-    _mapToPostWithCorrectId(post: WithId<PostDbType>): PostServiceModel {
+    }
+
+    private mapToPostWithCorrectId(post: WithId<PostDbType>): PostServiceModel {
         const {_id, blogId, ...rest} = post
         return {
             id: _id.toString(),
             blogId: blogId.toString(),
             ...rest
         }
-    },
-    _mapToUserWithCorrectId(user: WithId<UserDbType>): UserServiceModel {
+    }
+
+    private mapToUserWithCorrectId(user: WithId<UserDbType>): UserServiceModel {
         const {_id, ...rest} = user;
         return {
             id: _id.toString(),
             ...rest
         }
-    },
-    _mapToCommentWithCorrectId(comment: WithId<CommentDbType>): CommentServiceModel {
+    }
+
+    private mapToCommentWithCorrectId(comment: WithId<CommentDbType>): CommentServiceModel {
         const {_id, postId, commentatorInfo, ...rest} = comment;
         return {
             ...rest,
@@ -43,8 +46,7 @@ export const commentsRepository = {
                 userLogin: commentatorInfo.userLogin
             }
         }
-    },
-
+    }
 
     async createComment(comment: CommentCreateType): Promise<CommentId> {
         const commentToDb: CommentDbType = {
@@ -60,30 +62,37 @@ export const commentsRepository = {
         const _id = await commentCollection.insertOne(commentToDb)
 
         return _id.insertedId.toString()
-    },
+    }
+
     async deleteComment(commentId: CommentId): Promise<boolean> {
-        const comment = await commentCollection.deleteOne(this._toIdQuery(commentId))
+        const comment = await commentCollection.deleteOne(this.toIdQuery(commentId))
 
         return comment.deletedCount === 1
-    },
+    }
+
     async updateComment(commentId: CommentId, updateCommentData: CommentUpdateType): Promise<boolean> {
-        const commentUpdated = await commentCollection.updateOne(this._toIdQuery(commentId), {$set: updateCommentData})
+        const commentUpdated = await commentCollection.updateOne(this.toIdQuery(commentId), {$set: updateCommentData})
 
         return commentUpdated.matchedCount === 1
-    },
+    }
+
     async findPostById(postId: PostId): Promise<PostServiceModel | null> {
-        const post: WithId<PostDbType> | null = await PostModel.findOne(this._toIdQuery(postId));
+        const post: WithId<PostDbType> | null = await PostModel.findOne(this.toIdQuery(postId));
 
-        return post ? this._mapToPostWithCorrectId(post) : null
-    },
+        return post ? this.mapToPostWithCorrectId(post) : null
+    }
+
     async findUserById(userId: UserId): Promise<UserServiceModel | null> {
-        const user: WithId<UserDbType> | null = await UserModel.findOne(this._toIdQuery(userId));
+        const user: WithId<UserDbType> | null = await UserModel.findOne(this.toIdQuery(userId));
 
-        return user ? this._mapToUserWithCorrectId(user) : null
-    },
+        return user ? this.mapToUserWithCorrectId(user) : null
+    }
+
     async findCommentById(commentId: CommentId): Promise<CommentServiceModel | null> {
-        const comment: WithId<CommentDbType> | null = await commentCollection.findOne(this._toIdQuery(commentId));
+        const comment: WithId<CommentDbType> | null = await commentCollection.findOne(this.toIdQuery(commentId));
 
-        return comment ? this._mapToCommentWithCorrectId(comment) : null
-    },
+        return comment ? this.mapToCommentWithCorrectId(comment) : null
+    }
 }
+
+export const commentsRepository = new CommentsRepository()

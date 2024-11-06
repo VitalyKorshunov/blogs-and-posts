@@ -3,7 +3,7 @@ import {postsRepository} from '../repositories/postsRepository';
 import {BlogServiceModel} from '../../../types/entities/blogs-types';
 import {ExecutionStatus, result, ResultType, StatusCode} from '../../../common/utils/errorsAndStatusCodes.utils';
 
-export const postsService = {
+class PostsService {
     async createPostInBlog(post: PostInputModel): Promise<ResultType<PostId>> {
         const blog: BlogServiceModel | null = await postsRepository.findBlogById(post.blogId)
 
@@ -22,10 +22,12 @@ export const postsService = {
         } else {
             return result.notFound('blog not found')
         }
-    },
+    }
+
     async deletePost(id: PostId): Promise<number> {
         return postsRepository.deletePost(id)
-    },
+    }
+
     async updatePost(post: PostInputModel, id: PostId): Promise<ExecutionStatus> {
         const blog: BlogServiceModel | null = await postsRepository.findBlogById(post.blogId)
 
@@ -42,5 +44,7 @@ export const postsService = {
         } else {
             return new ExecutionStatus(StatusCode.NotFound)
         }
-    },
+    }
 }
+
+export const postsService = new PostsService()

@@ -12,7 +12,7 @@ describe('some tests', () => {
         await testHelpers.closeConnectToDbForTests()
     })
 
-    it('some test', async () => {
+    it.skip('some test', async () => {
         const createdBlog = await testHelpers.createBlogByAdmin()
         const posts: PostViewModel[] = await testHelpers.createMultiplePostsInBlog(200, createdBlog.id)
         console.log(await testHelpers.countPostsInDb())

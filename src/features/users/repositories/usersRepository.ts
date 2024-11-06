@@ -4,36 +4,41 @@ import {UserId, UserServiceModel} from '../../../types/entities/users-types';
 import {UserDbType} from '../../../types/db/user-db-types';
 import {UserModel} from '../../../db/mongo-db';
 
-export const usersRepository = {
-    _toIdQuery(id: UserId): IdQueryDbType {
+class UsersRepository {
+    private toIdQuery(id: UserId): IdQueryDbType {
         return {_id: new ObjectId(id)}
-    },
-    _mapToUserServiceModel(user: WithId<UserDbType>): UserServiceModel {
+    }
+
+    private mapToUserServiceModel(user: WithId<UserDbType>): UserServiceModel {
         const {_id, ...rest} = user
         return {
             id: _id.toString(),
             ...rest
         }
-    },
+    }
 
     async createUser(user: UserDbType): Promise<UserId> {
         const _id = await UserModel.insertMany([user])
 
         return _id[0]._id.toString()
-    },
+    }
+
     async findUserByFieldAndValue(field: string, value: string): Promise<UserServiceModel | null> {
         const queryToDb = (
             (field === 'id')
-                ? this._toIdQuery(value)
+                ? this.toIdQuery(value)
                 : {[field]: value}
         )
 
         const user: WithId<UserDbType> | null = await UserModel.findOne(queryToDb).lean()
-        return user ? this._mapToUserServiceModel(user) : null
-    },
+        return user ? this.mapToUserServiceModel(user) : null
+    }
+
     async deleteUser(userId: UserId): Promise<number> {
-        const user = await UserModel.deleteOne(this._toIdQuery(userId))
+        const user = await UserModel.deleteOne(this.toIdQuery(userId))
 
         return user.deletedCount
-    },
+    }
 }
+
+export const usersRepository = new UsersRepository()

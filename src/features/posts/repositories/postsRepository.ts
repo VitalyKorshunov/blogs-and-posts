@@ -6,26 +6,27 @@ import {IdQueryDbType} from '../../../types/db/query-db-types';
 import {BlogId, BlogServiceModel} from '../../../types/entities/blogs-types';
 import {BlogDbType} from '../../../types/db/blog-db-types';
 
-export const postsRepository = {
-    _toIdQuery(id: PostId): IdQueryDbType {
+class PostsRepository {
+    private toIdQuery(id: PostId): IdQueryDbType {
         return {_id: new ObjectId(id)}
-    },
-    _mapToPostWithCorrectId(post: WithId<PostDbType>): PostServiceModel {
+    }
+
+    private mapToPostWithCorrectId(post: WithId<PostDbType>): PostServiceModel {
         const {_id, blogId, ...rest} = post
         return {
             id: _id.toString(),
             blogId: blogId.toString(),
             ...rest
         }
-    },
-    _mapToBlogWithCorrectId(blog: WithId<BlogDbType>): BlogServiceModel {
+    }
+
+    private mapToBlogWithCorrectId(blog: WithId<BlogDbType>): BlogServiceModel {
         const {_id, ...rest} = blog
         return {
             id: _id.toString(),
             ...rest
         }
-    },
-
+    }
 
     async createPost(post: PostCreateType): Promise<PostId> {
         const postToDb: PostDbType = {
@@ -36,24 +37,28 @@ export const postsRepository = {
         await createdPost.save()
 
         return createdPost._id.toString()
-    },
+    }
+
     async deletePost(postId: PostId): Promise<number> {
-        const post = await PostModel.deleteOne(this._toIdQuery(postId))
+        const post = await PostModel.deleteOne(this.toIdQuery(postId))
 
         return post.deletedCount
-    },
+    }
+
     async updatePost(post: PostUpdateType, postId: PostId): Promise<number> {
-        const blogId: ObjectId = this._toIdQuery(post.blogId)._id
+        const blogId: ObjectId = this.toIdQuery(post.blogId)._id
         const updatedPost: PostUpdateDbType = {...post, blogId: blogId}
 
-        const postUpdated = await PostModel.updateOne(this._toIdQuery(postId), {$set: updatedPost})
+        const postUpdated = await PostModel.updateOne(this.toIdQuery(postId), {$set: updatedPost})
 
         return postUpdated.modifiedCount
-    },
+    }
 
     async findBlogById(id: BlogId): Promise<BlogServiceModel | null> {
         const blog: WithId<BlogDbType> | null = await BlogModel.findById(id).lean();
 
-        return blog ? this._mapToBlogWithCorrectId(blog) : null
-    },
+        return blog ? this.mapToBlogWithCorrectId(blog) : null
+    }
 }
+
+export const postsRepository = new PostsRepository()
