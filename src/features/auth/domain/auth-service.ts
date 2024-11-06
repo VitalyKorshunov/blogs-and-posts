@@ -152,21 +152,16 @@ export const authService = {
         }
         const userId: UserId = await usersRepository.createUser(newUser)
 
-        try {
-            nodemailerService.sendEmailConfirmation(newUser.email, newUser.emailConfirmation.confirmationCode).catch(() => {
-            })
-        } catch (error) {
-            console.error(error)
-            await usersRepository.deleteUser(userId)
+        nodemailerService.sendEmailConfirmation(newUser.email, newUser.emailConfirmation.confirmationCode).catch((e) => {
+            console.log(e)
+        })
 
-            return result.emailError('error nodemailer send email ')
-        }
 
         return result.success(null)
     },
 
     async registrationConfirmationEmail(code: EmailConfirmationCodeInputModel): Promise<ResultType<null | ErrorsType>> {
-        const error = {errorsMessages: [{message: 'code error', field: 'code'}]}
+        const error = {errorsMessages: [{message: 'code not found', field: 'code'}]}
 
         const isCodeConfirmationFound: boolean = await authRepository.isCodeConfirmationFound(code)
 
@@ -309,9 +304,7 @@ export const authService = {
     },
     async newPassword(newPassword: string, recoveryCode: string): Promise<ResultType<null>> {
         const user: UserServiceModel | null = await authRepository.findUserByRecoveryCode(recoveryCode)
-        const user2 = await authRepository.findUserByEmail('vitaliy.korshunov1994@gmail.com')
-        console.log(user2)
-// console.log(recoveryCode)
+
         if (!user) {
             return result.notFound('user with current recovery code not found')
         }
@@ -319,9 +312,9 @@ export const authService = {
         if (user.recoveryPassword.expirationDate < new Date()) {
             return result.passwordError('recovery code is expired')
         }
-console.log(newPassword)
+        console.log(newPassword)
         const newPassHash = await hashPassService.generateHash(newPassword)
-console.log(newPassHash)
+        console.log(newPassHash)
         const updatePasswordWithRecoveryPassword: PasswordUpdateWithRecoveryType = {
             passHash: newPassHash,
             recoveryPassword: {

@@ -27,7 +27,8 @@ export const nodemailerService = {
 
         const info = await transporter.sendMail(message)
 
-        console.log(info)
+        // console.log(info)
+        return
     },
 
     async sendRecoveryPasswordCode(email: string, recoveryCode: string) {
@@ -55,6 +56,7 @@ export const nodemailerService = {
 
         const info = await transporter.sendMail(message)
 
-        console.log(info)
+        // console.log(info)
+        return
     }
 }

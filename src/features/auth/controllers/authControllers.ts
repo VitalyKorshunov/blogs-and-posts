@@ -105,9 +105,9 @@ export const authControllers = {
     },
 
     async newPassword(req: Request, res: Response) {
-        const {password, recoveryCode} = req.body
+        const {newPassword, recoveryCode} = req.body
 
-        const result = await authService.newPassword(password, recoveryCode)
+        const result = await authService.newPassword(newPassword, recoveryCode)
 
         if (result.statusCode === StatusesCode.Success) {
             res.sendStatus(204)

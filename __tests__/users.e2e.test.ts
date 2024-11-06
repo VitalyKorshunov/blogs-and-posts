@@ -15,10 +15,10 @@ describe('/users', () => {
         await testHelpers.closeConnectToDbForTests()
     })
 
-    it('should create user, 201', async () => {
+    it('post[/users] should create user by admin, 201', async () => {
         const newUser: UserInputModel = {
-            login: '123', //length 3
-            password: '123456', //length 6
+            login: testHelpers.generateString(3),
+            password: testHelpers.generateString(6),
             email: '123@test.co'
         }
 
@@ -38,8 +38,8 @@ describe('/users', () => {
         expect(await testHelpers.countUsersInDb()).toEqual(1)
 
         const newUser2: UserInputModel = {
-            login: '1122334455', //length 10
-            password: '11122233344455566677', //length 20
+            login: testHelpers.generateString(10), //length 10
+            password: testHelpers.generateString(20), //length 20
             email: '12345@test.cats'
         }
 
@@ -58,13 +58,11 @@ describe('/users', () => {
 
         expect(await testHelpers.countUsersInDb()).toEqual(2)
     })
-    it('shouldn\'t create user, 401', async () => {
-        const createdUser = await testHelpers.createUserInDb()
-
+    it('post[/users] shouldn\'t create user with incorrect auth, 401', async () => {
         const newUser: UserInputModel = {
-            login: '12345',
-            password: '123456',
-            email: '12345@test.com'
+            login: testHelpers.generateString(3),
+            password: testHelpers.generateString(6),
+            email: '123@test.co'
         }
 
         const res = await req
@@ -72,14 +70,12 @@ describe('/users', () => {
             .send(newUser)
             .expect(401)
 
-        expect(await testHelpers.countUsersInDb()).toEqual(1)
+        expect(await testHelpers.countUsersInDb()).toEqual(0)
     })
-    it('shouldn\'t create user, 400', async () => {
-        const createdUser = await testHelpers.createUserInDb()
-
+    it('post[/users] shouldn\'t create user, 400', async () => {
         const newUser1: UserInputModel = {
-            login: '12', //length 2
-            password: '12345', //length 5
+            login: testHelpers.generateString(2),
+            password: testHelpers.generateString(5),
             email: '12@test.c'
         }
 
@@ -95,12 +91,12 @@ describe('/users', () => {
         expect(res1.body.errorsMessages[1].field).toEqual('email')
         expect(res1.body.errorsMessages[2].field).toEqual('password')
 
-        expect(await testHelpers.countUsersInDb()).toEqual(1)
+        expect(await testHelpers.countUsersInDb()).toEqual(0)
 
 
         const newUser2: UserInputModel = {
-            login: '12345678901', //length 11
-            password: '111222333444555666777', //length 21
+            login: testHelpers.generateString(11),
+            password: testHelpers.generateString(21),
             email: '12test.com'
         }
 
@@ -115,10 +111,10 @@ describe('/users', () => {
         expect(res2.body.errorsMessages[1].field).toEqual('email')
         expect(res2.body.errorsMessages[2].field).toEqual('password')
 
-        expect(await testHelpers.countUsersInDb()).toEqual(1)
+        expect(await testHelpers.countUsersInDb()).toEqual(0)
     })
 
-    it('should get empty array, 200', async () => {
+    it('get[/users] should get empty array, 200', async () => {
         const res = await req
             .get(SETTINGS.PATH.USERS)
             .set({'Authorization': 'Basic ' + codedAuth})
@@ -132,18 +128,18 @@ describe('/users', () => {
         }
         expect(res.body).toEqual(expectedResult)
     })
-    it('shouldn\'t get array, 401', async () => {
+    it('get[/users] shouldn\'t get array, 401', async () => {
         const res = await req
             .get(SETTINGS.PATH.USERS)
             .expect(401)
 
         expect(await testHelpers.countUsersInDb()).toEqual(0)
     })
-    it('should get not empty and correct array, 200', async () => {
-        const user1 = await testHelpers.createUserInDb('123')
-        const user2 = await testHelpers.createUserInDb('1234')
-        const user3 = await testHelpers.createUserInDb('1s23s45')
-        const user4 = await testHelpers.createUserInDb('123456S')
+    it('get[/users] should get not empty and correct array, 200', async () => {
+        const user1 = await testHelpers.createUserByAdmin('123')
+        const user2 = await testHelpers.createUserByAdmin('1234')
+        const user3 = await testHelpers.createUserByAdmin('1s23s45')
+        const user4 = await testHelpers.createUserByAdmin('123456S')
 
         const query1 = {}
 
@@ -285,8 +281,8 @@ describe('/users', () => {
         expect(res5.body).toEqual(expectedResult5)
     })
 
-    it('should del, 204', async () => {
-        const createdUser = await testHelpers.createUserInDb()
+    it('delete[/users/:id] should del, 204', async () => {
+        const createdUser = await testHelpers.createUserByAdmin()
 
         expect(await testHelpers.countUsersInDb()).toEqual(1)
 
@@ -297,8 +293,8 @@ describe('/users', () => {
 
         expect(await testHelpers.countBlogsInDb()).toEqual(0)
     })
-    it('shouldn\'t del, 404', async () => {
-        const createdUser = await testHelpers.createUserInDb()
+    it('delete[/users/:id] shouldn\'t del, 404', async () => {
+        const createdUser = await testHelpers.createUserByAdmin()
 
         expect(await testHelpers.countUsersInDb()).toEqual(1)
 
@@ -315,8 +311,8 @@ describe('/users', () => {
 
         expect(await testHelpers.countUsersInDb()).toEqual(1)
     })
-    it('shouldn\'t del 401', async () => {
-        const createdUser = await testHelpers.createUserInDb()
+    it('delete[/users/:id] shouldn\'t del 401', async () => {
+        const createdUser = await testHelpers.createUserByAdmin()
 
         expect(await testHelpers.countUsersInDb()).toEqual(1)
 

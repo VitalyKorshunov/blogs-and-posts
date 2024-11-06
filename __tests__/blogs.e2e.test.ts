@@ -120,7 +120,7 @@ describe('/blogs', () => {
     })
 
     it('[/blogs/{blogId}/posts] should create post in blog by admin, 201', async () => {
-        const blog: BlogViewModel = await testHelpers.createBlogInDb()
+        const blog: BlogViewModel = await testHelpers.createBlogByAdmin()
 
         const newPost: BlogPostInputModel = {
             title: testHelpers.generateString(1, 't'),
@@ -187,7 +187,7 @@ describe('/blogs', () => {
         expect(await testHelpers.countPostsInDb()).toBe(2)
     })
     it('[/blogs/{blogId}/posts] shouldn\'t create post in blog with incorrect fields length by admin, 400', async () => {
-        const blog: BlogViewModel = await testHelpers.createBlogInDb()
+        const blog: BlogViewModel = await testHelpers.createBlogByAdmin()
 
         const newPost: BlogPostInputModel = {
             title: testHelpers.generateString(0),
@@ -260,7 +260,7 @@ describe('/blogs', () => {
         expect(await testHelpers.countPostsInDb()).toEqual(0)
     })
     it('[/blogs/{blogId}/posts] shouldn\'t create post in blog with incorrect auth by admin, 401', async () => {
-        const blog: BlogViewModel = await testHelpers.createBlogInDb()
+        const blog: BlogViewModel = await testHelpers.createBlogByAdmin()
 
         const newPost: BlogPostInputModel = {
             title: testHelpers.generateString(9999),
@@ -418,7 +418,7 @@ describe('/blogs', () => {
             .expect(404)
     })
     it('[/blogs/{blogId}] should find, 200', async () => {
-        const createdBlog = await testHelpers.createBlogInDb()
+        const createdBlog = await testHelpers.createBlogByAdmin()
 
         const res = await req
             .get(SETTINGS.PATH.BLOGS + '/' + createdBlog.id)
@@ -428,7 +428,7 @@ describe('/blogs', () => {
     })
 
     it('[/blogs/{blogId}/posts] should find filtered posts in blog, 200', async () => {
-        const createdBlog = await testHelpers.createBlogInDb()
+        const createdBlog = await testHelpers.createBlogByAdmin()
         const posts : PostViewModel[] = await testHelpers.createMultiplePostsInBlog(3, createdBlog.id)
         const post1 = posts[0]
         const post2 = posts[1]
@@ -486,7 +486,7 @@ describe('/blogs', () => {
         expect(res4.body).toEqual({items: [post1, post2, post3], pagesCount: 1, page: 1, pageSize: 10, totalCount: 3})
     })
     it('[/blogs/{blogId}/posts] shouldn\'t find filtered posts in blog, 404', async () => {
-        const createdBlog = await testHelpers.createBlogInDb()
+        const createdBlog = await testHelpers.createBlogByAdmin()
         const posts: PostViewModel[] = await testHelpers.createMultiplePostsInBlog(3, createdBlog.id)
 
         const query = {
@@ -515,7 +515,7 @@ describe('/blogs', () => {
         expect(await testHelpers.countBlogsInDb()).toEqual(4)
     })
     it('[/blogs/{blogId}] shouldn\'t delete blog by admin, 404', async () => {
-        const createdBlog = await testHelpers.createBlogInDb()
+        const createdBlog = await testHelpers.createBlogByAdmin()
 
         expect(await testHelpers.countBlogsInDb()).toEqual(1)
 
@@ -527,7 +527,7 @@ describe('/blogs', () => {
         expect(await testHelpers.countBlogsInDb()).toEqual(1)
     })
     it('[/blogs/{blogId}] shouldn\'t delete blog by admin with incorrect auth header, 401', async () => {
-        const createdBlog = await testHelpers.createBlogInDb()
+        const createdBlog = await testHelpers.createBlogByAdmin()
 
         expect(await testHelpers.countBlogsInDb()).toEqual(1)
 
@@ -540,7 +540,7 @@ describe('/blogs', () => {
     })
 
     it('[/blogs/{blogId}] should update blog by admin, 204', async () => {
-        const createdBlog = await testHelpers.createBlogInDb()
+        const createdBlog = await testHelpers.createBlogByAdmin()
 
         const blogToUpdate: BlogInputModel = {
             name: 'n2',
@@ -559,7 +559,7 @@ describe('/blogs', () => {
         expect(updatedBlog).toEqual({...createdBlog, ...blogToUpdate})
     })
     it('[/blogs/{blogId}] shouldn\'t update blog by admin, 404', async () => {
-        const createdBlog = await testHelpers.createBlogInDb()
+        const createdBlog = await testHelpers.createBlogByAdmin()
 
         const updatedBlog: BlogInputModel = {
             name: 'n1',
@@ -577,7 +577,7 @@ describe('/blogs', () => {
 
     })
     it('[/blogs/{blogId}] shouldn\'t update blog by admin, 400', async () => {
-        const createdBlog = await testHelpers.createBlogInDb()
+        const createdBlog = await testHelpers.createBlogByAdmin()
 
         const blogToUpdate: BlogInputModel = {
             name: createString(16),
@@ -601,7 +601,7 @@ describe('/blogs', () => {
         expect(res.body.errorsMessages[2].field).toEqual('websiteUrl')
     })
     it('[/blogs/{blogId}] shouldn\'t update blog by admin with incorrect auth header, 401', async () => {
-        const newBlog = await testHelpers.createBlogInDb()
+        const newBlog = await testHelpers.createBlogByAdmin()
 
         const blogToUpdate: BlogInputModel = {
             name: createString(16),

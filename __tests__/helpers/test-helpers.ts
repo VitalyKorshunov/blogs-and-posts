@@ -119,10 +119,7 @@ export const testHelpers = {
 
         return res.body;
     },
-    createUserByUser: async (login: string = '123', email: string = '123@gmail.com', password: string = '123456'): Promise<{
-        email: string,
-        code: string
-    }> => {
+    createUserByUser: async (login: string = '123', email: string = '123@gmail.com', password: string = '123456'): Promise<EmailWithConfirmationCodeType> => {
         const mockedSendEmailConfirmation = testHelpers.mock.nodemailerService.sendEmailConfirmation()
 
         const newUser: UserInputModel = {
@@ -176,7 +173,7 @@ export const testHelpers = {
             createdAt: post.createdAt.toISOString()
         };
     },
-    findAndMapUserByIndex: async (index: number): Promise<WithId<UserDbType>> => {
+    findAndMapUserByIndex: async (index: number = 0): Promise<WithId<UserDbType>> => {
         const users: WithId<UserDbType>[] = await UserModel.find({}, {__v: 0}).lean()
 
         return users[index];
@@ -226,11 +223,13 @@ export const testHelpers = {
         return usersEmailsAndEmailConfirmationCodes
     },
 
-    async createMultiplyUsersWithConfirmedEmail(countUsers: number) {
-        const usersCode: EmailWithConfirmationCodeType[] = await this.createMultiplyUsersWithUnconfirmedEmail(countUsers)
+    async createMultiplyUsersWithConfirmedEmail(countUsers: number): Promise<EmailWithConfirmationCodeType[]> {
+        const usersEmailWithCode: EmailWithConfirmationCodeType[] = await this.createMultiplyUsersWithUnconfirmedEmail(countUsers)
 
         for (let i = 1; i <= countUsers; i++) {
-            await this.confirmRegistrationByCode(usersCode[i - 1].code)
+            await this.confirmRegistrationByCode(usersEmailWithCode[i - 1].code)
         }
+
+        return usersEmailWithCode
     }
 }

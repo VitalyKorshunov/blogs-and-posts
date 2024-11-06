@@ -19,6 +19,9 @@ export const loginOrEmailValidator = body('loginOrEmail').isString().withMessage
 export const passwordValidator = body('password').isString().withMessage('not string').trim()
     .isLength({min: 6, max: 20}).withMessage('more than 20 or less than 6')
 
+export const newPasswordValidator = body('newPassword').isString().withMessage('not string').trim()
+    .isLength({min: 6, max: 20}).withMessage('more than 20 or less than 6')
+
 export const emailConfirmationCodeValidator = body('code').isString().withMessage('not string').trim()
     .isLength({min: 36, max: 36}).withMessage('invalid length')
 
@@ -84,7 +87,7 @@ export const passwordRecoveryValidators = [
 export const newPasswordValidators = [
     rateLimitGuardMiddlewares,
 
-    passwordValidator,
+    newPasswordValidator,
     recoveryCodeValidator,
 
     inputCheckErrorsMiddleware

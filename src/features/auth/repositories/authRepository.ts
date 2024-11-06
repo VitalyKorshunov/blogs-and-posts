@@ -52,12 +52,12 @@ export const authRepository = {
         return !!isCodeFound
     },
     async findUserById(userId: UserId): Promise<UserServiceModel | null> {
-        const user: WithId<UserDbType> | null = await UserModel.findOne(this._toIdQuery(userId))
+        const user: WithId<UserDbType> | null = await UserModel.findOne(this._toIdQuery(userId)).lean()
 
         return user ? this._mapToUserServiceModel(user) : null
     },
     async findUserByEmailConfirmationCode(code: EmailConfirmationCodeInputModel) {
-        const user: WithId<UserDbType> | null = await UserModel.findOne({'emailConfirmation.confirmationCode': code});
+        const user: WithId<UserDbType> | null = await UserModel.findOne({'emailConfirmation.confirmationCode': code}).lean();
 
         return user ? this._mapToUserServiceModel(user) : null
     },

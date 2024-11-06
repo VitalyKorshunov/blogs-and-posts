@@ -13,7 +13,7 @@ describe('some tests', () => {
     })
 
     it('some test', async () => {
-        const createdBlog = await testHelpers.createBlogInDb()
+        const createdBlog = await testHelpers.createBlogByAdmin()
         const posts: PostViewModel[] = await testHelpers.createMultiplePostsInBlog(200, createdBlog.id)
         console.log(await testHelpers.countPostsInDb())
 

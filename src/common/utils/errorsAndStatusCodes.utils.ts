@@ -137,13 +137,13 @@ export const result = {
 export const handleError = (result: ResultType<unknown>, res: Response) => {
     switch (result.statusCode) {
         case StatusesCode.NotFound: {
-            console.error(result.errorMessage)
+            console.log(result.errorMessage)
             res.status(400).json(result.data ?? {})
             break
         }
         case StatusesCode.InvalidCredentials:
         case StatusesCode.TokenError: {
-            console.error(result.errorMessage)
+            console.log(result.errorMessage)
             res.sendStatus(401)
             break
         }
@@ -154,7 +154,7 @@ export const handleError = (result: ResultType<unknown>, res: Response) => {
             break
         }
         case StatusesCode.EmailError: {
-            console.error(result.errorMessage)
+            console.log(result.errorMessage)
             res.status(400).json(result.data ?? {})
             break
         }
