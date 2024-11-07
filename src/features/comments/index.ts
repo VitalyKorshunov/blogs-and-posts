@@ -4,21 +4,22 @@ import {
     findCommentValidators,
     updateCommentsValidators
 } from './middlewares/commentsValidators'
-import {commentsControllers} from './controllers/commentsControllers';
+import {CommentsControllers} from './controllers/commentsControllers';
 
 export const commentsRouter = Router()
+const commentsControllers = new CommentsControllers()
 
 commentsRouter.get(
     '/:id',
     ...findCommentValidators,
-    commentsControllers.findComment)
+    commentsControllers.findComment.bind(commentsControllers))
 
 commentsRouter.delete(
     '/:id',
     ...deleteCommentsValidators,
-    commentsControllers.deleteComment)
+    commentsControllers.deleteComment.bind(commentsControllers))
 
 commentsRouter.put(
     '/:id',
     ...updateCommentsValidators,
-    commentsControllers.updateComment)
+    commentsControllers.updateComment.bind(commentsControllers))

@@ -8,42 +8,44 @@ import {
 } from './middlewares/blogValidators'
 import {adminMiddleware} from '../../global-middlewares/admin-middleware'
 import {SETTINGS} from '../../settings';
-import {blogsControllers} from './controllers/blogsControllers';
+import {BlogsControllers} from './controllers/blogsControllers';
 import {routersPaths} from '../../common/path/paths';
 
 export const blogsRouter = Router()
 
+const blogsControllers = new BlogsControllers()
+
 blogsRouter.post(
     '/',
     ...blogValidators,
-    blogsControllers.createBlog)
+    blogsControllers.createBlog.bind(blogsControllers))
 
 blogsRouter.post(
     '/:id' + routersPaths.posts,
     ...blogPostValidators,
-    blogsControllers.createPostInBlog)
+    blogsControllers.createPostInBlog.bind(blogsControllers))
 
 blogsRouter.get(
     '/',
     ...sortBlogsValidators,
-    blogsControllers.getBlogs)
+    blogsControllers.getBlogs.bind(blogsControllers))
 
 blogsRouter.get(
     '/:id',
     findBlogValidator,
-    blogsControllers.findBlog)
+    blogsControllers.findBlog.bind(blogsControllers))
 
 blogsRouter.get(
     '/:id' + SETTINGS.PATH.POSTS,
     ...sortPostsInBlogValidators,
-    blogsControllers.getPostsInBlog)
+    blogsControllers.getPostsInBlog.bind(blogsControllers))
 
 blogsRouter.delete(
     '/:id',
     adminMiddleware, findBlogValidator,
-    blogsControllers.delBlog)
+    blogsControllers.delBlog.bind(blogsControllers))
 
 blogsRouter.put(
     '/:id',
     findBlogValidator, ...blogValidators,
-    blogsControllers.updateBlog)
+    blogsControllers.updateBlog.bind(blogsControllers))

@@ -6,7 +6,7 @@ import {sortQueryFieldsUtils} from '../../../common/utils/sortQueryFields.utils'
 import {SortOutputQueryType} from '../../../types/utils/sort-types';
 import {PostModel} from '../../../db/mongo-db';
 
-class PostsQueryRepository {
+export class PostsQueryRepository {
     private toIdQuery(id: PostId): IdQueryDbType {
         return {_id: new ObjectId(id)}
     }
@@ -95,5 +95,3 @@ class PostsQueryRepository {
     //     }
     // },
 }
-
-export const postsQueryRepository = new PostsQueryRepository()

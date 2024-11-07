@@ -20,7 +20,7 @@ import {
 import {SecurityDbType} from '../../../types/db/security-db-types';
 
 
-class AuthRepository {
+export class AuthRepository {
     private toIdQuery(id: UserId): IdQueryDbType {
         return {_id: new ObjectId(id)}
     }
@@ -133,5 +133,3 @@ class AuthRepository {
         return !!isUserUpdated.matchedCount
     }
 }
-
-export const authRepository = new AuthRepository()

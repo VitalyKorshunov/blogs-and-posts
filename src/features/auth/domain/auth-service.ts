@@ -8,7 +8,6 @@ import {
     UserInputModel,
     UserServiceModel
 } from '../../../types/entities/users-types';
-import {authRepository} from '../repositories/authRepository';
 import {result, ResultType} from '../../../common/utils/errorsAndStatusCodes.utils';
 import {UserDbType} from '../../../types/db/user-db-types';
 import {v7 as uuidv7} from 'uuid';
@@ -27,8 +26,15 @@ import {
     SecuritySessionSearchQueryType,
     SecurityUpdateType
 } from '../../../types/entities/security-types';
+import {AuthRepository} from '../repositories/authRepository';
 
-class AuthService {
+export class AuthService {
+    private authRepository: AuthRepository
+
+    constructor() {
+        this.authRepository = new AuthRepository()
+    }
+
     private async findUserByLoginOrEmail(loginOrEmail: string): Promise<UserServiceModel | null> {
         const field = loginOrEmail.includes('@') ? 'email' : 'login'
 
@@ -103,7 +109,7 @@ class AuthService {
             expireDate: this.unixTimestampToDate(refreshTokenPayload.exp),
         }
 
-        const isSecuritySessionSet: boolean = await authRepository.setSecuritySessionData(securitySessionData)
+        const isSecuritySessionSet: boolean = await this.authRepository.setSecuritySessionData(securitySessionData)
         if (!isSecuritySessionSet) {
             return result.tokenError('failed to set security session data')
         }
@@ -120,7 +126,7 @@ class AuthService {
         const {deviceId, iat} = refreshTokenPayload
         const lastActiveDate: Date = this.unixTimestampToDate(iat)
 
-        const isSecuritySessionDataDeleted: boolean = await authRepository.deleteSecuritySessionData(deviceId, lastActiveDate)
+        const isSecuritySessionDataDeleted: boolean = await this.authRepository.deleteSecuritySessionData(deviceId, lastActiveDate)
         if (!isSecuritySessionDataDeleted) {
             return result.tokenError('refresh token not updated')
         }
@@ -167,11 +173,11 @@ class AuthService {
     async registrationConfirmationEmail(code: EmailConfirmationCodeInputModel): Promise<ResultType<null | ErrorsType>> {
         const error = {errorsMessages: [{message: 'code not found', field: 'code'}]}
 
-        const isCodeConfirmationFound: boolean = await authRepository.isCodeConfirmationFound(code)
+        const isCodeConfirmationFound: boolean = await this.authRepository.isCodeConfirmationFound(code)
 
         if (!isCodeConfirmationFound) return result.notFound('code confirmation not found', error)
 
-        const user: UserServiceModel | null = await authRepository.findUserByEmailConfirmationCode(code)
+        const user: UserServiceModel | null = await this.authRepository.findUserByEmailConfirmationCode(code)
 
         if (!user) return result.notFound('user not found')
         if (user.emailConfirmation.isConfirmed) return result.emailError('email already confirmed', error)
@@ -183,7 +189,7 @@ class AuthService {
             isConfirmed: true
         }
 
-        const isUpdatedEmailConfirmation: boolean = await authRepository.updateUserEmailConfirmation(user.id, updateEmailConfirmation)
+        const isUpdatedEmailConfirmation: boolean = await this.authRepository.updateUserEmailConfirmation(user.id, updateEmailConfirmation)
 
         if (!isUpdatedEmailConfirmation) return result.emailError('email confirmation does not update')
 
@@ -193,10 +199,10 @@ class AuthService {
     async resendRegistrationEmail(email: string): Promise<ResultType<null | ErrorsType>> {
         const error = {errorsMessages: [{message: 'email not found', field: 'email'}]}
 
-        const isEmailFound: boolean = await authRepository.isEmailFound(email)
+        const isEmailFound: boolean = await this.authRepository.isEmailFound(email)
         if (!isEmailFound) return result.emailError('email not found', error)
 
-        const user: UserServiceModel | null = await authRepository.findUserByEmail(email)
+        const user: UserServiceModel | null = await this.authRepository.findUserByEmail(email)
         if (!user) return result.notFound('user not found')
 
         if (user.emailConfirmation.isConfirmed) return result.emailError('email already confirmed', error)
@@ -209,7 +215,7 @@ class AuthService {
             isConfirmed: false
         }
 
-        const isUpdatedEmailConfirmation: boolean = await authRepository.updateUserEmailConfirmation(user.id, updateEmailConfirmation)
+        const isUpdatedEmailConfirmation: boolean = await this.authRepository.updateUserEmailConfirmation(user.id, updateEmailConfirmation)
 
         if (!isUpdatedEmailConfirmation) return result.notFound('email confirmations not updated')
 
@@ -231,7 +237,7 @@ class AuthService {
             return result.tokenError('refresh token invalid')
         }
 
-        const isUserFound: boolean = await authRepository.isUserFound(oldRefreshTokenPayload.userId)
+        const isUserFound: boolean = await this.authRepository.isUserFound(oldRefreshTokenPayload.userId)
 
         if (!isUserFound) {
             return result.notFound('user not found')
@@ -244,7 +250,7 @@ class AuthService {
             lastActiveDate
         }
 
-        const securitySession: SecurityServiceModel | null = await authRepository.getSecuritySession(securitySessionQuery)
+        const securitySession: SecurityServiceModel | null = await this.authRepository.getSecuritySession(securitySessionQuery)
         if (!securitySession) {
             return result.tokenError('session does not exist with current data')
         }
@@ -270,7 +276,7 @@ class AuthService {
             expireDate: this.unixTimestampToDate(newRefreshTokenPayload.exp),
         }
 
-        const isSecuritySessionUpdated: boolean = await authRepository.updateSecuritySessionData(securitySessionQuery, securitySessionUpdateData)
+        const isSecuritySessionUpdated: boolean = await this.authRepository.updateSecuritySessionData(securitySessionQuery, securitySessionUpdateData)
         if (!isSecuritySessionUpdated) {
             return result.tokenError('failed to update security session data')
         }
@@ -279,7 +285,7 @@ class AuthService {
     }
 
     async passwordRecovery(email: any): Promise<ResultType<null>> {
-        const user = await authRepository.findUserByEmail(email)
+        const user = await this.authRepository.findUserByEmail(email)
 
         if (!user) {
             return result.notFound('user with current email not found')
@@ -299,7 +305,7 @@ class AuthService {
             return result.emailError('error send recovery password')
         }
 
-        const isUserPasswordRecoveryUpdate = await authRepository.updateUserRecoveryPassword(email, recoveryPasswordData)
+        const isUserPasswordRecoveryUpdate = await this.authRepository.updateUserRecoveryPassword(email, recoveryPasswordData)
         if (!isUserPasswordRecoveryUpdate) {
             return result.passwordError('error update recovery password')
         }
@@ -308,7 +314,7 @@ class AuthService {
     }
 
     async newPassword(newPassword: string, recoveryCode: string): Promise<ResultType<null>> {
-        const user: UserServiceModel | null = await authRepository.findUserByRecoveryCode(recoveryCode)
+        const user: UserServiceModel | null = await this.authRepository.findUserByRecoveryCode(recoveryCode)
 
         if (!user) {
             return result.notFound('user with current recovery code not found')
@@ -328,7 +334,7 @@ class AuthService {
             }
         }
 
-        const isPasswordWithRecoveryPasswordUpdated: boolean = await authRepository.updateUserPasswordWithRecoveryPassword(recoveryCode, updatePasswordWithRecoveryPassword)
+        const isPasswordWithRecoveryPasswordUpdated: boolean = await this.authRepository.updateUserPasswordWithRecoveryPassword(recoveryCode, updatePasswordWithRecoveryPassword)
 
         if (!isPasswordWithRecoveryPasswordUpdated) {
             return result.passwordError('password and recovery password does not updated')
@@ -337,5 +343,3 @@ class AuthService {
         return result.success(null)
     }
 }
-
-export const authService = new AuthService()

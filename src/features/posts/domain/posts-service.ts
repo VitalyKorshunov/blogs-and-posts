@@ -1,11 +1,17 @@
 import {PostCreateType, PostId, PostInputModel, PostUpdateType} from '../../../types/entities/posts-types';
-import {postsRepository} from '../repositories/postsRepository';
 import {BlogServiceModel} from '../../../types/entities/blogs-types';
 import {ExecutionStatus, result, ResultType, StatusCode} from '../../../common/utils/errorsAndStatusCodes.utils';
+import {PostsRepository} from '../repositories/postsRepository';
 
-class PostsService {
+export class PostsService {
+    private postsRepository: PostsRepository
+
+    constructor() {
+        this.postsRepository = new PostsRepository()
+    }
+
     async createPostInBlog(post: PostInputModel): Promise<ResultType<PostId>> {
-        const blog: BlogServiceModel | null = await postsRepository.findBlogById(post.blogId)
+        const blog: BlogServiceModel | null = await this.postsRepository.findBlogById(post.blogId)
 
         if (blog) {
             const newPost: PostCreateType = {
@@ -16,7 +22,7 @@ class PostsService {
                 blogName: blog.name,
                 createdAt: new Date()
             }
-            const postId: PostId = await postsRepository.createPost(newPost)
+            const postId: PostId = await this.postsRepository.createPost(newPost)
 
             return result.success(postId)
         } else {
@@ -25,11 +31,11 @@ class PostsService {
     }
 
     async deletePost(id: PostId): Promise<number> {
-        return postsRepository.deletePost(id)
+        return this.postsRepository.deletePost(id)
     }
 
     async updatePost(post: PostInputModel, id: PostId): Promise<ExecutionStatus> {
-        const blog: BlogServiceModel | null = await postsRepository.findBlogById(post.blogId)
+        const blog: BlogServiceModel | null = await this.postsRepository.findBlogById(post.blogId)
 
         if (blog) {
             const updatedPost: PostUpdateType = {
@@ -40,11 +46,9 @@ class PostsService {
                 blogName: blog.name
             }
 
-            return new ExecutionStatus(StatusCode.Success, await postsRepository.updatePost(updatedPost, id))
+            return new ExecutionStatus(StatusCode.Success, await this.postsRepository.updatePost(updatedPost, id))
         } else {
             return new ExecutionStatus(StatusCode.NotFound)
         }
     }
 }
-
-export const postsService = new PostsService()

@@ -10,63 +10,64 @@ import {
     registrationConfirmationEmailValidators,
     resendRegistrationEmailValidators
 } from './middlewares/authValidators';
-import {authControllers} from './controllers/authControllers';
 import {routersPaths} from '../../common/path/paths';
-
+import {AuthControllers} from './controllers/authControllers';
 
 export const authRouter = Router()
+
+const authControllers = new AuthControllers()
 
 authRouter.post(
     routersPaths.auth.login,
     ...loginUserValidators,
-    authControllers.loginUser
+    authControllers.loginUser.bind(authControllers)
 )
 
 authRouter.get(
     routersPaths.auth.me,
     ...getUserInfoValidators,
-    authControllers.getUserInfo
+    authControllers.getUserInfo.bind(authControllers)
 )
 
 authRouter.post(
     routersPaths.auth.registration,
     ...registerUserValidators,
-    authControllers.registerUser
+    authControllers.registerUser.bind(authControllers)
 )
 
 authRouter.post(
     routersPaths.auth.registrationConfirmation,
     ...registrationConfirmationEmailValidators,
-    authControllers.registrationConfirmationEmail
+    authControllers.registrationConfirmationEmail.bind(authControllers)
 )
 
 authRouter.post(
     routersPaths.auth.registrationEmailResending,
     ...resendRegistrationEmailValidators,
-    authControllers.resendRegistrationEmail
+    authControllers.resendRegistrationEmail.bind(authControllers)
 )
 
 authRouter.post(
     routersPaths.auth.refreshToken,
     ...refreshTokenValidators,
-    authControllers.updateTokens
+    authControllers.updateTokens.bind(authControllers)
 )
 
 authRouter.post(
     routersPaths.auth.logout,
     ...logoutUserValidators,
-    authControllers.logoutUser
+    authControllers.logoutUser.bind(authControllers)
 )
 
 authRouter.post(
     routersPaths.auth.passwordRecovery,
     ...passwordRecoveryValidators,
-    authControllers.passwordRecovery
+    authControllers.passwordRecovery.bind(authControllers)
 )
 
 authRouter.post(
     routersPaths.auth.newPassword,
     ...newPasswordValidators,
-    authControllers.newPassword
+    authControllers.newPassword.bind(authControllers)
 )
 

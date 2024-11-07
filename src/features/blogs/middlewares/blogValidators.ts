@@ -4,8 +4,9 @@ import {NextFunction, Request, Response} from 'express'
 import {adminMiddleware} from '../../../global-middlewares/admin-middleware'
 import {ObjectId} from 'mongodb';
 import {contentValidator, shortDescriptionValidator, titleValidator} from '../../posts/middlewares/postValidators';
-import {blogsQueryRepository} from '../repositories/blogsQueryRepository';
+import {BlogsQueryRepository} from '../repositories/blogsQueryRepository';
 
+//TODO: нужно ли выносить валидацию в класс?
 export const nameValidator = body('name').isString().withMessage('not string').trim()
     .isLength({min: 1, max: 15}).withMessage('more than 15 or 0')
 
@@ -38,7 +39,7 @@ export const findBlogValidator = async (req: Request<{ id: string }>, res: Respo
         res.status(404).json({error: 'invalid id'})
         return
     }
-
+    const blogsQueryRepository = new BlogsQueryRepository()
     const isBlogFound: boolean = await blogsQueryRepository.isBlogFound(req.params.id)
 
     if (isBlogFound) {

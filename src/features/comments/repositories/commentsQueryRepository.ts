@@ -5,7 +5,7 @@ import {PostId} from '../../../types/entities/posts-types';
 import {CommentId, CommentsSortViewModel, CommentViewModel} from '../../../types/entities/comments-types';
 import {CommentDbType, CommentsQueryDbType} from '../../../types/db/comments-db-types';
 
-class CommentsQueryRepository {
+export class CommentsQueryRepository {
     private toIdQuery(id: PostId): IdQueryDbType {
         return {_id: new ObjectId(id)}
     }
@@ -72,4 +72,3 @@ class CommentsQueryRepository {
     }
 }
 
-export const commentsQueryRepository = new CommentsQueryRepository()

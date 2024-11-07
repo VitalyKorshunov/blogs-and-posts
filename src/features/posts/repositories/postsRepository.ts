@@ -6,7 +6,7 @@ import {IdQueryDbType} from '../../../types/db/query-db-types';
 import {BlogId, BlogServiceModel} from '../../../types/entities/blogs-types';
 import {BlogDbType} from '../../../types/db/blog-db-types';
 
-class PostsRepository {
+export class PostsRepository {
     private toIdQuery(id: PostId): IdQueryDbType {
         return {_id: new ObjectId(id)}
     }
@@ -60,5 +60,3 @@ class PostsRepository {
         return blog ? this.mapToBlogWithCorrectId(blog) : null
     }
 }
-
-export const postsRepository = new PostsRepository()

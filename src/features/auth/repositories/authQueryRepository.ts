@@ -4,7 +4,7 @@ import {UserId} from '../../../types/entities/users-types';
 import {ObjectId, WithId} from 'mongodb';
 import {UserModel} from '../../../db/mongo-db';
 
-class AuthQueryRepository {
+export class AuthQueryRepository {
     private mapToUserInfoModel(user: WithId<UserDbType>) {
         const userInfo: UserInfoViewModel = {
             email: user.email,
@@ -20,4 +20,3 @@ class AuthQueryRepository {
     }
 }
 
-export const authQueryRepository = new AuthQueryRepository()

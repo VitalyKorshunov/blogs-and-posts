@@ -3,7 +3,7 @@ import {ObjectId} from 'mongodb';
 import {IdQueryDbType} from '../../../types/db/query-db-types';
 import {BlogModel} from '../../../db/mongo-db';
 
-class BlogsRepository {
+export class BlogsRepository {
     private toIdQuery(id: string): IdQueryDbType {
         return {_id: new ObjectId(id)}
     }
@@ -27,5 +27,3 @@ class BlogsRepository {
         return updatedBlog.matchedCount
     }
 }
-
-export const blogsRepository = new BlogsRepository()

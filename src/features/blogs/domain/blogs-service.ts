@@ -1,7 +1,13 @@
 import {BlogCreateType, BlogId, BlogInputModel, BlogUpdateType} from '../../../types/entities/blogs-types';
-import {blogsRepository} from '../repositories/blogsRepository';
+import {BlogsRepository} from '../repositories/blogsRepository';
 
-class BlogsService {
+export class BlogsService {
+    private blogsRepository: BlogsRepository;
+
+    constructor() {
+        this.blogsRepository = new BlogsRepository()
+    }
+
     async createBlog(blog: BlogInputModel): Promise<BlogId> {
         const newBlog: BlogCreateType = {
             name: blog.name,
@@ -10,11 +16,11 @@ class BlogsService {
             createdAt: new Date(),
             isMembership: false
         }
-        return await blogsRepository.createBlog(newBlog)
+        return await this.blogsRepository.createBlog(newBlog)
     }
 
     async deleteBlog(id: BlogId): Promise<number> {
-        return await blogsRepository.deleteBlogById(id)
+        return await this.blogsRepository.deleteBlogById(id)
     }
 
     async updateBlog(blog: BlogInputModel, id: BlogId): Promise<number> {
@@ -24,8 +30,6 @@ class BlogsService {
             websiteUrl: blog.websiteUrl
         }
 
-        return await blogsRepository.updateBlog(updatedBlog, id)
+        return await this.blogsRepository.updateBlog(updatedBlog, id)
     }
 }
-
-export const blogsService = new BlogsService()

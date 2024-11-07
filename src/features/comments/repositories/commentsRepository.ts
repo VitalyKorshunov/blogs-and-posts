@@ -13,7 +13,7 @@ import {
 } from '../../../types/entities/comments-types';
 import {CommentDbType} from '../../../types/db/comments-db-types';
 
-class CommentsRepository {
+export class CommentsRepository {
     private toIdQuery(id: PostId): IdQueryDbType {
         return {_id: new ObjectId(id)}
     }
@@ -94,5 +94,3 @@ class CommentsRepository {
         return comment ? this.mapToCommentWithCorrectId(comment) : null
     }
 }
-
-export const commentsRepository = new CommentsRepository()

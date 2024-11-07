@@ -1,12 +1,20 @@
 import {Request, Response} from 'express';
-import {commentsService} from '../domain/comments-service';
-import {commentsQueryRepository} from '../repositories/commentsQueryRepository';
 import {ParamType} from '../../../types/request-response/request-types';
 import {CommentInputModel, CommentViewModel} from '../../../types/entities/comments-types';
+import {CommentsService} from '../domain/comments-service';
+import {CommentsQueryRepository} from '../repositories/commentsQueryRepository';
 
-export const commentsControllers = {
+export class CommentsControllers {
+    private commentsService: CommentsService
+    private commentsQueryRepository: CommentsQueryRepository
+
+    constructor() {
+        this.commentsService = new CommentsService()
+        this.commentsQueryRepository = new CommentsQueryRepository()
+    }
+
     async deleteComment(req: Request<ParamType>, res: Response) {
-        const isCommentDeleted = await commentsService.deleteComment(req.user!.id, req.params.id)
+        const isCommentDeleted = await this.commentsService.deleteComment(req.user!.id, req.params.id)
 
         if (isCommentDeleted) {
             res.sendStatus(204)
@@ -18,17 +26,17 @@ export const commentsControllers = {
             res.sendStatus(404)
             return
         }
-    },
+    }
 
     async findComment(req: Request<ParamType>, res: Response<CommentViewModel>) {
-        const comment = await commentsQueryRepository.findAndMap(req.params.id)
+        const comment = await this.commentsQueryRepository.findAndMap(req.params.id)
         res
             .status(200)
             .json(comment)
-    },
+    }
 
     async updateComment(req: Request<ParamType, any, CommentInputModel>, res: Response) {
-        const statusCode = await commentsService.updateComment(req.user!.id, req.params.id, req.body)
+        const statusCode = await this.commentsService.updateComment(req.user!.id, req.params.id, req.body)
 
         if (statusCode.statusCode === 1) {
             res.sendStatus(204)
@@ -40,5 +48,5 @@ export const commentsControllers = {
             res.sendStatus(404)
             return
         }
-    },
+    }
 }

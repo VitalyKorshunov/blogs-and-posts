@@ -2,8 +2,8 @@ import {body, query} from 'express-validator'
 import {inputCheckErrorsMiddleware} from '../../../global-middlewares/inputCheckErrorsMiddleware'
 import {NextFunction, Request, Response} from 'express'
 import {ObjectId} from 'mongodb';
-import {commentsQueryRepository} from '../repositories/commentsQueryRepository';
 import {accessTokenGuardMiddleware} from '../../../global-middlewares/accessTokenGuard-middleware';
+import {CommentsQueryRepository} from '../repositories/commentsQueryRepository';
 
 
 export const commentContentValidator = body('content').isString().withMessage('not string').trim()
@@ -15,6 +15,7 @@ export const findCommentValidator = async (req: Request<{ id: string }>, res: Re
         return
     }
 
+    const commentsQueryRepository = new CommentsQueryRepository()
     const isCommentFound = await commentsQueryRepository.isCommentFound(req.params.id)
 
     if (isCommentFound) {

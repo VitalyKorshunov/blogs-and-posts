@@ -6,42 +6,51 @@ import {
     getPostsValidators
 } from './middlewares/postValidators'
 import {adminMiddleware} from '../../global-middlewares/admin-middleware'
-import {postsControllers} from './controllers/postsControllers';
 import {routersPaths} from '../../common/path/paths';
+import {PostsControllers} from './controllers/postsControllers';
 
 export const postsRouter = Router()
+
+const postsControllers = new PostsControllers()
 
 postsRouter.post(
     '/',
     ...createPostValidators,
-    postsControllers.createPost)
+    postsControllers.createPost.bind(postsControllers)
+)
 
 postsRouter.get(
     '/',
     ...getPostsValidators,
-    postsControllers.getPosts)
+    postsControllers.getPosts.bind(postsControllers)
+)
 
 postsRouter.get(
     '/:id',
     findPostValidator,
-    postsControllers.findPost)
+    postsControllers.findPost.bind(postsControllers)
+)
 
 postsRouter.delete(
     '/:id',
     adminMiddleware, findPostValidator,
-    postsControllers.delPost)
+    postsControllers.delPost.bind(postsControllers)
+)
 
 postsRouter.put(
     '/:id',
     findPostValidator, ...createPostValidators,
-    postsControllers.updatePost)
+    postsControllers.updatePost.bind(postsControllers)
+)
 
 postsRouter.get(
     '/:id' + routersPaths.comments,
     findPostValidator, ...getPostsValidators,
-    postsControllers.getCommentsInPost)
+    postsControllers.getCommentsInPost.bind(postsControllers)
+)
 
 postsRouter.post(
     '/:id' + routersPaths.comments,
     ...createCommentInPostValidator,
-    postsControllers.createCommentInPost)
+    postsControllers.createCommentInPost.bind(postsControllers)
+)

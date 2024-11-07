@@ -14,7 +14,7 @@ import {SortOutputQueryType} from '../../../types/utils/sort-types';
 import {PostDbType} from '../../../types/db/post-db-types';
 import {result, ResultType} from '../../../common/utils/errorsAndStatusCodes.utils';
 
-class BlogsQueryRepository {
+export class BlogsQueryRepository {
     private toIdQuery(id: string): IdQueryDbType {
         return {_id: new ObjectId(id)}
     }
@@ -121,5 +121,3 @@ class BlogsQueryRepository {
         return result.success(data)
     }
 }
-
-export const blogsQueryRepository = new BlogsQueryRepository()

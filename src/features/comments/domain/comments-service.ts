@@ -1,5 +1,4 @@
 import {PostId, PostServiceModel} from '../../../types/entities/posts-types';
-import {commentsRepository} from '../repositories/commentsRepository';
 import {
     CommentCreateType,
     CommentId,
@@ -7,6 +6,7 @@ import {
     CommentUpdateType
 } from '../../../types/entities/comments-types';
 import {UserId, UserServiceModel} from '../../../types/entities/users-types';
+import {CommentsRepository} from '../repositories/commentsRepository';
 
 class NotFoundError {
     constructor(public message: string = 'entity not found') {
@@ -17,11 +17,18 @@ enum statusCode {
     good = 1,
     bad = 0
 }
-// TODO зарефакторить и переписать на классы
-export const commentsService = {
+
+// TODO зарефакторить
+export class CommentsService {
+    private commentsRepository: CommentsRepository
+
+    constructor() {
+        this.commentsRepository = new CommentsRepository()
+    }
+
     async createComment(postId: PostId, userId: UserId, comment: CommentInputModel): Promise<CommentId | null> {
-        const post: PostServiceModel | null = await commentsRepository.findPostById(postId)
-        const user: UserServiceModel | null = await commentsRepository.findUserById(userId)
+        const post: PostServiceModel | null = await this.commentsRepository.findPostById(postId)
+        const user: UserServiceModel | null = await this.commentsRepository.findUserById(userId)
 
         if (!post || !user) return null
 
@@ -36,26 +43,28 @@ export const commentsService = {
                 createdAt: new Date()
             }
 
-            return await commentsRepository.createComment(newComment)
+            return await this.commentsRepository.createComment(newComment)
         } else {
             throw new NotFoundError('Blog not found (postsService.create)')
         }
-    },
+    }
+
     async deleteComment(userId: UserId, commentId: CommentId): Promise<boolean | null> {
-        const user = await commentsRepository.findUserById(userId);
-        const comment = await commentsRepository.findCommentById(commentId)
+        const user = await this.commentsRepository.findUserById(userId);
+        const comment = await this.commentsRepository.findCommentById(commentId)
 
         if (user?.id !== comment?.commentatorInfo.userId) {
             return null
         }
 
-        return commentsRepository.deleteComment(commentId)
-    },
+        return this.commentsRepository.deleteComment(commentId)
+    }
+
     async updateComment(userId: UserId, commentId: CommentId, comment: CommentUpdateType,): Promise<{
         statusCode: number
     }> {
-        const user = await commentsRepository.findUserById(userId)
-        const oldComment = await commentsRepository.findCommentById(commentId)
+        const user = await this.commentsRepository.findUserById(userId)
+        const oldComment = await this.commentsRepository.findCommentById(commentId)
 
         if (user?.id !== oldComment?.commentatorInfo.userId) {
             return {statusCode: statusCode.bad}
@@ -65,8 +74,8 @@ export const commentsService = {
             content: comment.content
         }
 
-        const isCommentUpdated = await commentsRepository.updateComment(commentId, updateCommentData)
+        const isCommentUpdated = await this.commentsRepository.updateComment(commentId, updateCommentData)
 
         return {statusCode: isCommentUpdated ? statusCode.good : statusCode.bad}
-    },
+    }
 }
