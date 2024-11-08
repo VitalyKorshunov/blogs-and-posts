@@ -1,17 +1,23 @@
 import {UserId} from '../../../types/entities/users-types';
 import {result, ResultType} from '../../../common/utils/errorsAndStatusCodes.utils';
 import {DeviceId, SecurityServiceModel} from '../../../types/entities/security-types';
-import {securityRepository} from '../repositories/securityRepository';
+import {SecurityRepository} from '../repositories/securityRepository';
 
-class SecurityService {
+export class SecurityService {
+    private securityRepository: SecurityRepository
+
+    constructor() {
+        this.securityRepository = new SecurityRepository()
+    }
+
     async deleteAllUserDevicesExceptCurrent(userId: UserId, deviceId: DeviceId): Promise<ResultType<null>> {
-        await securityRepository.deleteAllUserDevicesExceptCurrent(userId, deviceId)
+        await this.securityRepository.deleteAllUserDevicesExceptCurrent(userId, deviceId)
 
         return result.success(null)
     }
 
     async deleteUserDeviceByDeviceId(userId: UserId, deviceId: DeviceId): Promise<ResultType<null>> {
-        const session: SecurityServiceModel | null = await securityRepository.findUserSessionByDeviceId(deviceId)
+        const session: SecurityServiceModel | null = await this.securityRepository.findUserSessionByDeviceId(deviceId)
         if (!session) {
             return result.notFound('not found session by deviceId')
         }
@@ -20,10 +26,8 @@ class SecurityService {
             return result.permissionDeniedError('this user cannot delete sessions that are not his own')
         }
 
-        await securityRepository.deleteUserDeviceByDeviceId(deviceId)
+        await this.securityRepository.deleteUserDeviceByDeviceId(deviceId)
 
         return result.success(null)
     }
 }
-
-export const securityService = new SecurityService()

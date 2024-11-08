@@ -1,26 +1,34 @@
 import {Request, Response} from 'express';
-import {securityQueryRepository} from '../repositories/securityQueryRepository';
 import {DeviceId, SecurityViewModel} from '../../../types/entities/security-types';
 import {ResultType, StatusesCode} from '../../../common/utils/errorsAndStatusCodes.utils';
-import {securityService} from '../domain/securityService';
+import {SecurityQueryRepository} from '../repositories/securityQueryRepository';
+import {SecurityService} from '../domain/securityService';
 
-export const securityControllers = {
+export class SecurityControllers {
+    private securityQueryRepository: SecurityQueryRepository
+    private securityService: SecurityService
+
+    constructor() {
+        this.securityQueryRepository = new SecurityQueryRepository()
+        this.securityService = new SecurityService()
+    }
+
     async getAllUserDevices(req: Request, res: Response) {
         const {id} = req.user!
 
-        const result: SecurityViewModel[] | null = await securityQueryRepository.getAllActiveSessionsByUser(id)
+        const result: SecurityViewModel[] | null = await this.securityQueryRepository.getAllActiveSessionsByUser(id)
 
         if (result) {
             res.status(200).json(result)
         } else {
             res.sendStatus(401)
         }
-    },
+    }
 
     async deleteAllUserDevicesExceptCurrent(req: Request, res: Response) {
         const {id, deviceId} = req.user!
 
-        const result: ResultType<null> = await securityService.deleteAllUserDevicesExceptCurrent(id, deviceId!)
+        const result: ResultType<null> = await this.securityService.deleteAllUserDevicesExceptCurrent(id, deviceId!)
 
         if (result.statusCode === StatusesCode.Success) {
             res.sendStatus(204)
@@ -28,13 +36,13 @@ export const securityControllers = {
         } else {
             res.sendStatus(401)
         }
-    },
+    }
 
     async deleteUserDeviceByDeviceId(req: Request<{ deviceId: DeviceId }>, res: Response) {
         const deviceId: DeviceId = req.params.deviceId
         const {id} = req.user!
 
-        const result: ResultType<null> = await securityService.deleteUserDeviceByDeviceId(id, deviceId)
+        const result: ResultType<null> = await this.securityService.deleteUserDeviceByDeviceId(id, deviceId)
 
         if (result.statusCode === StatusesCode.Success) {
             res.sendStatus(204)
@@ -45,5 +53,5 @@ export const securityControllers = {
         } else {
             res.sendStatus(401)
         }
-    },
+    }
 }

@@ -3,8 +3,7 @@ import {inputCheckErrorsMiddleware} from '../../../global-middlewares/inputCheck
 import {adminMiddleware} from '../../../global-middlewares/admin-middleware'
 import {ObjectId} from 'mongodb';
 import {NextFunction, Request, Response} from 'express';
-import {usersQueryRepository} from '../repositories/usersQueryRepository';
-
+import {UsersQueryRepository} from '../repositories/usersQueryRepository';
 
 export const loginValidator = body('login').isString().withMessage('not string').trim()
     .isLength({
@@ -42,6 +41,7 @@ export const findUserValidator = async (req: Request<{ id: string }>, res: Respo
         return
     }
 
+    const usersQueryRepository = new UsersQueryRepository()
     const isUserFound: boolean = await usersQueryRepository.isUserFound(req.params.id)
 
     if (isUserFound) {

@@ -4,7 +4,7 @@ import {UserId, UserServiceModel} from '../../../types/entities/users-types';
 import {UserDbType} from '../../../types/db/user-db-types';
 import {UserModel} from '../../../db/mongo-db';
 
-class UsersRepository {
+export class UsersRepository {
     private toIdQuery(id: UserId): IdQueryDbType {
         return {_id: new ObjectId(id)}
     }
@@ -40,5 +40,3 @@ class UsersRepository {
         return user.deletedCount
     }
 }
-
-export const usersRepository = new UsersRepository()

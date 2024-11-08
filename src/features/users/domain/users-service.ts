@@ -1,12 +1,18 @@
 import {UserId, UserInputModel} from '../../../types/entities/users-types';
-import {usersRepository} from '../repositories/usersRepository';
 import {hashPassService} from '../../../common/adapters/hashPass.service';
 import {UserDbType} from '../../../types/db/user-db-types';
 import {ErrorsType} from '../../../types/utils/output-errors-type';
+import {UsersRepository} from '../repositories/usersRepository';
 
-class UsersService {
+export class UsersService {
+    private usersRepository: UsersRepository
+
+    constructor() {
+        this.usersRepository = new UsersRepository()
+    }
+
     private async checkExistValueInField(field: string, value: string): Promise<boolean> {
-        const isExist = await usersRepository.findUserByFieldAndValue(field, value)
+        const isExist = await this.usersRepository.findUserByFieldAndValue(field, value)
 
         return !!isExist
     }
@@ -41,12 +47,10 @@ class UsersService {
             }
         }
 
-        return await usersRepository.createUser(newUser)
+        return await this.usersRepository.createUser(newUser)
     }
 
     async deleteUser(id: UserId): Promise<number> {
-        return usersRepository.deleteUser(id)
+        return this.usersRepository.deleteUser(id)
     }
 }
-
-export const usersService = new UsersService()

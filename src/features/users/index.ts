@@ -1,21 +1,26 @@
 import {Router} from 'express'
 import {findUserValidator, sortUsersValidators, usersValidators,} from './middlewares/usersValidators'
 import {adminMiddleware} from '../../global-middlewares/admin-middleware'
-import {usersControllers} from './controllers/usersControllers';
+import {UsersControllers} from './controllers/usersControllers';
 
 export const usersRouter = Router()
+
+const usersControllers = new UsersControllers()
 
 usersRouter.post(
     '/',
     ...usersValidators,
-    usersControllers.createUser)
+    usersControllers.createUser.bind(usersControllers)
+)
 
 usersRouter.get(
     '/',
     adminMiddleware, ...sortUsersValidators,
-    usersControllers.getUsers)
+    usersControllers.getUsers.bind(usersControllers)
+)
 
 usersRouter.delete(
     '/:id',
     adminMiddleware, findUserValidator,
-    usersControllers.deleteUser)
+    usersControllers.deleteUser.bind(usersControllers)
+)

@@ -1,4 +1,3 @@
-import {usersRepository} from '../../users/repositories/usersRepository';
 import {hashPassService} from '../../../common/adapters/hashPass.service';
 import {
     EmailConfirmationType,
@@ -27,22 +26,25 @@ import {
     SecurityUpdateType
 } from '../../../types/entities/security-types';
 import {AuthRepository} from '../repositories/authRepository';
+import {UsersRepository} from '../../users/repositories/usersRepository';
 
 export class AuthService {
     private authRepository: AuthRepository
+    private usersRepository: UsersRepository
 
     constructor() {
         this.authRepository = new AuthRepository()
+        this.usersRepository = new UsersRepository()
     }
 
     private async findUserByLoginOrEmail(loginOrEmail: string): Promise<UserServiceModel | null> {
         const field = loginOrEmail.includes('@') ? 'email' : 'login'
 
-        return await usersRepository.findUserByFieldAndValue(field, loginOrEmail)
+        return await this.usersRepository.findUserByFieldAndValue(field, loginOrEmail)
     }
 
     private async checkExistValueInField(field: string, value: string): Promise<boolean> {
-        const isExist = await usersRepository.findUserByFieldAndValue(field, value)
+        const isExist = await this.usersRepository.findUserByFieldAndValue(field, value)
 
         return !!isExist
     }
@@ -160,7 +162,8 @@ export class AuthService {
                 isConfirmed: false
             }
         }
-        const userId: UserId = await usersRepository.createUser(newUser)
+
+        await this.usersRepository.createUser(newUser)
 
         nodemailerService.sendEmailConfirmation(newUser.email, newUser.emailConfirmation.confirmationCode).catch((e) => {
             console.log(e)

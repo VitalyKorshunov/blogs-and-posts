@@ -3,7 +3,7 @@ import {jwtService} from '../common/adapters/jwt.service';
 import {DeviceId} from '../types/entities/security-types';
 import {UserId} from '../types/entities/users-types';
 import {VerifyRefreshTokenViewModel} from '../types/auth/jwt-types';
-import {securityRepository} from '../features/security/repositories/securityRepository';
+import {SecurityRepository} from '../features/security/repositories/securityRepository';
 
 export const refreshTokenGuardMiddleware = async (req: Request, res: Response, next: NextFunction) => {
     const refreshToken = req.cookies.refreshToken as string
@@ -17,6 +17,8 @@ export const refreshTokenGuardMiddleware = async (req: Request, res: Response, n
 
     if (payload) {
         const {userId, deviceId} = payload
+
+        const securityRepository = new SecurityRepository()
 
         const isSessionByDeviceIdFound = await securityRepository.isSessionByDeviceIdFound(payload.deviceId)
         if (!isSessionByDeviceIdFound) {

@@ -4,7 +4,7 @@ import {UserDbType, UsersQueryDbType} from '../../../types/db/user-db-types';
 import {UserId, UsersSortViewModel, UserViewModel} from '../../../types/entities/users-types';
 import {UserModel} from '../../../db/mongo-db';
 
-class UsersQueryRepository {
+export class UsersQueryRepository {
     private toIdQuery(id: UserId): IdQueryDbType {
         return {_id: new ObjectId(id)}
     }
@@ -83,5 +83,3 @@ class UsersQueryRepository {
         }
     }
 }
-
-export const usersQueryRepository = new UsersQueryRepository()

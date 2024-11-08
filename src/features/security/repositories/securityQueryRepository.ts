@@ -4,7 +4,7 @@ import {ObjectId, WithId} from 'mongodb';
 import {UserId} from '../../../types/entities/users-types';
 import {securityCollection} from '../../../db/mongo-db';
 
-class SecurityQueryRepository {
+export class SecurityQueryRepository {
     private mapToSecurityViewModel(data: WithId<SecurityDbType>): SecurityViewModel {
         return {
             ip: data.ip,
@@ -26,5 +26,3 @@ class SecurityQueryRepository {
         return filteredSession.map(session => this.mapToSecurityViewModel(session))
     }
 }
-
-export const securityQueryRepository = new SecurityQueryRepository()
