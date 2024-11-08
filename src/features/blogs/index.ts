@@ -8,12 +8,10 @@ import {
 } from './middlewares/blogValidators'
 import {adminMiddleware} from '../../global-middlewares/admin-middleware'
 import {SETTINGS} from '../../settings';
-import {BlogsControllers} from './controllers/blogsControllers';
 import {routersPaths} from '../../common/path/paths';
+import {blogsControllers} from './composition-root';
 
 export const blogsRouter = Router()
-
-const blogsControllers = new BlogsControllers()
 
 blogsRouter.post(
     '/',

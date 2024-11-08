@@ -7,12 +7,8 @@ import {AuthService} from '../domain/auth-service';
 import {AuthQueryRepository} from '../repositories/authQueryRepository';
 
 export class AuthControllers {
-    private authService: AuthService
-    private authQueryRepository: AuthQueryRepository
-
-    constructor() {
-        this.authService = new AuthService()
-        this.authQueryRepository = new AuthQueryRepository()
+    constructor(protected authService: AuthService,
+                protected authQueryRepository: AuthQueryRepository) {
     }
 
     async loginUser(req: Request<{}, {}, AuthInputModel>, res: Response) {

@@ -29,12 +29,8 @@ import {AuthRepository} from '../repositories/authRepository';
 import {UsersRepository} from '../../users/repositories/usersRepository';
 
 export class AuthService {
-    private authRepository: AuthRepository
-    private usersRepository: UsersRepository
-
-    constructor() {
-        this.authRepository = new AuthRepository()
-        this.usersRepository = new UsersRepository()
+    constructor(protected authRepository: AuthRepository,
+                protected usersRepository: UsersRepository) {
     }
 
     private async findUserByLoginOrEmail(loginOrEmail: string): Promise<UserServiceModel | null> {

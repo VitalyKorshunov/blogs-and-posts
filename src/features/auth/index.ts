@@ -11,11 +11,9 @@ import {
     resendRegistrationEmailValidators
 } from './middlewares/authValidators';
 import {routersPaths} from '../../common/path/paths';
-import {AuthControllers} from './controllers/authControllers';
+import {authControllers} from './composition-root';
 
 export const authRouter = Router()
-
-const authControllers = new AuthControllers()
 
 authRouter.post(
     routersPaths.auth.login,

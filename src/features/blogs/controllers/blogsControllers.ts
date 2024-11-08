@@ -14,16 +14,10 @@ import {PostsService} from '../../posts/domain/posts-service';
 import {PostsQueryRepository} from '../../posts/repositories/postsQueryRepository';
 
 export class BlogsControllers {
-    private blogsService: BlogsService
-    private blogsQueryRepository: BlogsQueryRepository;
-    private postsService: PostsService
-    private postsQueryRepository: PostsQueryRepository
-
-    constructor() {
-        this.blogsService = new BlogsService()
-        this.blogsQueryRepository = new BlogsQueryRepository()
-        this.postsService = new PostsService()
-        this.postsQueryRepository = new PostsQueryRepository()
+    constructor(protected blogsService: BlogsService,
+                protected blogsQueryRepository: BlogsQueryRepository,
+                protected postsService: PostsService,
+                protected postsQueryRepository: PostsQueryRepository) {
     }
 
     async createBlog(req: Request<any, any, BlogInputModel>, res: Response<BlogViewModel>) {

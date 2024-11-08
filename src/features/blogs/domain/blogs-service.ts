@@ -2,10 +2,7 @@ import {BlogCreateType, BlogId, BlogInputModel, BlogUpdateType} from '../../../t
 import {BlogsRepository} from '../repositories/blogsRepository';
 
 export class BlogsService {
-    private blogsRepository: BlogsRepository;
-
-    constructor() {
-        this.blogsRepository = new BlogsRepository()
+    constructor(protected blogsRepository: BlogsRepository) {
     }
 
     async createBlog(blog: BlogInputModel): Promise<BlogId> {
