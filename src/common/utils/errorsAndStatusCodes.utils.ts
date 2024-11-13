@@ -78,7 +78,6 @@ export type ResultType<T> =
     | ResultEmailError
     | PermissionDeniedError
     | ResultPasswordError
-
 export const result = {
     success<T>(data: T): ResultSuccess<T> {
         return {

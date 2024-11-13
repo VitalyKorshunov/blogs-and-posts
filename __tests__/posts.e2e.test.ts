@@ -382,7 +382,7 @@ describe('/posts', () => {
         }
 
         const res = await req
-            .post(`${SETTINGS.PATH.POSTS}/${postId}${routersPaths.comments}`)
+            .post(`${SETTINGS.PATH.POSTS}/${postId}${routersPaths.comments.comments}`)
             // .set({'Authorization': `Bearer ${}`}) TODO
             .send(comment)
             // .expect(201)

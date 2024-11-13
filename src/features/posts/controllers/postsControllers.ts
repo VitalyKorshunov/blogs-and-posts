@@ -1,5 +1,5 @@
 import {Request, Response} from 'express';
-import {PostInputModel, PostsSortViewModel, PostViewModel} from '../../../types/entities/posts-types';
+import {PostId, PostInputModel, PostsSortViewModel, PostViewModel} from '../../../types/entities/posts-types';
 import {ParamType} from '../../../types/request-response/request-types';
 import {CommentInputModel, CommentsSortViewModel, CommentViewModel} from '../../../types/entities/comments-types';
 import {StatusesCode} from '../../../common/utils/errorsAndStatusCodes.utils';
@@ -7,6 +7,8 @@ import {PostsService} from '../domain/posts-service';
 import {PostsQueryRepository} from '../repositories/postsQueryRepository';
 import {CommentsService} from '../../comments/domain/comments-service';
 import {CommentsQueryRepository} from '../../comments/repositories/commentsQueryRepository';
+import {accessTokenUtils} from '../../../common/utils/accessToken.utils';
+import {UserId} from '../../../types/entities/users-types';
 
 export class PostsControllers {
     private postsService: PostsService
@@ -62,20 +64,24 @@ export class PostsControllers {
     }
 
     async getCommentsInPost(req: Request<ParamType>, res: Response<CommentsSortViewModel>) {
-        const comments = await this.commentsQueryRepository.getAll(req.params.id, req.query)
+        const userId = await accessTokenUtils.getAccessTokenUserId(req)
+        const comments = await this.commentsQueryRepository.getAll(req.params.id, req.query, userId)
 
         res.status(200).json(comments)
     }
 
     async createCommentInPost(req: Request<ParamType, {}, CommentInputModel>, res: Response<CommentViewModel>) {
-        const commentId = await this.commentsService.createComment(req.params.id, req.user!.id, req.body)
+        const postId: PostId = req.params.id
+        const userId : UserId = req.user!.id
+        const inputComment: CommentInputModel = req.body
+        const commentId = await this.commentsService.createComment(postId, userId, inputComment)
 
         if (commentId === null) {
             res.sendStatus(404)
             return
         }
 
-        const comment = await this.commentsQueryRepository.findAndMap(commentId)
+        const comment = await this.commentsQueryRepository.findAndMap(commentId, userId)//TODO
 
         if (comment) {
             res.status(201).json(comment)

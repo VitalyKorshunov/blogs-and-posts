@@ -4,10 +4,14 @@ import {NextFunction, Request, Response} from 'express'
 import {ObjectId} from 'mongodb';
 import {accessTokenGuardMiddleware} from '../../../global-middlewares/accessTokenGuard-middleware';
 import {CommentsQueryRepository} from '../repositories/commentsQueryRepository';
+import {LikeStatus} from '../../../types/db/comments-db-types';
 
 
 export const commentContentValidator = body('content').isString().withMessage('not string').trim()
     .isLength({min: 20, max: 300}).withMessage('more than 300 or less than 20')
+
+export const likeStatusValidator = body('likeStatus').isString().withMessage('not string').trim()
+    .isIn(Object.values(LikeStatus)).withMessage('invalid value')
 
 export const findCommentValidator = async (req: Request<{ id: string }>, res: Response, next: NextFunction) => {
     if (!ObjectId.isValid(req.params.id)) {
@@ -65,6 +69,15 @@ export const deleteCommentsValidators = [
     accessTokenGuardMiddleware,
 
     findCommentValidator,
+
+    inputCheckErrorsMiddleware
+]
+
+export const likeStatusCommentsValidators = [
+    accessTokenGuardMiddleware,
+
+    findCommentValidator,
+    likeStatusValidator,
 
     inputCheckErrorsMiddleware
 ]

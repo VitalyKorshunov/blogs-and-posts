@@ -44,13 +44,13 @@ postsRouter.put(
 )
 
 postsRouter.get(
-    '/:id' + routersPaths.comments,
+    '/:id' + routersPaths.comments.comments,
     findPostValidator, ...getPostsValidators,
     postsControllers.getCommentsInPost.bind(postsControllers)
 )
 
 postsRouter.post(
-    '/:id' + routersPaths.comments,
+    '/:id' + routersPaths.comments.comments,
     ...createCommentInPostValidator,
     postsControllers.createCommentInPost.bind(postsControllers)
 )

@@ -3,6 +3,8 @@ import {ParamType} from '../../../types/request-response/request-types';
 import {CommentInputModel, CommentViewModel} from '../../../types/entities/comments-types';
 import {CommentsService} from '../domain/comments-service';
 import {CommentsQueryRepository} from '../repositories/commentsQueryRepository';
+import {StatusesCode} from '../../../common/utils/errorsAndStatusCodes.utils';
+import {accessTokenUtils} from '../../../common/utils/accessToken.utils';
 
 export class CommentsControllers {
     private commentsService: CommentsService
@@ -29,7 +31,9 @@ export class CommentsControllers {
     }
 
     async findComment(req: Request<ParamType>, res: Response<CommentViewModel>) {
-        const comment = await this.commentsQueryRepository.findAndMap(req.params.id)
+        const userId = await accessTokenUtils.getAccessTokenUserId(req)
+        console.log(userId)
+        const comment = await this.commentsQueryRepository.findAndMap(req.params.id, userId)//TODO
         res
             .status(200)
             .json(comment)
@@ -47,6 +51,25 @@ export class CommentsControllers {
         } else {
             res.sendStatus(404)
             return
+        }
+    }
+
+    async updateLikeStatus(req: Request, res: Response) {
+        //TODO с типизацией Request<CommentId, {}, keyof typeof LikeStatus> подсвечивает красным likeStatus, хотя валидация есть
+        const commentId = req.params.id
+        const userId = req.user!.id
+        const likeStatus = req.body.likeStatus
+console.log('from controllers ',{
+    commentId,
+    userId,
+    likeStatus
+})
+        const result = await this.commentsService.updateLikeStatus(commentId, userId, likeStatus)
+
+        if (result.statusCode === StatusesCode.Success) {
+            res.sendStatus(204)
+        } else {
+            res.sendStatus(404)
         }
     }
 }

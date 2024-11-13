@@ -3,10 +3,13 @@ import {
     CommentCreateType,
     CommentId,
     CommentInputModel,
-    CommentUpdateType
+    CommentUpdateType,
+    CommentUserLikeStatusInfoServiceType
 } from '../../../types/entities/comments-types';
 import {UserId, UserServiceModel} from '../../../types/entities/users-types';
 import {CommentsRepository} from '../repositories/commentsRepository';
+import {LikeStatus} from '../../../types/db/comments-db-types';
+import {result, ResultType} from '../../../common/utils/errorsAndStatusCodes.utils';
 
 class NotFoundError {
     constructor(public message: string = 'entity not found') {
@@ -77,5 +80,37 @@ export class CommentsService {
         const isCommentUpdated = await this.commentsRepository.updateComment(commentId, updateCommentData)
 
         return {statusCode: isCommentUpdated ? statusCode.good : statusCode.bad}
+    }
+
+    async updateLikeStatus(commentId: CommentId, userId: UserId, newLikeStatus: keyof typeof LikeStatus): Promise<ResultType<null>> {
+
+        const isCommentFound = await this.commentsRepository.isCommentFound(commentId)
+        if (!isCommentFound) {
+            return result.notFound('comment not found')
+        }
+
+        const userLikeStatusForComment: CommentUserLikeStatusInfoServiceType | null = await this.commentsRepository.findUserLikeStatusForComment(commentId, userId)
+
+console.log('userLikeStatusForComment', userLikeStatusForComment)
+        if (userLikeStatusForComment === null && newLikeStatus !== LikeStatus.None) {
+            // к лайк или дизлайк +1
+            console.log('like +1 create')
+            await this.commentsRepository.createUserLikeStatusForComment(commentId, userId, newLikeStatus)
+
+        } else if ((userLikeStatusForComment === null && newLikeStatus === LikeStatus.None)
+            || (userLikeStatusForComment?.likeStatus === newLikeStatus)) {
+            return result.success(null)
+
+        } else if (userLikeStatusForComment !== null && newLikeStatus === LikeStatus.None) {
+            // к лайк или дизлайк --
+            await this.commentsRepository.deleteUserLikeStatusForComment(commentId, userId, userLikeStatusForComment.likeStatus)
+
+        } else if (userLikeStatusForComment !== null && newLikeStatus !== LikeStatus.None) {
+            // если был лайк или дизлайк, то к ним -1, а к новому статусу +1
+            await this.commentsRepository.updateUserLikeStatusForComment(commentId, userId, userLikeStatusForComment.likeStatus, newLikeStatus)
+        }
+
+
+        return result.success(null)
     }
 }

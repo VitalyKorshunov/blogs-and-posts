@@ -7,7 +7,28 @@ export type CommentDbType = {
         userId: ObjectId
         userLogin: string
     }
+    likesAndDislikesInfo: LikesAndDislikesCommentInfoDbType
     createdAt: Date
+}
+
+export type LikesAndDislikesCommentInfoDbType = {
+    countCommentLikesAndDislikes: CountCommentLikesAndDislikes
+    commentUserLikeStatusInfo: CommentUserLikeStatusInfoDbType[]
+}
+
+export type CountCommentLikesAndDislikes = {
+    likesCount: number
+    dislikesCount: number
+}
+export type CommentUserLikeStatusInfoDbType = {
+    userId: ObjectId
+    likeStatus: keyof typeof LikeStatus
+}
+
+export enum LikeStatus {
+    Like = 'Like',
+    Dislike = 'Dislike',
+    None = 'None',
 }
 
 export type CommentUpdateDbType = {

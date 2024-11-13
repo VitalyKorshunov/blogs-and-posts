@@ -5,7 +5,10 @@ export const routersPaths = {
     },
     blogs: '/blogs',
     posts: '/posts',
-    comments: '/comments',
+    comments: {
+        comments: '/comments',
+        likeStatus: '/like-status'
+    },
     users: '/users',
     auth: {
         auth: '/auth',
