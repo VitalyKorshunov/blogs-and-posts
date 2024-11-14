@@ -11,6 +11,10 @@ export type CommentDbType = {
     createdAt: Date
 }
 
+export type CommentIdWithUserLikeStatusDbType = {
+    _id: ObjectId
+    likesAndDislikesInfo: Pick<LikesAndDislikesCommentInfoDbType, 'commentUserLikeStatusInfo'>
+}
 export type LikesAndDislikesCommentInfoDbType = {
     countCommentLikesAndDislikes: CountCommentLikesAndDislikes
     commentUserLikeStatusInfo: CommentUserLikeStatusInfoDbType[]
@@ -30,6 +34,8 @@ export enum LikeStatus {
     Dislike = 'Dislike',
     None = 'None',
 }
+
+export type OneOfLikeStatus = keyof typeof LikeStatus
 
 export type CommentUpdateDbType = {
     content: string

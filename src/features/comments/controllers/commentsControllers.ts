@@ -1,10 +1,11 @@
 import {Request, Response} from 'express';
 import {ParamType} from '../../../types/request-response/request-types';
-import {CommentInputModel, CommentViewModel} from '../../../types/entities/comments-types';
+import {CommentId, CommentInputModel, CommentViewModel} from '../../../types/entities/comments-types';
 import {CommentsService} from '../domain/comments-service';
 import {CommentsQueryRepository} from '../repositories/commentsQueryRepository';
 import {StatusesCode} from '../../../common/utils/errorsAndStatusCodes.utils';
 import {accessTokenUtils} from '../../../common/utils/accessToken.utils';
+import {LikeStatus} from '../../../types/db/comments-db-types';
 
 export class CommentsControllers {
     private commentsService: CommentsService
@@ -54,16 +55,15 @@ export class CommentsControllers {
         }
     }
 
-    async updateLikeStatus(req: Request, res: Response) {
-        //TODO с типизацией Request<CommentId, {}, keyof typeof LikeStatus> подсвечивает красным likeStatus, хотя валидация есть
+    async updateLikeStatus(req: Request<{ id: CommentId }, {}, { likeStatus: LikeStatus }>, res: Response) {
         const commentId = req.params.id
         const userId = req.user!.id
         const likeStatus = req.body.likeStatus
-console.log('from controllers ',{
-    commentId,
-    userId,
-    likeStatus
-})
+        console.log('from controllers ', {
+            commentId,
+            userId,
+            likeStatus
+        })
         const result = await this.commentsService.updateLikeStatus(commentId, userId, likeStatus)
 
         if (result.statusCode === StatusesCode.Success) {

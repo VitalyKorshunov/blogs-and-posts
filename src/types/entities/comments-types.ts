@@ -26,6 +26,11 @@ export type CommentUserLikeStatus = {
     myStatus: keyof typeof LikeStatus
 }
 
+export type CommentIdWithCommentUserLikeStatus = {
+    commentId: string
+    myStatus: keyof typeof LikeStatus
+}
+
 export type CommentLikeInfo = {
     likesCount: number
     dislikesCount: number

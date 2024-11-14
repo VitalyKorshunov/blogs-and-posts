@@ -91,10 +91,8 @@ export class CommentsService {
 
         const userLikeStatusForComment: CommentUserLikeStatusInfoServiceType | null = await this.commentsRepository.findUserLikeStatusForComment(commentId, userId)
 
-console.log('userLikeStatusForComment', userLikeStatusForComment)
         if (userLikeStatusForComment === null && newLikeStatus !== LikeStatus.None) {
             // к лайк или дизлайк +1
-            console.log('like +1 create')
             await this.commentsRepository.createUserLikeStatusForComment(commentId, userId, newLikeStatus)
 
         } else if ((userLikeStatusForComment === null && newLikeStatus === LikeStatus.None)
@@ -102,7 +100,7 @@ console.log('userLikeStatusForComment', userLikeStatusForComment)
             return result.success(null)
 
         } else if (userLikeStatusForComment !== null && newLikeStatus === LikeStatus.None) {
-            // к лайк или дизлайк --
+            // к лайк или дизлайк -1
             await this.commentsRepository.deleteUserLikeStatusForComment(commentId, userId, userLikeStatusForComment.likeStatus)
 
         } else if (userLikeStatusForComment !== null && newLikeStatus !== LikeStatus.None) {
