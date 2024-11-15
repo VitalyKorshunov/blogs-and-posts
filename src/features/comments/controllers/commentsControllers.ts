@@ -33,8 +33,8 @@ export class CommentsControllers {
 
     async findComment(req: Request<ParamType>, res: Response<CommentViewModel>) {
         const userId = await accessTokenUtils.getAccessTokenUserId(req)
-        console.log(userId)
-        const comment = await this.commentsQueryRepository.findAndMap(req.params.id, userId)//TODO
+
+        const comment = await this.commentsQueryRepository.findCommentById(req.params.id, userId)
         res
             .status(200)
             .json(comment)

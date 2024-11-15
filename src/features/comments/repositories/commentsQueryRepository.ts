@@ -55,7 +55,7 @@ export class CommentsQueryRepository {
         return !!comment
     }
 
-    async findUserLikeStatusForComments(commentIds: CommentId[], userId: UserId): Promise<CommentIdWithCommentUserLikeStatus[] | null> {
+    async findUserLikeStatusForComments(commentIds: CommentId[], userId: UserId): Promise<CommentIdWithCommentUserLikeStatus[]> {
         const queryCommentIds = commentIds.map(id => new ObjectId(id))
 
         const userLikeStatusForComments = await commentCollection.find(
@@ -69,10 +69,18 @@ export class CommentsQueryRepository {
                 }
             }).toArray()
 
-        return userLikeStatusForComments.length ? userLikeStatusForComments.map(commentWithLikeStatus => this.mapToCommentUserInfoWithCorrectId(commentWithLikeStatus)) : null
+        const result = commentIds.map(commentId => {
+            const foundComment = userLikeStatusForComments.find(comment => comment._id.toString() === commentId)
+
+            return foundComment
+                ? this.mapToCommentUserInfoWithCorrectId(foundComment)
+                : {commentId, myStatus: LikeStatus.None}
+        })
+
+        return result
     }
 
-    async findAndMap(commentId: CommentId, userId: UserId | null): Promise<CommentViewModel> {
+    async findCommentById(commentId: CommentId, userId: UserId | null): Promise<CommentViewModel> {
         const comment: WithId<CommentDbType> | null = await commentCollection.findOne(this.toIdQuery(commentId), {
             projection: {
                 'likesAndDislikesInfo.commentUserLikeStatusInfo': 0,
@@ -81,10 +89,7 @@ export class CommentsQueryRepository {
 
         const userLikeStatus: CommentIdWithCommentUserLikeStatus[] =
             userId
-                ? await this.findUserLikeStatusForComments([commentId], userId) ?? [{
-                commentId,
-                myStatus: LikeStatus.None
-            }]
+                ? await this.findUserLikeStatusForComments([commentId], userId)
                 : [{commentId, myStatus: LikeStatus.None}]
 
         if (comment) {
@@ -94,11 +99,8 @@ export class CommentsQueryRepository {
         }
     }
 
-    async getAll(postId: PostId, query: any, userId: UserId | null): Promise<CommentsSortViewModel> {
-        return await this.sortComments(postId, query, userId)
-    }
+    async findAllCommentsForPost(postId: PostId, query: any, userId: UserId | null): Promise<CommentsSortViewModel> {
 
-    async sortComments(postId: PostId, query: any, userId: UserId | null): Promise<CommentsSortViewModel> {
         const postObjectId: ObjectId = this.toIdQuery(postId)._id
         const findFilter = {postId: postObjectId}
 
@@ -109,7 +111,7 @@ export class CommentsQueryRepository {
             pageSize: query.pageSize ? query.pageSize : 10
         }
         const comments: WithId<CommentDbType>[] = await commentCollection
-            .find(findFilter)
+            .find(findFilter, {projection: {'likesAndDislikesInfo.commentUserLikeStatusInfo': 0}})
             .sort(filter.sortBy, filter.sortDirection)
             .skip(filter.countSkips)
             .limit(filter.pageSize)
@@ -122,19 +124,8 @@ export class CommentsQueryRepository {
 
         const commentsWithUserLikeStatus: CommentIdWithCommentUserLikeStatus[] =
             userId
-                ? await this.findUserLikeStatusForComments(commentIds, userId) ??
-                commentIds.map(commentId => {
-                    return {
-                        commentId,
-                        myStatus: LikeStatus.None
-                    }
-                })
-                : commentIds.map(commentId => {
-                    return {
-                        commentId,
-                        myStatus: LikeStatus.None
-                    }
-                })
+                ? await this.findUserLikeStatusForComments(commentIds, userId)
+                : commentIds.map(commentId => ({commentId, myStatus: LikeStatus.None}))
 
         return {
             pagesCount: commentsCount,
@@ -142,12 +133,11 @@ export class CommentsQueryRepository {
             pageSize: filter.pageSize,
             totalCount: totalComments,
             items: comments.map(comment => {
-                const userLikeStatus = commentsWithUserLikeStatus.find((res) =>
-                        res.commentId === comment._id.toString())
-                    ?? {
-                        commentId: comment._id.toString(), myStatus: LikeStatus.None
-                    }
-                return this.mapToCommentViewModel(comment, userLikeStatus)
+                const foundLikeStatus = commentsWithUserLikeStatus.find(commentLikeStatus => commentLikeStatus.commentId === comment._id.toString()) ?? {
+                    commentId: comment._id.toString(),
+                    myStatus: LikeStatus.None
+                }
+                return this.mapToCommentViewModel(comment, foundLikeStatus)
             })
         }
     }

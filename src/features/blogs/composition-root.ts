@@ -13,3 +13,10 @@ const postsQueryRepository = new PostsQueryRepository()
 const postsService = new PostsService()
 
 export const blogsControllers = new BlogsControllers(blogsService, blogsQueryRepository, postsService, postsQueryRepository)
+
+// export const container = new Container()
+//
+// container.bind<BlogsControllers>(BlogsControllers).to(BlogsControllers)
+// container.bind<BlogsService>(BlogsService).to(BlogsService)
+// container.bind<BlogsRepository>(BlogsRepository).to(BlogsRepository)
+// container.bind<BlogsQueryRepository>(BlogsQueryRepository).to(BlogsQueryRepository)

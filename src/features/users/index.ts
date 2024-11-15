@@ -2,10 +2,11 @@ import {Router} from 'express'
 import {findUserValidator, sortUsersValidators, usersValidators,} from './middlewares/usersValidators'
 import {adminMiddleware} from '../../global-middlewares/admin-middleware'
 import {UsersControllers} from './controllers/usersControllers';
+import {container} from './composition-root';
 
 export const usersRouter = Router()
 
-const usersControllers = new UsersControllers()
+const usersControllers = container.resolve(UsersControllers)
 
 usersRouter.post(
     '/',

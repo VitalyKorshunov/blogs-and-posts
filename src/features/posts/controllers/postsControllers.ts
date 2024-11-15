@@ -65,7 +65,7 @@ export class PostsControllers {
 
     async getCommentsInPost(req: Request<ParamType>, res: Response<CommentsSortViewModel>) {
         const userId = await accessTokenUtils.getAccessTokenUserId(req)
-        const comments = await this.commentsQueryRepository.getAll(req.params.id, req.query, userId)
+        const comments = await this.commentsQueryRepository.findAllCommentsForPost(req.params.id, req.query, userId)
 
         res.status(200).json(comments)
     }
@@ -81,7 +81,7 @@ export class PostsControllers {
             return
         }
 
-        const comment = await this.commentsQueryRepository.findAndMap(commentId, userId)//TODO
+        const comment = await this.commentsQueryRepository.findCommentById(commentId, userId)
 
         if (comment) {
             res.status(201).json(comment)

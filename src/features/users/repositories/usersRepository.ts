@@ -3,7 +3,9 @@ import {IdQueryDbType} from '../../../types/db/query-db-types';
 import {UserId, UserServiceModel} from '../../../types/entities/users-types';
 import {UserDbType} from '../../../types/db/user-db-types';
 import {UserModel} from '../../../db/mongo-db';
+import {injectable} from 'inversify';
 
+@injectable()
 export class UsersRepository {
     private toIdQuery(id: UserId): IdQueryDbType {
         return {_id: new ObjectId(id)}

@@ -6,7 +6,6 @@ import {ObjectId} from 'mongodb';
 import {contentValidator, shortDescriptionValidator, titleValidator} from '../../posts/middlewares/postValidators';
 import {BlogsQueryRepository} from '../repositories/blogsQueryRepository';
 
-//TODO: нужно ли выносить валидацию в класс?
 export const nameValidator = body('name').isString().withMessage('not string').trim()
     .isLength({min: 1, max: 15}).withMessage('more than 15 or 0')
 

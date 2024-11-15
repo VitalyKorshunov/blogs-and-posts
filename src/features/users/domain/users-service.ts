@@ -3,12 +3,12 @@ import {hashPassService} from '../../../common/adapters/hashPass.service';
 import {UserDbType} from '../../../types/db/user-db-types';
 import {ErrorsType} from '../../../types/utils/output-errors-type';
 import {UsersRepository} from '../repositories/usersRepository';
+import {inject, injectable} from 'inversify';
+import 'reflect-metadata'
 
+@injectable()
 export class UsersService {
-    private usersRepository: UsersRepository
-
-    constructor() {
-        this.usersRepository = new UsersRepository()
+    constructor(@inject(UsersRepository) protected usersRepository: UsersRepository) {
     }
 
     private async checkExistValueInField(field: string, value: string): Promise<boolean> {
