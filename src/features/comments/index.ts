@@ -33,5 +33,5 @@ commentsRouter.put(
 commentsRouter.put(
     '/:id' + routersPaths.comments.likeStatus,
     ...likeStatusCommentsValidators,
-    commentsControllers.updateLikeStatus.bind(commentsControllers)
+    commentsControllers.updateUserLikeStatusForComment.bind(commentsControllers)
 )

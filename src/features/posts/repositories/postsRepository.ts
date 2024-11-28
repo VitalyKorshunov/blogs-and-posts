@@ -31,6 +31,13 @@ export class PostsRepository {
     async createPost(post: PostCreateType): Promise<PostId> {
         const postToDb: PostDbType = {
             ...post,
+            likesAndDislikesInfo: {
+                countPostsLikesAndDislikes: {
+                    likesCount: 0,
+                    dislikesCount: 0
+                },
+                postsUserLikeStatusInfo: []
+            },
             blogId: new ObjectId(post.blogId)
         }
         const createdPost = new PostModel(postToDb)

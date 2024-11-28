@@ -4,7 +4,10 @@ export const routersPaths = {
         allData: '/all-data'
     },
     blogs: '/blogs',
-    posts: '/posts',
+    posts: {
+        posts: '/posts',
+        likeStatus: '/like-status'
+    },
     comments: {
         comments: '/comments',
         likeStatus: '/like-status'

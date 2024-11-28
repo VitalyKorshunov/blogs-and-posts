@@ -6,6 +6,7 @@ import {ObjectId} from 'mongodb';
 import {accessTokenGuardMiddleware} from '../../../global-middlewares/accessTokenGuard-middleware';
 import {BlogsQueryRepository} from '../../blogs/repositories/blogsQueryRepository';
 import {PostsQueryRepository} from '../repositories/postsQueryRepository';
+import {likeStatusValidator} from '../../comments/middlewares/commentsValidators';
 
 export const commentContentValidator = body('content').isString().withMessage('not string').trim()
     .isLength({min: 20, max: 300}).withMessage('more than 300 or less than 20')
@@ -90,6 +91,15 @@ export const createCommentInPostValidator = [
 
     findPostValidator,
     commentContentValidator,
+
+    inputCheckErrorsMiddleware
+]
+
+export const likeStatusPostsValidators = [
+    accessTokenGuardMiddleware,
+
+    findPostValidator,
+    likeStatusValidator,
 
     inputCheckErrorsMiddleware
 ]

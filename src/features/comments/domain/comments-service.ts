@@ -82,7 +82,7 @@ export class CommentsService {
         return {statusCode: isCommentUpdated ? statusCode.good : statusCode.bad}
     }
 
-    async updateLikeStatus(commentId: CommentId, userId: UserId, newLikeStatus: keyof typeof LikeStatus): Promise<ResultType<null>> {
+    async updateUserLikeStatusForComment(commentId: CommentId, userId: UserId, newLikeStatus: keyof typeof LikeStatus): Promise<ResultType<null>> {
 
         const isCommentFound = await this.commentsRepository.isCommentFound(commentId)
         if (!isCommentFound) {

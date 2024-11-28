@@ -19,7 +19,7 @@ blogsRouter.post(
     blogsControllers.createBlog.bind(blogsControllers))
 
 blogsRouter.post(
-    '/:id' + routersPaths.posts,
+    '/:id' + routersPaths.posts.posts,
     ...blogPostValidators,
     blogsControllers.createPostInBlog.bind(blogsControllers))
 

@@ -55,7 +55,7 @@ export class CommentsControllers {
         }
     }
 
-    async updateLikeStatus(req: Request<{ id: CommentId }, {}, { likeStatus: LikeStatus }>, res: Response) {
+    async updateUserLikeStatusForComment(req: Request<{ id: CommentId }, {}, { likeStatus: LikeStatus }>, res: Response) {
         const commentId = req.params.id
         const userId = req.user!.id
         const likeStatus = req.body.likeStatus
@@ -64,7 +64,7 @@ export class CommentsControllers {
             userId,
             likeStatus
         })
-        const result = await this.commentsService.updateLikeStatus(commentId, userId, likeStatus)
+        const result = await this.commentsService.updateUserLikeStatusForComment(commentId, userId, likeStatus)
 
         if (result.statusCode === StatusesCode.Success) {
             res.sendStatus(204)

@@ -3,7 +3,7 @@ import {
     createCommentInPostValidator,
     createPostValidators,
     findPostValidator,
-    getPostsValidators
+    getPostsValidators, likeStatusPostsValidators
 } from './middlewares/postValidators'
 import {adminMiddleware} from '../../global-middlewares/admin-middleware'
 import {routersPaths} from '../../common/path/paths';
@@ -53,4 +53,10 @@ postsRouter.post(
     '/:id' + routersPaths.comments.comments,
     ...createCommentInPostValidator,
     postsControllers.createCommentInPost.bind(postsControllers)
+)
+
+postsRouter.put(
+    '/:id' + routersPaths.comments.likeStatus,
+    ...likeStatusPostsValidators,
+    postsControllers.updateUserLikeStatusForPost.bind(postsControllers)
 )

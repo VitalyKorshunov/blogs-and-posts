@@ -15,7 +15,6 @@ export class PostsControllers {
     private postsQueryRepository: PostsQueryRepository
     private commentsService: CommentsService
     private commentsQueryRepository: CommentsQueryRepository
-
     constructor() {
         this.postsService = new PostsService()
         this.postsQueryRepository = new PostsQueryRepository()
@@ -87,4 +86,8 @@ export class PostsControllers {
             res.status(201).json(comment)
         }
     }
+
+    async updateUserLikeStatusForPost(req: Request, res: Response) {
+        
+    };
 }
