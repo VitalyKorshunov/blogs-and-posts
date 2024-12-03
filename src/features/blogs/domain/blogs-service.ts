@@ -1,18 +1,20 @@
-import {BlogCreateType, BlogId, BlogInputModel, BlogUpdateType} from '../../../types/entities/blogs-types';
+import {BlogId, BlogInputModel, BlogUpdateType} from '../../../types/entities/blogs-types';
 import {BlogsRepository} from '../repositories/blogsRepository';
+import {BlogDbType} from '../../../types/db/blog-db-types';
 
 export class BlogsService {
     constructor(protected blogsRepository: BlogsRepository) {
     }
 
     async createBlog(blog: BlogInputModel): Promise<BlogId> {
-        const newBlog: BlogCreateType = {
-            name: blog.name,
-            description: blog.description,
-            websiteUrl: blog.websiteUrl,
-            createdAt: new Date(),
-            isMembership: false
-        }
+        const newBlog/*: BlogCreateType*/ = new BlogDbType(
+            blog.name,
+            blog.description,
+            blog.websiteUrl,
+            new Date(),
+            false
+        )
+
         return await this.blogsRepository.createBlog(newBlog)
     }
 

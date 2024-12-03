@@ -1,9 +1,12 @@
-export type BlogDbType = {
-    name: string
-    description: string
-    websiteUrl: string
-    createdAt: Date
-    isMembership: boolean
+export class BlogDbType {
+    constructor(
+        // public _id: ObjectId,
+        public name: string,
+        public description: string,
+        public websiteUrl: string,
+        public createdAt: Date,
+        public isMembership: boolean) {
+    }
 }
 
 export type BlogsQueryDBType = {
