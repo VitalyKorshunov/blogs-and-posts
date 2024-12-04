@@ -5,7 +5,9 @@ import {PostId, PostsSortViewModel, PostViewModel} from '../../../types/entities
 import {sortQueryFieldsUtils} from '../../../common/utils/sortQueryFields.utils';
 import {SortOutputQueryType} from '../../../types/utils/sort-types';
 import {PostModel} from '../../../db/mongo-db';
+import {injectable} from 'inversify';
 
+@injectable()
 export class PostsQueryRepository {
     private toIdQuery(id: PostId): IdQueryDbType {
         return {_id: new ObjectId(id)}
@@ -29,7 +31,7 @@ export class PostsQueryRepository {
         return !!post
     }
 
-    async findAndMap(postId: PostId): Promise<PostViewModel> {
+    async findPostById(postId: PostId): Promise<PostViewModel> {
         const post: WithId<PostDbType> | null = await PostModel.findOne(this.toIdQuery(postId))
 
         if (post) {

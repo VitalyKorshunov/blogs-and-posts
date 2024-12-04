@@ -13,7 +13,9 @@ import {
     CommentUserLikeStatusInfoServiceType
 } from '../../../types/entities/comments-types';
 import {CommentDbType, CommentUserLikeStatusInfoDbType, LikeStatus} from '../../../types/db/comments-db-types';
+import {injectable} from 'inversify';
 
+@injectable()
 export class CommentsRepository {
     private toIdQuery(id: PostId): IdQueryDbType {
         return {_id: new ObjectId(id)}

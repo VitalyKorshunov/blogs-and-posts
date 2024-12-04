@@ -4,11 +4,12 @@ import {UserDbType} from '../../../types/db/user-db-types';
 import {ErrorsType} from '../../../types/utils/output-errors-type';
 import {UsersRepository} from '../repositories/usersRepository';
 import {inject, injectable} from 'inversify';
-import 'reflect-metadata'
 
 @injectable()
 export class UsersService {
-    constructor(@inject(UsersRepository) protected usersRepository: UsersRepository) {
+    constructor(
+        @inject(UsersRepository) protected usersRepository: UsersRepository
+    ) {
     }
 
     private async checkExistValueInField(field: string, value: string): Promise<boolean> {

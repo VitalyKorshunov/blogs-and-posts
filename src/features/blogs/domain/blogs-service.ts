@@ -1,9 +1,13 @@
 import {BlogId, BlogInputModel, BlogUpdateType} from '../../../types/entities/blogs-types';
 import {BlogsRepository} from '../repositories/blogsRepository';
 import {BlogDbType} from '../../../types/db/blog-db-types';
+import {inject, injectable} from 'inversify';
 
+@injectable()
 export class BlogsService {
-    constructor(protected blogsRepository: BlogsRepository) {
+    constructor(
+        @inject(BlogsRepository) protected blogsRepository: BlogsRepository
+    ) {
     }
 
     async createBlog(blog: BlogInputModel): Promise<BlogId> {

@@ -5,12 +5,13 @@ import {ErrorsType} from '../../../types/utils/output-errors-type';
 import {UsersService} from '../domain/users-service';
 import {UsersQueryRepository} from '../repositories/usersQueryRepository';
 import {inject, injectable} from 'inversify';
-import 'reflect-metadata'
 
 @injectable()
 export class UsersControllers {
-    constructor(@inject(UsersService) protected usersService: UsersService,
-                @inject(UsersQueryRepository) protected usersQueryRepository: UsersQueryRepository) {
+    constructor(
+        @inject(UsersService) protected usersService: UsersService,
+        @inject(UsersQueryRepository) protected usersQueryRepository: UsersQueryRepository
+    ) {
     }
 
     async createUser(req: Request<any, any, UserInputModel>, res: Response<UserViewModel | ErrorsType>) {

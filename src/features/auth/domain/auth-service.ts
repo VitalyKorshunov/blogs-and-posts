@@ -27,10 +27,13 @@ import {
 } from '../../../types/entities/security-types';
 import {AuthRepository} from '../repositories/authRepository';
 import {UsersRepository} from '../../users/repositories/usersRepository';
+import {inject} from 'inversify';
 
 export class AuthService {
-    constructor(protected authRepository: AuthRepository,
-                protected usersRepository: UsersRepository) {
+    constructor(
+        @inject(AuthRepository) protected authRepository: AuthRepository,
+        @inject(UsersRepository) protected usersRepository: UsersRepository
+    ) {
     }
 
     private async findUserByLoginOrEmail(loginOrEmail: string): Promise<UserServiceModel | null> {

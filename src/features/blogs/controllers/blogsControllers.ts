@@ -8,16 +8,20 @@ import {
 import {BlogsService} from '../domain/blogs-service';
 import {BlogPostInputModel, PostId, PostInputModel, PostViewModel} from '../../../types/entities/posts-types';
 import {ParamType} from '../../../types/request-response/request-types';
-import {StatusesCode} from '../../../common/utils/errorsAndStatusCodes.utils';
+import {StatusCode} from '../../../common/utils/errorsAndStatusCodes.utils';
 import {BlogsQueryRepository} from '../repositories/blogsQueryRepository';
 import {PostsService} from '../../posts/domain/posts-service';
 import {PostsQueryRepository} from '../../posts/repositories/postsQueryRepository';
+import {inject, injectable} from 'inversify';
 
+@injectable()
 export class BlogsControllers {
-    constructor(protected blogsService: BlogsService,
-                protected blogsQueryRepository: BlogsQueryRepository,
-                protected postsService: PostsService,
-                protected postsQueryRepository: PostsQueryRepository) {
+    constructor(
+        @inject(BlogsService) protected blogsService: BlogsService,
+        @inject(BlogsQueryRepository) protected blogsQueryRepository: BlogsQueryRepository,
+        @inject(PostsService) protected postsService: PostsService,
+        @inject(PostsQueryRepository) protected postsQueryRepository: PostsQueryRepository
+    ) {
     }
 
     async createBlog(req: Request<any, any, BlogInputModel>, res: Response<BlogViewModel>) {
@@ -25,7 +29,7 @@ export class BlogsControllers {
 
         const newBlog = await this.blogsQueryRepository.findAndMap(newBlogId)
 
-        if (newBlog.statusCode === StatusesCode.Success) {
+        if (newBlog.statusCode === StatusCode.Success) {
             res
                 .status(201)
                 .json(newBlog.data)
@@ -44,10 +48,10 @@ export class BlogsControllers {
 
         const result = await this.postsService.createPostInBlog(post)
 
-        if (result.statusCode === StatusesCode.Success) {
+        if (result.statusCode === StatusCode.Success) {
             const postId: PostId = result.data
 
-            const post: PostViewModel = await this.postsQueryRepository.findAndMap(postId)
+            const post: PostViewModel = await this.postsQueryRepository.findPostById(postId)
             res
                 .status(201)
                 .json(post)
@@ -69,7 +73,7 @@ export class BlogsControllers {
     async findBlog(req: Request<ParamType>, res: Response<BlogViewModel | {}>) {
         const blog = await this.blogsQueryRepository.findAndMap(req.params.id);
 
-        if (blog.statusCode === StatusesCode.Success) {
+        if (blog.statusCode === StatusCode.Success) {
             res.status(200).json(blog.data)
         }
     }
@@ -82,7 +86,7 @@ export class BlogsControllers {
     async getPostsInBlog(req: Request/*<ParamType, {}, {}, SortQueryType>*/, res: Response<PostsForBlogSortViewModel>/*<BlogPostFilterViewModel>*/) {
         const result = await this.blogsQueryRepository.getSortedPostsInBlog(req.params.id, req.query)
 
-        if (result.statusCode === StatusesCode.Success) {
+        if (result.statusCode === StatusCode.Success) {
             const sortedPostsInBlog: PostsForBlogSortViewModel = result.data
             res.status(200).json(sortedPostsInBlog)
         } else {

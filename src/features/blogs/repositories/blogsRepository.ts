@@ -2,7 +2,9 @@ import {BlogCreateType, BlogId, BlogUpdateType} from '../../../types/entities/bl
 import {ObjectId} from 'mongodb';
 import {IdQueryDbType} from '../../../types/db/query-db-types';
 import {BlogModel} from '../../../db/mongo-db';
+import {injectable} from 'inversify';
 
+@injectable()
 export class BlogsRepository {
     private toIdQuery(id: string): IdQueryDbType {
         return {_id: new ObjectId(id)}

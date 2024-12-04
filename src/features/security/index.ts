@@ -6,10 +6,11 @@ import {
     getAllUserDevices
 } from './middlewares/securityValidators';
 import {SecurityControllers} from './controllers/securityControllers';
+import {container} from '../composition-root';
+
+const securityControllers = container.resolve(SecurityControllers)
 
 export const securityRouter = Router()
-
-const securityControllers = new SecurityControllers()
 
 securityRouter.get(
     routersPaths.security.devices,

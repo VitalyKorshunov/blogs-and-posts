@@ -3,7 +3,9 @@ import {SecurityDbType} from '../../../types/db/security-db-types';
 import {ObjectId, WithId} from 'mongodb';
 import {UserId} from '../../../types/entities/users-types';
 import {securityCollection} from '../../../db/mongo-db';
+import {injectable} from 'inversify';
 
+@injectable()
 export class SecurityQueryRepository {
     private mapToSecurityViewModel(data: WithId<SecurityDbType>): SecurityViewModel {
         return {

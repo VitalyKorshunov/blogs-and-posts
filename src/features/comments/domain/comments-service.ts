@@ -10,67 +10,62 @@ import {UserId, UserServiceModel} from '../../../types/entities/users-types';
 import {CommentsRepository} from '../repositories/commentsRepository';
 import {LikeStatus} from '../../../types/db/comments-db-types';
 import {result, ResultType} from '../../../common/utils/errorsAndStatusCodes.utils';
+import {inject, injectable} from 'inversify';
 
-class NotFoundError {
-    constructor(public message: string = 'entity not found') {
-    }
-}
 
-enum statusCode {
-    good = 1,
-    bad = 0
-}
-
-// TODO зарефакторить
+@injectable()
 export class CommentsService {
-    private commentsRepository: CommentsRepository
-
-    constructor() {
-        this.commentsRepository = new CommentsRepository()
+    constructor(
+        @inject(CommentsRepository) protected commentsRepository: CommentsRepository
+    ) {
     }
 
-    async createComment(postId: PostId, userId: UserId, comment: CommentInputModel): Promise<CommentId | null> {
+    async createComment(postId: PostId, userId: UserId, comment: CommentInputModel): Promise<ResultType<CommentId>> {
         const post: PostServiceModel | null = await this.commentsRepository.findPostById(postId)
         const user: UserServiceModel | null = await this.commentsRepository.findUserById(userId)
 
-        if (!post || !user) return null
+        if (!post || !user) return result.notFound('post or user not found')
 
-        if (comment) {
-            const newComment: CommentCreateType = {
-                content: comment.content,
-                postId: post.id,
-                commentatorInfo: {
-                    userId: user.id,
-                    userLogin: user.login,
-                },
-                createdAt: new Date()
-            }
+        if (!comment) return result.notFound('comment not found')
 
-            return await this.commentsRepository.createComment(newComment)
-        } else {
-            throw new NotFoundError('Blog not found (postsService.create)')
+        const newComment: CommentCreateType = {
+            content: comment.content,
+            postId: post.id,
+            commentatorInfo: {
+                userId: user.id,
+                userLogin: user.login,
+            },
+            createdAt: new Date()
         }
+
+        const commentId = await this.commentsRepository.createComment(newComment)
+
+        return result.success(commentId)
     }
 
-    async deleteComment(userId: UserId, commentId: CommentId): Promise<boolean | null> {
+    async deleteComment(userId: UserId, commentId: CommentId): Promise<ResultType<boolean>> {
         const user = await this.commentsRepository.findUserById(userId);
         const comment = await this.commentsRepository.findCommentById(commentId)
 
-        if (user?.id !== comment?.commentatorInfo.userId) {
-            return null
+        if (!user || !comment) return result.notFound('user or comment not found')
+
+        if (user.id !== comment.commentatorInfo.userId) {
+            return result.notBelongToUser('comment does not belong to user')
         }
 
-        return this.commentsRepository.deleteComment(commentId)
+        const isCommentDeleted = await this.commentsRepository.deleteComment(commentId)
+
+        return result.success(isCommentDeleted)
     }
 
-    async updateComment(userId: UserId, commentId: CommentId, comment: CommentUpdateType,): Promise<{
-        statusCode: number
-    }> {
+    async updateComment(userId: UserId, commentId: CommentId, comment: CommentUpdateType,): Promise<ResultType<boolean>> {
         const user = await this.commentsRepository.findUserById(userId)
         const oldComment = await this.commentsRepository.findCommentById(commentId)
 
-        if (user?.id !== oldComment?.commentatorInfo.userId) {
-            return {statusCode: statusCode.bad}
+        if (!user || !oldComment) return result.notFound('user or old comment not found')
+
+        if (user.id !== oldComment.commentatorInfo.userId) {
+            return result.notBelongToUser('old comment does not belong to user')
         }
 
         const updateCommentData: CommentUpdateType = {
@@ -79,7 +74,7 @@ export class CommentsService {
 
         const isCommentUpdated = await this.commentsRepository.updateComment(commentId, updateCommentData)
 
-        return {statusCode: isCommentUpdated ? statusCode.good : statusCode.bad}
+        return result.success(isCommentUpdated)
     }
 
     async updateUserLikeStatusForComment(commentId: CommentId, userId: UserId, newLikeStatus: keyof typeof LikeStatus): Promise<ResultType<null>> {
@@ -107,7 +102,6 @@ export class CommentsService {
             // если был лайк или дизлайк, то к ним -1, а к новому статусу +1
             await this.commentsRepository.updateUserLikeStatusForComment(commentId, userId, userLikeStatusForComment.likeStatus, newLikeStatus)
         }
-
 
         return result.success(null)
     }

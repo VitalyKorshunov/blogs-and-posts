@@ -11,7 +11,10 @@ import {
     resendRegistrationEmailValidators
 } from './middlewares/authValidators';
 import {routersPaths} from '../../common/path/paths';
-import {authControllers} from './composition-root';
+import {container} from '../composition-root';
+import {AuthControllers} from './controllers/authControllers';
+
+const authControllers = container.resolve(AuthControllers)
 
 export const authRouter = Router()
 

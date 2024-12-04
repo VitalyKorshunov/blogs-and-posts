@@ -1,20 +1,7 @@
 import {Response} from 'express';
 import {ErrorsType} from '../../types/utils/output-errors-type';
 
-export class ExecutionStatus {
-    constructor(public statusCode: StatusCode, public data?: any) {
-    }
-}
-
 export enum StatusCode {
-    NotFound = 'NotFound',
-    ErrorSendEmail = 'error send email',
-    Success = 'Success',
-    Invalid = 'Invalid',
-    BadRequest = 'BadRequest',
-}
-
-export enum StatusesCode {
     Success,
     NotFound,
     InvalidCredentials,
@@ -22,50 +9,56 @@ export enum StatusesCode {
     LoginOrEmailError,
     EmailError,
     PermissionDenied,
-    PasswordError
+    PasswordError,
+    NotBelongToUser
 }
 
 type ResultSuccess<T> = {
-    statusCode: StatusesCode.Success
+    statusCode: StatusCode.Success
     data: T
 }
 type ResultNotFound = {
-    statusCode: StatusesCode.NotFound
+    statusCode: StatusCode.NotFound
     errorMessage: string
     data?: ErrorsType
 }
 
 type ResultInvalidCredentials = {
-    statusCode: StatusesCode.InvalidCredentials
+    statusCode: StatusCode.InvalidCredentials
     errorMessage: string
 }
 
 type ResultTokenError = {
-    statusCode: StatusesCode.TokenError
+    statusCode: StatusCode.TokenError
     errorMessage: string
 }
 
 type ResultLoginOrEmailError = {
-    statusCode: StatusesCode.LoginOrEmailError
+    statusCode: StatusCode.LoginOrEmailError
     message: string
     date?: ErrorsType
 }
 
 type ResultEmailError = {
-    statusCode: StatusesCode.EmailError
+    statusCode: StatusCode.EmailError
     errorMessage: string
     data?: ErrorsType
 }
 
-type PermissionDeniedError = {
-    statusCode: StatusesCode.PermissionDenied
+type ResultPermissionDeniedError = {
+    statusCode: StatusCode.PermissionDenied
     errorMessage: string
 }
 
 type ResultPasswordError = {
-    statusCode: StatusesCode.PasswordError
+    statusCode: StatusCode.PasswordError
     errorMessage: string
     data?: ErrorsType
+}
+
+type ResultNotBelongToUserError = {
+    statusCode: StatusCode.NotBelongToUser
+    errorMessage: string
 }
 
 
@@ -76,88 +69,97 @@ export type ResultType<T> =
     | ResultTokenError
     | ResultLoginOrEmailError
     | ResultEmailError
-    | PermissionDeniedError
+    | ResultPermissionDeniedError
     | ResultPasswordError
+    | ResultNotBelongToUserError
+
+
 export const result = {
     success<T>(data: T): ResultSuccess<T> {
         return {
-            statusCode: StatusesCode.Success,
+            statusCode: StatusCode.Success,
             data
         }
     },
     notFound(errorMessage: string, error?: ErrorsType): ResultNotFound {
         return {
-            statusCode: StatusesCode.NotFound,
+            statusCode: StatusCode.NotFound,
             errorMessage,
             data: error
         }
     },
     invalidCredentials(errorMessage: string): ResultInvalidCredentials {
         return {
-            statusCode: StatusesCode.InvalidCredentials,
+            statusCode: StatusCode.InvalidCredentials,
             errorMessage
         }
     },
     tokenError(errorMessage: string): ResultTokenError {
         return {
-            statusCode: StatusesCode.TokenError,
+            statusCode: StatusCode.TokenError,
             errorMessage
         }
     },
     loginOrEmailWithError(message: string, date: ErrorsType): ResultLoginOrEmailError {
         return {
-            statusCode: StatusesCode.LoginOrEmailError,
+            statusCode: StatusCode.LoginOrEmailError,
             message,
             date
         }
     },
     emailError(errorMessage: string, data?: ErrorsType): ResultEmailError {
         return {
-            statusCode: StatusesCode.EmailError,
+            statusCode: StatusCode.EmailError,
             errorMessage,
             data
         }
     },
-    permissionDeniedError(errorMessage: string): PermissionDeniedError {
+    permissionDeniedError(errorMessage: string): ResultPermissionDeniedError {
         return {
-            statusCode: StatusesCode.PermissionDenied,
+            statusCode: StatusCode.PermissionDenied,
             errorMessage
         }
     },
-    passwordError(errorMessage: string, data?: ErrorsType) : ResultPasswordError {
+    passwordError(errorMessage: string, data?: ErrorsType): ResultPasswordError {
         return {
-            statusCode: StatusesCode.PasswordError,
+            statusCode: StatusCode.PasswordError,
             errorMessage,
             data
+        }
+    },
+    notBelongToUser(errorMessage: string): ResultNotBelongToUserError {
+        return {
+            statusCode:StatusCode.NotBelongToUser,
+            errorMessage
         }
     }
 }
 
 export const handleError = (result: ResultType<unknown>, res: Response) => {
     switch (result.statusCode) {
-        case StatusesCode.NotFound: {
+        case StatusCode.NotFound: {
             console.log(result.errorMessage)
             res.status(400).json(result.data ?? {})
             break
         }
-        case StatusesCode.InvalidCredentials:
-        case StatusesCode.TokenError: {
+        case StatusCode.InvalidCredentials:
+        case StatusCode.TokenError: {
             console.log(result.errorMessage)
             res.sendStatus(401)
             break
         }
 
-        case StatusesCode.LoginOrEmailError: {
+        case StatusCode.LoginOrEmailError: {
             console.log(result.message)
             res.status(400).json(result.date || {})
             break
         }
-        case StatusesCode.EmailError: {
+        case StatusCode.EmailError: {
             console.log(result.errorMessage)
             res.status(400).json(result.data ?? {})
             break
         }
-        case StatusesCode.PermissionDenied: {
+        case StatusCode.PermissionDenied: {
             res.sendStatus(403)
             break
         }

@@ -3,7 +3,9 @@ import {securityCollection} from '../../../db/mongo-db';
 import {UserId} from '../../../types/entities/users-types';
 import {ObjectId, WithId} from 'mongodb';
 import {SecurityDbType} from '../../../types/db/security-db-types';
+import {injectable} from 'inversify';
 
+@injectable()
 export class SecurityRepository {
     private mapToSecuritySessionServiceModel(securitySession: WithId<SecurityDbType>): SecurityServiceModel {
         const {_id, userId, ...rest} = securitySession

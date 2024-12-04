@@ -16,7 +16,9 @@ import {
     OneOfLikeStatus
 } from '../../../types/db/comments-db-types';
 import {UserId} from '../../../types/entities/users-types';
+import {injectable} from 'inversify';
 
+@injectable()
 export class CommentsQueryRepository {
     private toIdQuery(id: PostId): IdQueryDbType {
         return {_id: new ObjectId(id)}
@@ -80,7 +82,7 @@ export class CommentsQueryRepository {
         return result
     }
 
-    async findCommentById(commentId: CommentId, userId: UserId | null): Promise<CommentViewModel> {
+    async findCommentById(commentId: CommentId, userId: UserId | null): Promise<CommentViewModel | null> {
         const comment: WithId<CommentDbType> | null = await commentCollection.findOne(this.toIdQuery(commentId), {
             projection: {
                 'likesAndDislikesInfo.commentUserLikeStatusInfo': 0,
@@ -92,11 +94,9 @@ export class CommentsQueryRepository {
                 ? await this.findUserLikeStatusForComments([commentId], userId)
                 : [{commentId, myStatus: LikeStatus.None}]
 
-        if (comment) {
-            return this.mapToCommentViewModel(comment, userLikeStatus[0])
-        } else {
-            throw new Error('comment not found (commentsQueryRepository.findAndMap)')
-        }
+        return comment
+            ? this.mapToCommentViewModel(comment, userLikeStatus[0])
+            : null
     }
 
     async findAllCommentsForPost(postId: PostId, query: any, userId: UserId | null): Promise<CommentsSortViewModel> {

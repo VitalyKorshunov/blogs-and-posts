@@ -1,14 +1,18 @@
 import {Request, Response} from 'express';
 import {AuthInputModel, AuthTokensType} from '../../../types/auth/auth-types';
 import {UserInputModel} from '../../../types/entities/users-types';
-import {handleError, StatusesCode} from '../../../common/utils/errorsAndStatusCodes.utils';
+import {handleError, StatusCode} from '../../../common/utils/errorsAndStatusCodes.utils';
 import {DeviceName, IP} from '../../../types/entities/security-types';
 import {AuthService} from '../domain/auth-service';
 import {AuthQueryRepository} from '../repositories/authQueryRepository';
+import {inject, injectable} from 'inversify';
 
+@injectable()
 export class AuthControllers {
-    constructor(protected authService: AuthService,
-                protected authQueryRepository: AuthQueryRepository) {
+    constructor(
+        @inject(AuthService) protected authService: AuthService,
+        @inject(AuthQueryRepository) protected authQueryRepository: AuthQueryRepository
+    ) {
     }
 
     async loginUser(req: Request<{}, {}, AuthInputModel>, res: Response) {
@@ -18,7 +22,7 @@ export class AuthControllers {
 
         const result = await this.authService.loginUser(loginOrEmail, password, deviceName, ip);
 
-        if (result.statusCode === StatusesCode.Success) {
+        if (result.statusCode === StatusCode.Success) {
             const {accessToken, refreshToken}: AuthTokensType = result.data
 
             res.cookie('refreshToken', refreshToken, {
@@ -34,7 +38,7 @@ export class AuthControllers {
     async logoutUser(req: Request, res: Response) {
         const result = await this.authService.logoutUser(req.cookies.refreshToken)
 
-        if (result.statusCode === StatusesCode.Success) {
+        if (result.statusCode === StatusCode.Success) {
             res.sendStatus(204)
         } else {
             handleError(result, res)
@@ -55,7 +59,7 @@ export class AuthControllers {
         const {login, email, password}: UserInputModel = req.body
         const result = await this.authService.registrationUser({login, email, password})
 
-        if (result.statusCode === StatusesCode.Success) {
+        if (result.statusCode === StatusCode.Success) {
             res.sendStatus(204)
         } else {
             handleError(result, res)
@@ -65,7 +69,7 @@ export class AuthControllers {
     async registrationConfirmationEmail(req: Request, res: Response) {
         const result = await this.authService.registrationConfirmationEmail(req.body.code)
 
-        if (result.statusCode === StatusesCode.Success) {
+        if (result.statusCode === StatusCode.Success) {
             res.sendStatus(204)
         } else {
             handleError(result, res)
@@ -75,7 +79,7 @@ export class AuthControllers {
     async resendRegistrationEmail(req: Request, res: Response) {
         const result = await this.authService.resendRegistrationEmail(req.body.email)
 
-        if (result.statusCode === StatusesCode.Success) {
+        if (result.statusCode === StatusCode.Success) {
             res.sendStatus(204)
         } else {
             handleError(result, res)
@@ -87,7 +91,7 @@ export class AuthControllers {
 
         const result = await this.authService.updateTokens(refreshToken)
 
-        if (result.statusCode === StatusesCode.Success) {
+        if (result.statusCode === StatusCode.Success) {
             const {accessToken, refreshToken}: AuthTokensType = result.data
 
             res.cookie('refreshToken', refreshToken, {
@@ -113,7 +117,7 @@ export class AuthControllers {
 
         const result = await this.authService.newPassword(newPassword, recoveryCode)
 
-        if (result.statusCode === StatusesCode.Success) {
+        if (result.statusCode === StatusCode.Success) {
             res.sendStatus(204)
         } else {
             res.sendStatus(400)

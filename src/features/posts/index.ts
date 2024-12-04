@@ -3,15 +3,17 @@ import {
     createCommentInPostValidator,
     createPostValidators,
     findPostValidator,
-    getPostsValidators, likeStatusPostsValidators
+    getPostsValidators,
+    likeStatusPostsValidators
 } from './middlewares/postValidators'
 import {adminMiddleware} from '../../global-middlewares/admin-middleware'
 import {routersPaths} from '../../common/path/paths';
 import {PostsControllers} from './controllers/postsControllers';
+import {container} from '../composition-root';
+
+const postsControllers = container.resolve(PostsControllers)
 
 export const postsRouter = Router()
-
-const postsControllers = new PostsControllers()
 
 postsRouter.post(
     '/',

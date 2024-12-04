@@ -2,12 +2,13 @@ import {UserId} from '../../../types/entities/users-types';
 import {result, ResultType} from '../../../common/utils/errorsAndStatusCodes.utils';
 import {DeviceId, SecurityServiceModel} from '../../../types/entities/security-types';
 import {SecurityRepository} from '../repositories/securityRepository';
+import {inject, injectable} from 'inversify';
 
+@injectable()
 export class SecurityService {
-    private securityRepository: SecurityRepository
-
-    constructor() {
-        this.securityRepository = new SecurityRepository()
+    constructor(
+        @inject(SecurityRepository) protected securityRepository: SecurityRepository
+    ) {
     }
 
     async deleteAllUserDevicesExceptCurrent(userId: UserId, deviceId: DeviceId): Promise<ResultType<null>> {

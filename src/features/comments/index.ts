@@ -7,9 +7,11 @@ import {
 } from './middlewares/commentsValidators'
 import {CommentsControllers} from './controllers/commentsControllers';
 import {routersPaths} from '../../common/path/paths';
+import {container} from '../composition-root';
+
+const commentsControllers = container.resolve(CommentsControllers)
 
 export const commentsRouter = Router()
-const commentsControllers = new CommentsControllers()
 
 commentsRouter.get(
     '/:id',

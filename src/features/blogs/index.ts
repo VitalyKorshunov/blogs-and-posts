@@ -9,7 +9,10 @@ import {
 import {adminMiddleware} from '../../global-middlewares/admin-middleware'
 import {SETTINGS} from '../../settings';
 import {routersPaths} from '../../common/path/paths';
-import {blogsControllers} from './composition-root';
+import {container} from '../composition-root';
+import {BlogsControllers} from './controllers/blogsControllers';
+
+const blogsControllers = container.resolve(BlogsControllers)
 
 export const blogsRouter = Router()
 

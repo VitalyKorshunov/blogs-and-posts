@@ -13,7 +13,9 @@ import {sortQueryFieldsUtils} from '../../../common/utils/sortQueryFields.utils'
 import {SortOutputQueryType} from '../../../types/utils/sort-types';
 import {PostDbType} from '../../../types/db/post-db-types';
 import {result, ResultType} from '../../../common/utils/errorsAndStatusCodes.utils';
+import {injectable} from 'inversify';
 
+@injectable()
 export class BlogsQueryRepository {
     private toIdQuery(id: string): IdQueryDbType {
         return {_id: new ObjectId(id)}
