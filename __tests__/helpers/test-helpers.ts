@@ -1,6 +1,6 @@
 import {app} from '../../src/app'
 import {agent} from 'supertest'
-import {closeConnectToDB, connectToDB, db, UserModel} from '../../src/db/mongo-db';
+import {closeConnectToDB, connectToDB, db} from '../../src/db/mongo-db';
 import {SETTINGS} from '../../src/settings';
 import {BlogInputModel, BlogViewModel} from '../../src/types/entities/blogs-types';
 import {codedAuth} from './datasets';
@@ -12,7 +12,8 @@ import {UserDbType} from '../../src/types/db/user-db-types';
 import {BlogDbType} from '../../src/types/db/blog-db-types';
 import {PostDbType} from '../../src/types/db/post-db-types';
 import {routersPaths} from '../../src/common/path/paths';
-import {nodemailerService} from '../../src/common/adapters/nodemailer.service';
+import {nodemailerService} from '../../src/application/adapters/nodemailer.service';
+import {UserModel} from '../../src/domain/UsersEntity';
 
 export type EmailWithConfirmationCodeType = {
     email: string

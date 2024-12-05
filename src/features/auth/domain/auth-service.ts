@@ -1,4 +1,4 @@
-import {hashPassService} from '../../../common/adapters/hashPass.service';
+import {hashPassService} from '../../../application/adapters/hashPass.service';
 import {
     EmailConfirmationType,
     PasswordUpdateWithRecoveryType,
@@ -13,8 +13,8 @@ import {v7 as uuidv7} from 'uuid';
 import {add} from 'date-fns';
 import {ErrorsType} from '../../../types/utils/output-errors-type';
 import {AuthTokensType, EmailConfirmationCodeInputModel} from '../../../types/auth/auth-types';
-import {nodemailerService} from '../../../common/adapters/nodemailer.service';
-import {jwtService} from '../../../common/adapters/jwt.service';
+import {nodemailerService} from '../../../application/adapters/nodemailer.service';
+import {jwtService} from '../../../application/adapters/jwt.service';
 import {PayloadRefreshTokenInputType, VerifyRefreshTokenViewModel} from '../../../types/auth/jwt-types';
 import {
     DeviceId,
@@ -26,7 +26,7 @@ import {
     SecurityUpdateType
 } from '../../../types/entities/security-types';
 import {AuthRepository} from '../repositories/authRepository';
-import {UsersRepository} from '../../users/repositories/usersRepository';
+import {UsersRepository} from '../../../infrastructure/repositories/usersRepository';
 import {inject} from 'inversify';
 
 export class AuthService {
@@ -179,21 +179,15 @@ export class AuthService {
 
         if (!isCodeConfirmationFound) return result.notFound('code confirmation not found', error)
 
-        const user: UserServiceModel | null = await this.authRepository.findUserByEmailConfirmationCode(code)
+        const user = await this.authRepository.findUserByEmailConfirmationCode(code)
 
         if (!user) return result.notFound('user not found')
-        if (user.emailConfirmation.isConfirmed) return result.emailError('email already confirmed', error)
-        if (user.emailConfirmation.expirationDate < new Date()) return result.emailError('expired email code', error)
+        console.log(user)
+        if (!user.canBeConfirmed()) return result.emailError('email already confirmed or expired email code', error)
 
-        const updateEmailConfirmation: EmailConfirmationType = {
-            expirationDate: user.emailConfirmation.expirationDate,
-            confirmationCode: '',
-            isConfirmed: true
-        }
+        user.confirm()
 
-        const isUpdatedEmailConfirmation: boolean = await this.authRepository.updateUserEmailConfirmation(user.id, updateEmailConfirmation)
-
-        if (!isUpdatedEmailConfirmation) return result.emailError('email confirmation does not update')
+        await this.authRepository.save(user)
 
         return result.success(null)
     }

@@ -1,9 +1,9 @@
 import {ObjectId, WithId} from 'mongodb';
-import {IdQueryDbType} from '../../../types/db/query-db-types';
-import {UserId, UserServiceModel} from '../../../types/entities/users-types';
-import {UserDbType} from '../../../types/db/user-db-types';
-import {UserModel} from '../../../db/mongo-db';
+import {IdQueryDbType} from '../../types/db/query-db-types';
+import {UserId, UserServiceModel} from '../../types/entities/users-types';
+import {UserDbType} from '../../types/db/user-db-types';
 import {injectable} from 'inversify';
+import {UserModel} from '../../domain/UsersEntity';
 
 @injectable()
 export class UsersRepository {

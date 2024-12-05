@@ -1,12 +1,15 @@
 import {EmailConfirmationType, RecoveryPasswordType} from '../entities/users-types';
 
-export type UserDbType = {
-    login: string
-    email: string
-    passHash: string
-    createdAt: Date
-    recoveryPassword: RecoveryPasswordType
-    emailConfirmation: EmailConfirmationType
+export class UserDbType {
+    constructor(
+        public login: string,
+        public email: string,
+        public passHash: string,
+        public createdAt: Date,
+        public recoveryPassword: RecoveryPasswordType,
+        public emailConfirmation: EmailConfirmationType,
+    ) {
+    }
 }
 
 export type UsersQueryDbType = {

@@ -5,7 +5,7 @@ import {routersPaths} from '../src/common/path/paths';
 import {UserInputModel} from '../src/types/entities/users-types';
 import {UserDbType} from '../src/types/db/user-db-types';
 import {ObjectId, WithId} from 'mongodb';
-import {jwtService} from '../src/common/adapters/jwt.service';
+import {jwtService} from '../src/application/adapters/jwt.service';
 import ms = require('ms');
 
 describe('/auth', () => {
@@ -180,7 +180,7 @@ describe('/auth', () => {
         const registrationConfirmationData = {
             code: userEmailWithEmailConfirmationCode.code
         }
-
+console.log(registrationConfirmationData)
         await req
             .post(SETTINGS.PATH.AUTH + routersPaths.auth.registrationConfirmation)
             .send(registrationConfirmationData)

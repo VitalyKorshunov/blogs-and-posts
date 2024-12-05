@@ -1,7 +1,7 @@
 import {Request} from 'express';
 import {UserId} from '../../types/entities/users-types';
 import {PayloadAccessTokenInputType, VerifyAccessTokenViewModel} from '../../types/auth/jwt-types';
-import {jwtService} from '../adapters/jwt.service';
+import {jwtService} from '../../application/adapters/jwt.service';
 
 export const accessTokenUtils = {
     async getAccessTokenUserId(req: Request): Promise<UserId | null> {

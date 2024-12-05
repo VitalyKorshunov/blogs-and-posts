@@ -8,7 +8,6 @@ import {RateLimitDBType} from '../types/db/rateLimit-db-types';
 import {SecurityDbType} from '../types/db/security-db-types';
 import * as mongoose from 'mongoose';
 import {Schema} from 'mongoose';
-import {EmailConfirmationType, RecoveryPasswordType} from '../types/entities/users-types';
 
 let client: MongoClient = {} as MongoClient
 export let db: Db = {} as Db
@@ -30,29 +29,10 @@ const postSchema = new mongoose.Schema<WithId<PostDbType>>({
     createdAt: Date
 })
 
-const emailConfirmationSchema = new mongoose.Schema<EmailConfirmationType>({
-    expirationDate: Date,
-    confirmationCode: String,
-    isConfirmed: Boolean
-}, {_id: false})
-
-const recoveryPasswordSchema = new mongoose.Schema<RecoveryPasswordType>({
-    expirationDate: Date,
-    recoveryCode: String
-}, {_id: false})
-
-const userSchema = new mongoose.Schema<WithId<UserDbType>>({
-    login: String,
-    email: String,
-    passHash: String,
-    createdAt: Date,
-    recoveryPassword: recoveryPasswordSchema,
-    emailConfirmation: emailConfirmationSchema
-})
-
 export const BlogModel = mongoose.model(SETTINGS.DB.BLOG_COLLECTION_NAME, blogSchema)
 export const PostModel = mongoose.model(SETTINGS.DB.POST_COLLECTION_NAME, postSchema)
-export const UserModel = mongoose.model(SETTINGS.DB.USER_COLLECTION_NAME, userSchema)
+
+
 
 // получение доступа к коллекциям
 // export let blogCollection: Collection<BlogDbType> = {} as Collection<BlogDbType>

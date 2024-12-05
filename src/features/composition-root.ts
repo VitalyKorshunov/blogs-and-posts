@@ -1,4 +1,3 @@
-import 'reflect-metadata';
 import {BlogsControllers} from './blogs/controllers/blogsControllers';
 import {BlogsService} from './blogs/domain/blogs-service';
 import {BlogsRepository} from './blogs/repositories/blogsRepository';
@@ -17,9 +16,9 @@ import {SecurityService} from './security/domain/securityService';
 import {SecurityRepository} from './security/repositories/securityRepository';
 import {SecurityQueryRepository} from './security/repositories/securityQueryRepository';
 import {UsersControllers} from './users/controllers/usersControllers';
-import {UsersService} from './users/domain/users-service';
-import {UsersRepository} from './users/repositories/usersRepository';
-import {UsersQueryRepository} from './users/repositories/usersQueryRepository';
+import {UsersService} from '../application/users-service';
+import {UsersRepository} from '../infrastructure/repositories/usersRepository';
+import {UsersQueryRepository} from '../infrastructure/repositories/usersQueryRepository';
 import {CommentsControllers} from './comments/controllers/commentsControllers';
 import {CommentsService} from './comments/domain/comments-service';
 import {CommentsRepository} from './comments/repositories/commentsRepository';

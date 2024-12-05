@@ -2,7 +2,8 @@ import {UserInfoViewModel} from '../../../types/auth/auth-types';
 import {UserDbType} from '../../../types/db/user-db-types';
 import {UserId} from '../../../types/entities/users-types';
 import {ObjectId, WithId} from 'mongodb';
-import {UserModel} from '../../../db/mongo-db';
+
+import {UserModel} from '../../../domain/UsersEntity';
 
 export class AuthQueryRepository {
     private mapToUserInfoModel(user: WithId<UserDbType>) {

@@ -1,5 +1,5 @@
 import {NextFunction, Request, Response} from 'express';
-import {jwtService} from '../common/adapters/jwt.service';
+import {jwtService} from '../application/adapters/jwt.service';
 import {PayloadAccessTokenInputType, VerifyAccessTokenViewModel} from '../types/auth/jwt-types';
 
 export const accessTokenGuardMiddleware = async (req: Request, res: Response, next: NextFunction) => {

@@ -1,6 +1,6 @@
 import {PostId, PostServiceModel} from '../../../types/entities/posts-types'
 import {PostDbType} from '../../../types/db/post-db-types'
-import {commentCollection, PostModel, UserModel} from '../../../db/mongo-db';
+import {commentCollection, PostModel} from '../../../db/mongo-db';
 import {ObjectId, UpdateResult, WithId} from 'mongodb';
 import {IdQueryDbType} from '../../../types/db/query-db-types';
 import {UserId, UserServiceModel} from '../../../types/entities/users-types';
@@ -14,6 +14,7 @@ import {
 } from '../../../types/entities/comments-types';
 import {CommentDbType, CommentUserLikeStatusInfoDbType, LikeStatus} from '../../../types/db/comments-db-types';
 import {injectable} from 'inversify';
+import {UserModel} from '../../../domain/UsersEntity';
 
 @injectable()
 export class CommentsRepository {

@@ -1,8 +1,8 @@
-import {UserId, UserInputModel} from '../../../types/entities/users-types';
-import {hashPassService} from '../../../common/adapters/hashPass.service';
-import {UserDbType} from '../../../types/db/user-db-types';
-import {ErrorsType} from '../../../types/utils/output-errors-type';
-import {UsersRepository} from '../repositories/usersRepository';
+import {UserId, UserInputModel} from '../types/entities/users-types';
+import {hashPassService} from './adapters/hashPass.service';
+import {UserDbType} from '../types/db/user-db-types';
+import {ErrorsType} from '../types/utils/output-errors-type';
+import {UsersRepository} from '../infrastructure/repositories/usersRepository';
 import {inject, injectable} from 'inversify';
 
 @injectable()

@@ -1,4 +1,4 @@
-import {securityCollection, UserModel} from '../../../db/mongo-db';
+import {securityCollection} from '../../../db/mongo-db';
 import {EmailConfirmationCodeInputModel} from '../../../types/auth/auth-types';
 import {
     EmailConfirmationType,
@@ -18,6 +18,7 @@ import {
     SecurityUpdateType
 } from '../../../types/entities/security-types';
 import {SecurityDbType} from '../../../types/db/security-db-types';
+import {UserModel} from '../../../domain/UsersEntity';
 
 
 export class AuthRepository {
@@ -49,6 +50,10 @@ export class AuthRepository {
         return !!user
     }
 
+    async save(userModel: any) {
+        await userModel.save()
+    }
+
     async isCodeConfirmationFound(code: EmailConfirmationCodeInputModel): Promise<boolean> {
         const isCodeFound: number = await UserModel.countDocuments({'emailConfirmation.confirmationCode': code});
 
@@ -62,9 +67,9 @@ export class AuthRepository {
     }
 
     async findUserByEmailConfirmationCode(code: EmailConfirmationCodeInputModel) {
-        const user: WithId<UserDbType> | null = await UserModel.findOne({'emailConfirmation.confirmationCode': code}).lean();
+        const user/*: WithId<UserDbType> | null*/ = await UserModel.findOne({'emailConfirmation.confirmationCode': code})/*.lean()*/;
 
-        return user ? this.mapToUserServiceModel(user) : null
+        return user /*? /!*this.mapToUserServiceModel*!/(user) : null*/
     }
 
     async updateUserEmailConfirmation(id: UserId, update: EmailConfirmationType): Promise<boolean> {

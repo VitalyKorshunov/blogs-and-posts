@@ -3,9 +3,10 @@ import {
     BlogModel,
     commentCollection, PostModel,
     rateLimitCollection,
-    securityCollection, UserModel,
+    securityCollection,
 } from '../../db/mongo-db'
 import {routersPaths} from '../../common/path/paths';
+import {UserModel} from '../../domain/UsersEntity';
 
 export const testingRouter = Router()
 

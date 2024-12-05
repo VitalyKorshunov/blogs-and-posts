@@ -1,5 +1,5 @@
 import {NextFunction, Request, Response} from 'express';
-import {jwtService} from '../common/adapters/jwt.service';
+import {jwtService} from '../application/adapters/jwt.service';
 import {DeviceId} from '../types/entities/security-types';
 import {UserId} from '../types/entities/users-types';
 import {VerifyRefreshTokenViewModel} from '../types/auth/jwt-types';
