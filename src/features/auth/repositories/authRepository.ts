@@ -18,7 +18,7 @@ import {
     SecurityUpdateType
 } from '../../../types/entities/security-types';
 import {SecurityDbType} from '../../../types/db/security-db-types';
-import {UserModel} from '../../../domain/UsersEntity';
+import {HydratedUserType, UserModel} from '../../../domain/UsersEntity';
 
 
 export class AuthRepository {
@@ -67,9 +67,7 @@ export class AuthRepository {
     }
 
     async findUserByEmailConfirmationCode(code: EmailConfirmationCodeInputModel) {
-        const user/*: WithId<UserDbType> | null*/ = await UserModel.findOne({'emailConfirmation.confirmationCode': code})/*.lean()*/;
-
-        return user /*? /!*this.mapToUserServiceModel*!/(user) : null*/
+        return UserModel.findOne({'emailConfirmation.confirmationCode': code});
     }
 
     async updateUserEmailConfirmation(id: UserId, update: EmailConfirmationType): Promise<boolean> {
@@ -84,10 +82,8 @@ export class AuthRepository {
         return !!isEmailFound
     }
 
-    async findUserByEmail(email: string): Promise<UserServiceModel | null> {
-        const user: WithId<UserDbType> | null = await UserModel.findOne({email: email}).lean()
-
-        return user ? this.mapToUserServiceModel(user) : null
+    async findUserByEmail(email: string): Promise<HydratedUserType | null> {
+        return UserModel.findOne({email: email});
     }
 
     async setSecuritySessionData(sessionData: SecurityInputModel): Promise<boolean> {
@@ -126,10 +122,8 @@ export class AuthRepository {
         return !!isRecoveryPasswordUpdate.matchedCount
     }
 
-    async findUserByRecoveryCode(recoveryCode: string): Promise<UserServiceModel | null> {
-        const user: WithId<UserDbType> | null = await UserModel.findOne({'recoveryPassword.recoveryCode': recoveryCode}).lean()
-
-        return user ? this.mapToUserServiceModel(user) : null
+    async findUserByRecoveryCode(recoveryCode: string): Promise<HydratedUserType | null> {
+        return UserModel.findOne({'recoveryPassword.recoveryCode': recoveryCode})
     }
 
     async updateUserPasswordWithRecoveryPassword(recoveryCode: string, updatePasswordWithRecoveryPassword: PasswordUpdateWithRecoveryType): Promise<boolean> {

@@ -1,6 +1,5 @@
 import {hashPassService} from '../../../application/adapters/hashPass.service';
 import {
-    EmailConfirmationType,
     PasswordUpdateWithRecoveryType,
     RecoveryPasswordType,
     UserId,
@@ -8,7 +7,6 @@ import {
     UserServiceModel
 } from '../../../types/entities/users-types';
 import {result, ResultType} from '../../../common/utils/errorsAndStatusCodes.utils';
-import {UserDbType} from '../../../types/db/user-db-types';
 import {v7 as uuidv7} from 'uuid';
 import {add} from 'date-fns';
 import {ErrorsType} from '../../../types/utils/output-errors-type';
@@ -28,6 +26,7 @@ import {
 import {AuthRepository} from '../repositories/authRepository';
 import {UsersRepository} from '../../../infrastructure/repositories/usersRepository';
 import {inject} from 'inversify';
+import {UserModel} from '../../../domain/UsersEntity';
 
 export class AuthService {
     constructor(
@@ -144,30 +143,14 @@ export class AuthService {
         }
 
         const passHash = await hashPassService.generateHash(password)
-        const newUser: UserDbType = {
-            login,
-            email,
-            passHash,
-            createdAt: new Date(),
-            recoveryPassword: {
-                expirationDate: new Date(),
-                recoveryCode: '',
-            },
-            emailConfirmation: {
-                expirationDate: add(new Date(), {
-                    minutes: 10,
-                }),
-                confirmationCode: uuidv7(),
-                isConfirmed: false
-            }
-        }
 
-        await this.usersRepository.createUser(newUser)
+        const smartUser = UserModel.createUser(login, email, passHash)
 
-        nodemailerService.sendEmailConfirmation(newUser.email, newUser.emailConfirmation.confirmationCode).catch((e) => {
-            console.log(e)
+        await this.authRepository.save(smartUser)
+
+        nodemailerService.sendEmailConfirmation(smartUser.email, smartUser.emailConfirmation.confirmationCode).catch((e: Error) => {
+            console.log(e.message)
         })
-
 
         return result.success(null)
     }
@@ -179,15 +162,15 @@ export class AuthService {
 
         if (!isCodeConfirmationFound) return result.notFound('code confirmation not found', error)
 
-        const user = await this.authRepository.findUserByEmailConfirmationCode(code)
+        const smartUser = await this.authRepository.findUserByEmailConfirmationCode(code)
 
-        if (!user) return result.notFound('user not found')
-        console.log(user)
-        if (!user.canBeConfirmed()) return result.emailError('email already confirmed or expired email code', error)
+        if (!smartUser) return result.notFound('user not found')
 
-        user.confirm()
+        if (!smartUser.canBeConfirmed()) return result.emailError('email already confirmed or expired email code', error)
 
-        await this.authRepository.save(user)
+        smartUser.confirm()
+
+        await this.authRepository.save(smartUser)
 
         return result.success(null)
     }
@@ -198,30 +181,29 @@ export class AuthService {
         const isEmailFound: boolean = await this.authRepository.isEmailFound(email)
         if (!isEmailFound) return result.emailError('email not found', error)
 
-        const user: UserServiceModel | null = await this.authRepository.findUserByEmail(email)
-        if (!user) return result.notFound('user not found')
+        const smartUser = await this.authRepository.findUserByEmail(email)
+        if (!smartUser) return result.notFound('user not found')
 
-        if (user.emailConfirmation.isConfirmed) return result.emailError('email already confirmed', error)
+        if (smartUser.isEmailConfirmed()) return result.emailError('email already confirmed', error)
 
-        const updateEmailConfirmation: EmailConfirmationType = {
-            expirationDate: add(new Date(), {
-                minutes: 10
-            }),
-            confirmationCode: uuidv7(),
-            isConfirmed: false
-        }
+        smartUser.generateNewEmailConfirmationCode()
 
-        const isUpdatedEmailConfirmation: boolean = await this.authRepository.updateUserEmailConfirmation(user.id, updateEmailConfirmation)
+        this.authRepository.save(smartUser)
+        // const updateEmailConfirmation: EmailConfirmationType = {
+        //     expirationDate: add(new Date(), {
+        //         minutes: 10
+        //     }),
+        //     confirmationCode: uuidv7(),
+        //     isConfirmed: false
+        // }
 
-        if (!isUpdatedEmailConfirmation) return result.notFound('email confirmations not updated')
+        // const isUpdatedEmailConfirmation: boolean = await this.authRepository.updateUserEmailConfirmation(smartUser.id, updateEmailConfirmation)
 
-        try {
-            nodemailerService.sendEmailConfirmation(email, updateEmailConfirmation.confirmationCode).catch(() => {
-            })
-        } catch (error) {
-            console.error(error)
-            return result.emailError('error nodemailer send email')
-        }
+        // if (!isUpdatedEmailConfirmation) return result.notFound('email confirmations not updated')
+
+
+        nodemailerService.sendEmailConfirmation(email, smartUser.emailConfirmation.confirmationCode).catch(() => {
+        })
 
         return result.success(null)
     }
@@ -293,7 +275,7 @@ export class AuthService {
             }),
             recoveryCode: uuidv7()
         }
-        console.log(recoveryPasswordData)
+
         try {
             nodemailerService.sendRecoveryPasswordCode(email, recoveryPasswordData.recoveryCode).catch((err) => console.log(err))
         } catch (err) {
@@ -310,16 +292,16 @@ export class AuthService {
     }
 
     async newPassword(newPassword: string, recoveryCode: string): Promise<ResultType<null>> {
-        const user: UserServiceModel | null = await this.authRepository.findUserByRecoveryCode(recoveryCode)
+        const smartUser = await this.authRepository.findUserByRecoveryCode(recoveryCode)
 
-        if (!user) {
+        if (!smartUser) {
             return result.notFound('user with current recovery code not found')
         }
 
-        if (user.recoveryPassword.expirationDate < new Date()) {
+        if (smartUser.recoveryPassword.expirationDate < new Date()) {
             return result.passwordError('recovery code is expired')
         }
-        console.log(newPassword)
+
         const newPassHash = await hashPassService.generateHash(newPassword)
         console.log(newPassHash)
         const updatePasswordWithRecoveryPassword: PasswordUpdateWithRecoveryType = {

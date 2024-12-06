@@ -180,7 +180,7 @@ describe('/auth', () => {
         const registrationConfirmationData = {
             code: userEmailWithEmailConfirmationCode.code
         }
-console.log(registrationConfirmationData)
+
         await req
             .post(SETTINGS.PATH.AUTH + routersPaths.auth.registrationConfirmation)
             .send(registrationConfirmationData)

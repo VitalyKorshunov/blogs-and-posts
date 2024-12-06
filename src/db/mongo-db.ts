@@ -2,7 +2,6 @@ import {SETTINGS} from '../settings';
 import {Collection, Db, MongoClient, WithId} from 'mongodb';
 import {BlogDbType} from '../types/db/blog-db-types';
 import {PostDbType} from '../types/db/post-db-types';
-import {UserDbType} from '../types/db/user-db-types';
 import {CommentDbType} from '../types/db/comments-db-types';
 import {RateLimitDBType} from '../types/db/rateLimit-db-types';
 import {SecurityDbType} from '../types/db/security-db-types';
@@ -31,7 +30,6 @@ const postSchema = new mongoose.Schema<WithId<PostDbType>>({
 
 export const BlogModel = mongoose.model(SETTINGS.DB.BLOG_COLLECTION_NAME, blogSchema)
 export const PostModel = mongoose.model(SETTINGS.DB.POST_COLLECTION_NAME, postSchema)
-
 
 
 // получение доступа к коллекциям
