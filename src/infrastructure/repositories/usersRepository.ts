@@ -3,7 +3,7 @@ import {IdQueryDbType} from '../../types/db/query-db-types';
 import {UserId, UserServiceModel} from '../../types/entities/users-types';
 import {UserDbType} from '../../types/db/user-db-types';
 import {injectable} from 'inversify';
-import {UserModel} from '../../domain/UsersEntity';
+import {HydratedUserType, UserModel} from '../../domain/UsersEntity';
 
 @injectable()
 export class UsersRepository {
@@ -25,15 +25,14 @@ export class UsersRepository {
         return _id[0]._id.toString()
     }
 
-    async findUserByFieldAndValue(field: string, value: string): Promise<UserServiceModel | null> {
+    async findUserByFieldAndValue(field: string, value: string): Promise<HydratedUserType | null> {
         const queryToDb = (
             (field === 'id')
                 ? this.toIdQuery(value)
                 : {[field]: value}
         )
 
-        const user: WithId<UserDbType> | null = await UserModel.findOne(queryToDb).lean()
-        return user ? this.mapToUserServiceModel(user) : null
+        return UserModel.findOne(queryToDb)
     }
 
     async deleteUser(userId: UserId): Promise<number> {

@@ -188,7 +188,7 @@ describe('/auth', () => {
 
         const user: WithId<UserDbType> = await testHelpers.findAndMapUserByIndex(0)
 
-        expect(user.emailConfirmation.confirmationCode).toBe('')
+        expect(user.emailConfirmation.confirmationCode).toBe(registrationConfirmationData.code)
         expect(user.emailConfirmation.isConfirmed).toBe(true)
     })
     it('post[/auth/registration-confirmation] shouldn\'t verify user with incorrect data, 400', async () => {
