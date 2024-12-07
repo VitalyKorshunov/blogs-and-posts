@@ -33,7 +33,11 @@ export class UsersService {
 
         const passHash = await hashPassService.generateHash(password)
 
-        const smartUser = UserModel.createUser(login, email, passHash)
+        const smartUser = UserModel.createUser(
+            login,
+            email,
+            passHash
+        )
 
         smartUser.confirmEmail(smartUser.getEmailConfirmationCode())
 

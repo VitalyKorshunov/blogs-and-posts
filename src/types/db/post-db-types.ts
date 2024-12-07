@@ -1,7 +1,7 @@
 import {ObjectId} from 'mongodb';
 import {LikeStatus} from './comments-db-types';
 
-export type PostDbType = {
+export interface PostDbType  {
     title: string
     shortDescription: string
     content: string

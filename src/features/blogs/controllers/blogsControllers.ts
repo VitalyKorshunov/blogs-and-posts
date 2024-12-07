@@ -10,8 +10,8 @@ import {BlogPostInputModel, PostId, PostInputModel, PostViewModel} from '../../.
 import {ParamType} from '../../../types/request-response/request-types';
 import {StatusCode} from '../../../common/utils/errorsAndStatusCodes.utils';
 import {BlogsQueryRepository} from '../../../infrastructure/blogRepositories/blogsQueryRepository';
-import {PostsService} from '../../posts/domain/posts-service';
-import {PostsQueryRepository} from '../../posts/repositories/postsQueryRepository';
+import {PostsService} from '../../../application/posts-service';
+import {PostsQueryRepository} from '../../../infrastructure/postRepositories/postsQueryRepository';
 import {inject, injectable} from 'inversify';
 
 @injectable()

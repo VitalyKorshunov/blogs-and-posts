@@ -1,11 +1,11 @@
-import {PostDbType, PostsQueryDbType} from '../../../types/db/post-db-types'
+import {PostDbType, PostsQueryDbType} from '../../types/db/post-db-types'
 import {ObjectId, WithId} from 'mongodb';
-import {IdQueryDbType,} from '../../../types/db/query-db-types';
-import {PostId, PostsSortViewModel, PostViewModel} from '../../../types/entities/posts-types';
-import {sortQueryFieldsUtils} from '../../../common/utils/sortQueryFields.utils';
-import {SortOutputQueryType} from '../../../types/utils/sort-types';
-import {PostModel} from '../../../db/mongo-db';
+import {IdQueryDbType,} from '../../types/db/query-db-types';
+import {PostId, PostsSortViewModel, PostViewModel} from '../../types/entities/posts-types';
+import {sortQueryFieldsUtils} from '../../common/utils/sortQueryFields.utils';
+import {SortOutputQueryType} from '../../types/utils/sort-types';
 import {injectable} from 'inversify';
+import {PostModel} from '../../domain/PostEntity';
 
 @injectable()
 export class PostsQueryRepository {

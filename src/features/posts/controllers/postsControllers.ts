@@ -8,8 +8,8 @@ import {
     CommentViewModel
 } from '../../../types/entities/comments-types';
 import {StatusCode} from '../../../common/utils/errorsAndStatusCodes.utils';
-import {PostsService} from '../domain/posts-service';
-import {PostsQueryRepository} from '../repositories/postsQueryRepository';
+import {PostsService} from '../../../application/posts-service';
+import {PostsQueryRepository} from '../../../infrastructure/postRepositories/postsQueryRepository';
 import {CommentsService} from '../../comments/domain/comments-service';
 import {CommentsQueryRepository} from '../../comments/repositories/commentsQueryRepository';
 import {accessTokenUtils} from '../../../common/utils/accessToken.utils';
@@ -27,13 +27,21 @@ export class PostsControllers {
     }
 
     async createPost(req: Request<any, any, PostInputModel>, res: Response<PostViewModel>) {
-        const result = await this.postsService.createPostInBlog(req.body)
+        const {title, shortDescription, content, blogId} = req.body
+
+        const post: PostInputModel = {
+            title, shortDescription, content, blogId
+        }
+
+        const result = await this.postsService.createPostInBlog(post)
 
         if (result.statusCode === StatusCode.Success) {
             const postId = result.data
             const newPost = await this.postsQueryRepository.findPostById(postId)
 
             res.status(201).json(newPost)
+        } else if (result.statusCode === StatusCode.NotFound) {
+            res.sendStatus(404)
         } else {
             res.sendStatus(400)
         }
@@ -62,7 +70,12 @@ export class PostsControllers {
     }
 
     async updatePost(req: Request<ParamType, any, PostInputModel>, res: Response) {
-        const result = await this.postsService.updatePost(req.body, req.params.id)
+        const {title, shortDescription, content, blogId} = req.body
+        const updatedPost: PostInputModel = {
+            title, shortDescription, content, blogId
+        }
+
+        const result = await this.postsService.updatePost(updatedPost, req.params.id)
 
         if (result.statusCode === StatusCode.Success) {
             res.sendStatus(204)

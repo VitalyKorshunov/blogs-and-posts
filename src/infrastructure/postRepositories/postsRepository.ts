@@ -1,12 +1,12 @@
-import {PostCreateType, PostId, PostServiceModel, PostUpdateType} from '../../../types/entities/posts-types'
-import {PostDbType, PostUpdateDbType} from '../../../types/db/post-db-types'
-import {PostModel} from '../../../db/mongo-db';
+import {PostCreateType, PostId, PostServiceModel, PostUpdateType} from '../../types/entities/posts-types'
+import {PostDbType, PostUpdateDbType} from '../../types/db/post-db-types'
 import {ObjectId, WithId} from 'mongodb';
-import {IdQueryDbType} from '../../../types/db/query-db-types';
-import {BlogId, BlogServiceModel} from '../../../types/entities/blogs-types';
-import {BlogDbType} from '../../../types/db/blog-db-types';
+import {IdQueryDbType} from '../../types/db/query-db-types';
+import {BlogId, BlogServiceModel} from '../../types/entities/blogs-types';
+import {BlogDbType} from '../../types/db/blog-db-types';
 import {injectable} from 'inversify';
-import {BlogModel} from '../../../domain/BlogsEntity';
+import {BlogModel, HydratedBlogType} from '../../domain/BlogsEntity';
+import {HydratedPostType, PostModel} from '../../domain/PostEntity';
 
 @injectable()
 export class PostsRepository {
@@ -64,9 +64,15 @@ export class PostsRepository {
         return !!postUpdated.matchedCount
     }
 
-    async findBlogById(id: BlogId): Promise<BlogServiceModel | null> {
-        const blog: WithId<BlogDbType> | null = await BlogModel.findById(id).lean();
+    async findBlogById(id: BlogId): Promise<HydratedBlogType | null> {
+        return BlogModel.findById(id);
+    }
 
-        return blog ? this.mapToBlogWithCorrectId(blog) : null
+    async findPostById(id: PostId): Promise<HydratedPostType | null> {
+        return PostModel.findById(id);
+    }
+
+    async save(postModel: HydratedPostType) {
+        await postModel.save()
     }
 }

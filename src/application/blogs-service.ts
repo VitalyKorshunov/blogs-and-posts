@@ -1,7 +1,7 @@
 import {BlogId, BlogInputModel} from '../types/entities/blogs-types';
 import {BlogsRepository} from '../infrastructure/blogRepositories/blogsRepository';
 import {inject, injectable} from 'inversify';
-import {BlogModel, HydrateBlogType} from '../domain/BlogsEntity';
+import {BlogModel, HydratedBlogType} from '../domain/BlogsEntity';
 import {result, ResultType} from '../common/utils/errorsAndStatusCodes.utils';
 
 @injectable()
@@ -12,7 +12,11 @@ export class BlogsService {
     }
 
     async createBlog(blog: BlogInputModel): Promise<BlogId> {
-        const smartBlog: HydrateBlogType = BlogModel.createBlog(blog.name, blog.description, blog.websiteUrl)
+        const smartBlog: HydratedBlogType = BlogModel.createBlog(
+            blog.name,
+            blog.description,
+            blog.websiteUrl
+        )
 
         await this.blogsRepository.save(smartBlog)
         return smartBlog.getId()
@@ -31,11 +35,14 @@ export class BlogsService {
         //
         // return await this.blogsRepository.updateBlog(updatedBlog, id)
 
-        const smartBlog: HydrateBlogType | null = await this.blogsRepository.findBlogById(id)
+        const smartBlog: HydratedBlogType | null = await this.blogsRepository.findBlogById(id)
 
         if (!smartBlog) return result.notFound('Blog not found')
 
-        smartBlog.update(blog.name, blog.description, blog.websiteUrl)
+        smartBlog.update(
+            blog.name,
+            blog.description,
+            blog.websiteUrl)
 
         await this.blogsRepository.save(smartBlog)
 

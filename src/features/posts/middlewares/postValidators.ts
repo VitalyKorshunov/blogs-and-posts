@@ -5,7 +5,7 @@ import {adminMiddleware} from '../../../global-middlewares/admin-middleware'
 import {ObjectId} from 'mongodb';
 import {accessTokenGuardMiddleware} from '../../../global-middlewares/accessTokenGuard-middleware';
 import {BlogsQueryRepository} from '../../../infrastructure/blogRepositories/blogsQueryRepository';
-import {PostsQueryRepository} from '../repositories/postsQueryRepository';
+import {PostsQueryRepository} from '../../../infrastructure/postRepositories/postsQueryRepository';
 import {likeStatusValidator} from '../../comments/middlewares/commentsValidators';
 
 export const commentContentValidator = body('content').isString().withMessage('not string').trim()

@@ -2,7 +2,7 @@ import {BlogCreateType, BlogId, BlogUpdateType} from '../../types/entities/blogs
 import {ObjectId} from 'mongodb';
 import {IdQueryDbType} from '../../types/db/query-db-types';
 import {injectable} from 'inversify';
-import {BlogModel, HydrateBlogType} from '../../domain/BlogsEntity';
+import {BlogModel, HydratedBlogType} from '../../domain/BlogsEntity';
 
 @injectable()
 export class BlogsRepository {
@@ -10,7 +10,7 @@ export class BlogsRepository {
         return {_id: new ObjectId(id)}
     }
 
-    async save(blogModel: HydrateBlogType) {
+    async save(blogModel: HydratedBlogType) {
         await blogModel.save()
     }
     async createBlog(newBlog: BlogCreateType): Promise<BlogId> {
@@ -32,7 +32,7 @@ export class BlogsRepository {
         return updatedBlog.matchedCount
     }
 
-    async findBlogById(id: BlogId): Promise<HydrateBlogType | null> {
+    async findBlogById(id: BlogId): Promise<HydratedBlogType | null> {
         return BlogModel.findById(id)
     }
 }

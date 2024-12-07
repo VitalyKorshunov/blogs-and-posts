@@ -1,25 +1,12 @@
 import {SETTINGS} from '../settings';
-import {Collection, Db, MongoClient, WithId} from 'mongodb';
-import {PostDbType} from '../types/db/post-db-types';
+import {Collection, Db, MongoClient} from 'mongodb';
 import {CommentDbType} from '../types/db/comments-db-types';
 import {RateLimitDBType} from '../types/db/rateLimit-db-types';
 import {SecurityDbType} from '../types/db/security-db-types';
 import * as mongoose from 'mongoose';
-import {Schema} from 'mongoose';
 
 let client: MongoClient = {} as MongoClient
 export let db: Db = {} as Db
-
-const postSchema = new mongoose.Schema<WithId<PostDbType>>({
-    title: String,
-    shortDescription: String,
-    content: String,
-    blogId: Schema.Types.ObjectId,
-    blogName: String,
-    createdAt: Date
-})
-
-export const PostModel = mongoose.model(SETTINGS.DB.POST_COLLECTION_NAME, postSchema)
 
 
 // получение доступа к коллекциям

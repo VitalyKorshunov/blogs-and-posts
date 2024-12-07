@@ -1,4 +1,3 @@
-import {PostModel} from '../../db/mongo-db';
 import {ObjectId, WithId} from 'mongodb';
 import {IdQueryDbType} from '../../types/db/query-db-types';
 import {
@@ -15,6 +14,7 @@ import {PostDbType} from '../../types/db/post-db-types';
 import {result, ResultType} from '../../common/utils/errorsAndStatusCodes.utils';
 import {injectable} from 'inversify';
 import {BlogModel} from '../../domain/BlogsEntity';
+import {PostModel} from '../../domain/PostEntity';
 
 @injectable()
 export class BlogsQueryRepository {
