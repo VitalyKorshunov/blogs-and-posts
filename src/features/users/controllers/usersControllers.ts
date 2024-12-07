@@ -3,7 +3,7 @@ import {UserInputModel, UsersSortViewModel, UserViewModel} from '../../../types/
 import {ParamType} from '../../../types/request-response/request-types';
 import {ErrorsType} from '../../../types/utils/output-errors-type';
 import {UsersService} from '../../../application/users-service';
-import {UsersQueryRepository} from '../../../infrastructure/repositories/usersQueryRepository';
+import {UsersQueryRepository} from '../../../infrastructure/userRepositories/usersQueryRepository';
 import {inject, injectable} from 'inversify';
 
 @injectable()
@@ -16,7 +16,7 @@ export class UsersControllers {
 
     async createUser(req: Request<any, any, UserInputModel>, res: Response<UserViewModel | ErrorsType>) {
         const {login, email, password}: UserInputModel = req.body
-        const newUserId = await this.usersService.create({login, email, password})
+        const newUserId = await this.usersService.createUserByAdmin({login, email, password})
         if (typeof newUserId === 'string') {
             const newUser = await this.usersQueryRepository.findAndMap(newUserId)
             res

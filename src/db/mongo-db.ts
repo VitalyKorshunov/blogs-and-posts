@@ -1,6 +1,5 @@
 import {SETTINGS} from '../settings';
 import {Collection, Db, MongoClient, WithId} from 'mongodb';
-import {BlogDbType} from '../types/db/blog-db-types';
 import {PostDbType} from '../types/db/post-db-types';
 import {CommentDbType} from '../types/db/comments-db-types';
 import {RateLimitDBType} from '../types/db/rateLimit-db-types';
@@ -11,14 +10,6 @@ import {Schema} from 'mongoose';
 let client: MongoClient = {} as MongoClient
 export let db: Db = {} as Db
 
-const blogSchema = new mongoose.Schema<WithId<BlogDbType>>({
-    name: String,
-    description: String,
-    websiteUrl: String,
-    createdAt: Date,
-    isMembership: Boolean,
-})
-
 const postSchema = new mongoose.Schema<WithId<PostDbType>>({
     title: String,
     shortDescription: String,
@@ -28,7 +19,6 @@ const postSchema = new mongoose.Schema<WithId<PostDbType>>({
     createdAt: Date
 })
 
-export const BlogModel = mongoose.model(SETTINGS.DB.BLOG_COLLECTION_NAME, blogSchema)
 export const PostModel = mongoose.model(SETTINGS.DB.POST_COLLECTION_NAME, postSchema)
 
 

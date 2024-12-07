@@ -1,24 +1,24 @@
-import {securityCollection} from '../../../db/mongo-db';
-import {EmailConfirmationCodeInputModel} from '../../../types/auth/auth-types';
+import {securityCollection} from '../../db/mongo-db';
+import {EmailConfirmationCodeInputModel} from '../../types/auth/auth-types';
 import {
     EmailConfirmationType,
     PasswordUpdateWithRecoveryType,
     RecoveryPasswordType,
     UserId,
     UserServiceModel
-} from '../../../types/entities/users-types';
-import {IdQueryDbType} from '../../../types/db/query-db-types';
+} from '../../types/entities/users-types';
+import {IdQueryDbType} from '../../types/db/query-db-types';
 import {ObjectId, WithId} from 'mongodb';
-import {UserDbType} from '../../../types/db/user-db-types';
+import {UserDbType} from '../../types/db/user-db-types';
 import {
     DeviceId,
     SecurityInputModel,
     SecurityServiceModel,
     SecuritySessionSearchQueryType,
     SecurityUpdateType
-} from '../../../types/entities/security-types';
-import {SecurityDbType} from '../../../types/db/security-db-types';
-import {HydratedUserType, UserModel} from '../../../domain/UsersEntity';
+} from '../../types/entities/security-types';
+import {SecurityDbType} from '../../types/db/security-db-types';
+import {HydratedUserType, UserModel} from '../../domain/UsersEntity';
 
 
 export class AuthRepository {
@@ -50,7 +50,7 @@ export class AuthRepository {
         return !!user
     }
 
-    async save(userModel: any) {
+    async save(userModel: HydratedUserType) {
         await userModel.save()
     }
 

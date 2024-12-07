@@ -1,9 +1,9 @@
 import {UserId, UserInputModel} from '../types/entities/users-types';
 import {hashPassService} from './adapters/hashPass.service';
-import {UserDbType} from '../types/db/user-db-types';
 import {ErrorsType} from '../types/utils/output-errors-type';
-import {UsersRepository} from '../infrastructure/repositories/usersRepository';
+import {UsersRepository} from '../infrastructure/userRepositories/usersRepository';
 import {inject, injectable} from 'inversify';
+import {UserModel} from '../domain/UsersEntity';
 
 @injectable()
 export class UsersService {
@@ -18,7 +18,7 @@ export class UsersService {
         return !!isExist
     }
 
-    async create({login, email, password}: UserInputModel): Promise<UserId | ErrorsType> {
+    async createUserByAdmin({login, email, password}: UserInputModel): Promise<UserId | ErrorsType> {
         const errors: ErrorsType = {
             errorsMessages: []
         }
@@ -32,23 +32,14 @@ export class UsersService {
         }
 
         const passHash = await hashPassService.generateHash(password)
-        const newUser: UserDbType = {
-            login,
-            email,
-            passHash,
-            createdAt: new Date(),
-            recoveryPassword: {
-                expirationDate: new Date(),
-                recoveryCode: ''
-            },
-            emailConfirmation: {
-                expirationDate: new Date(),
-                confirmationCode: '',
-                isConfirmed: true
-            }
-        }
 
-        return await this.usersRepository.createUser(newUser)
+        const smartUser = UserModel.createUser(login, email, passHash)
+
+        smartUser.confirmEmail(smartUser.getEmailConfirmationCode())
+
+        await this.usersRepository.save(smartUser)
+
+        return smartUser.getId()
     }
 
     async deleteUser(id: UserId): Promise<number> {

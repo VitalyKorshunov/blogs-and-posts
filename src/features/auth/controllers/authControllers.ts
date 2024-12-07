@@ -3,8 +3,8 @@ import {AuthInputModel, AuthTokensType} from '../../../types/auth/auth-types';
 import {UserInputModel} from '../../../types/entities/users-types';
 import {handleError, StatusCode} from '../../../common/utils/errorsAndStatusCodes.utils';
 import {DeviceName, IP} from '../../../types/entities/security-types';
-import {AuthService} from '../domain/auth-service';
-import {AuthQueryRepository} from '../repositories/authQueryRepository';
+import {AuthService} from '../../../application/auth-service';
+import {AuthQueryRepository} from '../../../infrastructure/authRepositories/authQueryRepository';
 import {inject, injectable} from 'inversify';
 
 @injectable()

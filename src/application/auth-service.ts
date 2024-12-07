@@ -1,12 +1,12 @@
-import {hashPassService} from '../../../application/adapters/hashPass.service';
-import {UserId, UserInputModel} from '../../../types/entities/users-types';
-import {result, ResultType} from '../../../common/utils/errorsAndStatusCodes.utils';
+import {hashPassService} from './adapters/hashPass.service';
+import {UserId, UserInputModel} from '../types/entities/users-types';
+import {result, ResultType} from '../common/utils/errorsAndStatusCodes.utils';
 import {v7 as uuidv7} from 'uuid';
-import {ErrorsType} from '../../../types/utils/output-errors-type';
-import {AuthTokensType, EmailConfirmationCodeInputModel} from '../../../types/auth/auth-types';
-import {nodemailerService} from '../../../application/adapters/nodemailer.service';
-import {jwtService} from '../../../application/adapters/jwt.service';
-import {PayloadRefreshTokenInputType, VerifyRefreshTokenViewModel} from '../../../types/auth/jwt-types';
+import {ErrorsType} from '../types/utils/output-errors-type';
+import {AuthTokensType, EmailConfirmationCodeInputModel} from '../types/auth/auth-types';
+import {nodemailerService} from './adapters/nodemailer.service';
+import {jwtService} from './adapters/jwt.service';
+import {PayloadRefreshTokenInputType, VerifyRefreshTokenViewModel} from '../types/auth/jwt-types';
 import {
     DeviceId,
     DeviceName,
@@ -15,11 +15,11 @@ import {
     SecurityServiceModel,
     SecuritySessionSearchQueryType,
     SecurityUpdateType
-} from '../../../types/entities/security-types';
-import {AuthRepository} from '../repositories/authRepository';
-import {UsersRepository} from '../../../infrastructure/repositories/usersRepository';
+} from '../types/entities/security-types';
+import {AuthRepository} from '../infrastructure/authRepositories/authRepository';
+import {UsersRepository} from '../infrastructure/userRepositories/usersRepository';
 import {inject} from 'inversify';
-import {HydratedUserType, UserModel} from '../../../domain/UsersEntity';
+import {HydratedUserType, UserModel} from '../domain/UsersEntity';
 
 export class AuthService {
     constructor(

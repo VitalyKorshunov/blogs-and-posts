@@ -1,19 +1,20 @@
-import {BlogModel, PostModel} from '../../../db/mongo-db';
+import {PostModel} from '../../db/mongo-db';
 import {ObjectId, WithId} from 'mongodb';
-import {IdQueryDbType} from '../../../types/db/query-db-types';
+import {IdQueryDbType} from '../../types/db/query-db-types';
 import {
     BlogId,
     BlogsSortViewModel,
     BlogViewModel,
     PostsForBlogSortViewModel
-} from '../../../types/entities/blogs-types';
-import {PostViewModel} from '../../../types/entities/posts-types';
-import {BlogDbType, BlogsQueryDBType, PostsForBlogQueryDbType} from '../../../types/db/blog-db-types';
-import {sortQueryFieldsUtils} from '../../../common/utils/sortQueryFields.utils';
-import {SortOutputQueryType} from '../../../types/utils/sort-types';
-import {PostDbType} from '../../../types/db/post-db-types';
-import {result, ResultType} from '../../../common/utils/errorsAndStatusCodes.utils';
+} from '../../types/entities/blogs-types';
+import {PostViewModel} from '../../types/entities/posts-types';
+import {BlogDbType, BlogsQueryDBType, PostsForBlogQueryDbType} from '../../types/db/blog-db-types';
+import {sortQueryFieldsUtils} from '../../common/utils/sortQueryFields.utils';
+import {SortOutputQueryType} from '../../types/utils/sort-types';
+import {PostDbType} from '../../types/db/post-db-types';
+import {result, ResultType} from '../../common/utils/errorsAndStatusCodes.utils';
 import {injectable} from 'inversify';
+import {BlogModel} from '../../domain/BlogsEntity';
 
 @injectable()
 export class BlogsQueryRepository {

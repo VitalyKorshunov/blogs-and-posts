@@ -1,12 +1,12 @@
 import {Router} from 'express'
 import {
-    BlogModel,
     commentCollection, PostModel,
     rateLimitCollection,
     securityCollection,
 } from '../../db/mongo-db'
 import {routersPaths} from '../../common/path/paths';
 import {UserModel} from '../../domain/UsersEntity';
+import {BlogModel} from '../../domain/BlogsEntity';
 
 export const testingRouter = Router()
 

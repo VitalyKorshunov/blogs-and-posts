@@ -1,11 +1,12 @@
 import {PostCreateType, PostId, PostServiceModel, PostUpdateType} from '../../../types/entities/posts-types'
 import {PostDbType, PostUpdateDbType} from '../../../types/db/post-db-types'
-import {BlogModel, PostModel} from '../../../db/mongo-db';
+import {PostModel} from '../../../db/mongo-db';
 import {ObjectId, WithId} from 'mongodb';
 import {IdQueryDbType} from '../../../types/db/query-db-types';
 import {BlogId, BlogServiceModel} from '../../../types/entities/blogs-types';
 import {BlogDbType} from '../../../types/db/blog-db-types';
 import {injectable} from 'inversify';
+import {BlogModel} from '../../../domain/BlogsEntity';
 
 @injectable()
 export class PostsRepository {

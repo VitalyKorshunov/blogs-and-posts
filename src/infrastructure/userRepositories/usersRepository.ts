@@ -40,4 +40,8 @@ export class UsersRepository {
 
         return user.deletedCount
     }
+
+    async save(userModel: HydratedUserType) {
+        await userModel.save()
+    }
 }

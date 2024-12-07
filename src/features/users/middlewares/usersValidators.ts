@@ -3,7 +3,7 @@ import {inputCheckErrorsMiddleware} from '../../../global-middlewares/inputCheck
 import {adminMiddleware} from '../../../global-middlewares/admin-middleware'
 import {ObjectId} from 'mongodb';
 import {NextFunction, Request, Response} from 'express';
-import {UsersQueryRepository} from '../../../infrastructure/repositories/usersQueryRepository';
+import {UsersQueryRepository} from '../../../infrastructure/userRepositories/usersQueryRepository';
 
 export const loginValidator = body('login').isString().withMessage('not string').trim()
     .isLength({

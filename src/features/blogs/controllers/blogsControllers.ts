@@ -5,11 +5,11 @@ import {
     BlogViewModel,
     PostsForBlogSortViewModel
 } from '../../../types/entities/blogs-types';
-import {BlogsService} from '../domain/blogs-service';
+import {BlogsService} from '../../../application/blogs-service';
 import {BlogPostInputModel, PostId, PostInputModel, PostViewModel} from '../../../types/entities/posts-types';
 import {ParamType} from '../../../types/request-response/request-types';
 import {StatusCode} from '../../../common/utils/errorsAndStatusCodes.utils';
-import {BlogsQueryRepository} from '../repositories/blogsQueryRepository';
+import {BlogsQueryRepository} from '../../../infrastructure/blogRepositories/blogsQueryRepository';
 import {PostsService} from '../../posts/domain/posts-service';
 import {PostsQueryRepository} from '../../posts/repositories/postsQueryRepository';
 import {inject, injectable} from 'inversify';
@@ -62,6 +62,7 @@ export class BlogsControllers {
 
     async updateBlog(req: Request<ParamType, any, BlogInputModel>, res: Response) {
         await this.blogsService.updateBlog(req.body, req.params.id)
+
         res.sendStatus(204)
     }
 
