@@ -1,4 +1,3 @@
-import {securityCollection} from '../../db/mongo-db';
 import {EmailConfirmationCodeInputModel} from '../../types/auth/auth-types';
 import {
     EmailConfirmationType,
@@ -19,6 +18,7 @@ import {
 } from '../../types/entities/security-types';
 import {SecurityDbType} from '../../types/db/security-db-types';
 import {HydratedUserType, UserModel} from '../../domain/UsersEntity';
+import {HydratedSecurityType, SecurityModel} from '../../domain/SecurityEntity';
 
 
 export class AuthRepository {
@@ -93,19 +93,17 @@ export class AuthRepository {
             ...rest
         }
 
-        const isSecuritySessionSet = await securityCollection.insertOne(mappedSessionData)
+        const isSecuritySessionSet = await SecurityModel.insertMany([mappedSessionData])
 
-        return !!isSecuritySessionSet.insertedId
+        return !!isSecuritySessionSet[0]._id
     }
 
-    async getSecuritySession(securitySessionQuery: SecuritySessionSearchQueryType): Promise<SecurityServiceModel | null> {
-        const securitySession: WithId<SecurityDbType> | null = await securityCollection.findOne(securitySessionQuery)
-
-        return securitySession ? this.mapToSecuritySessionServiceModel(securitySession) : null
-    }
+    async getSecuritySession(securitySessionQuery: SecuritySessionSearchQueryType): Promise<HydratedSecurityType | null> {
+        return SecurityModel.findOne(securitySessionQuery)
+   }
 
     async deleteSecuritySessionData(deviceId: DeviceId, lastActiveDate: Date): Promise<boolean> {
-        const result = await securityCollection.deleteOne({deviceId, lastActiveDate})
+        const result = await SecurityModel.deleteOne({deviceId, lastActiveDate})
 
         return !!result.deletedCount
     }

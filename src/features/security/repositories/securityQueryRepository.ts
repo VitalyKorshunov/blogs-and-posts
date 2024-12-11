@@ -2,8 +2,8 @@ import {SecurityViewModel} from '../../../types/entities/security-types';
 import {SecurityDbType} from '../../../types/db/security-db-types';
 import {ObjectId, WithId} from 'mongodb';
 import {UserId} from '../../../types/entities/users-types';
-import {securityCollection} from '../../../db/mongo-db';
 import {injectable} from 'inversify';
+import {HydratedSecurityType, SecurityModel} from '../../../domain/SecurityEntity';
 
 @injectable()
 export class SecurityQueryRepository {
@@ -17,11 +17,11 @@ export class SecurityQueryRepository {
     }
 
     async getAllActiveSessionsByUser(userId: UserId): Promise<SecurityViewModel[] | null> {
-        const sessions: WithId<SecurityDbType>[] = await securityCollection.find({userId: new ObjectId(userId)}).toArray()
+        const sessions: HydratedSecurityType[] = await SecurityModel.find({userId: new ObjectId(userId)})
 
-        if (!sessions) return null
+        if (!sessions.length) return null
 
-        const filteredSession: WithId<SecurityDbType>[] = sessions.filter((session) => {
+        const filteredSession: HydratedSecurityType[] = sessions.filter((session) => {
             return session.expireDate > new Date()
         })
 

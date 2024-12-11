@@ -27,14 +27,6 @@ export class BlogsService {
     }
 
     async updateBlog(blog: BlogInputModel, id: BlogId): Promise<ResultType<null>> {
-        // const updatedBlog: BlogUpdateType = {
-        //     name: blog.name,
-        //     description: blog.description,
-        //     websiteUrl: blog.websiteUrl
-        // }
-        //
-        // return await this.blogsRepository.updateBlog(updatedBlog, id)
-
         const smartBlog: HydratedBlogType | null = await this.blogsRepository.findBlogById(id)
 
         if (!smartBlog) return result.notFound('Blog not found')

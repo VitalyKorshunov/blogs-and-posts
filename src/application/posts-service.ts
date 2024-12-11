@@ -25,21 +25,9 @@ export class PostsService {
             smartBlog.getName()
         )
 
-        // const newPost: PostCreateType = {
-        //     title: post.title,
-        //     content: post.content,
-        //     shortDescription: post.shortDescription,
-        //     blogId: smartBlog.id,
-        //     blogName: smartBlog.name,
-        //     createdAt: new Date()
-        // }
-
-        // const postId: PostId = await this.postsRepository.createPost(newPost)
-
         await this.postsRepository.save(smartPost)
 
         return result.success(smartPost.getId())
-
     }
 
     async deletePost(id: PostId): Promise<ResultType<boolean>> {
@@ -66,15 +54,6 @@ export class PostsService {
         )
 
         await this.postsRepository.save(smartPost)
-        // const updatedPost: PostUpdateType = {
-        //     title: updatedPost.title,
-        //     content: updatedPost.content,
-        //     shortDescription: updatedPost.shortDescription,
-        //     blogId: updatedPost.blogId,
-        //     blogName: smartBlog.name
-        // }
-
-        // const isPostUpdated = await this.postsRepository.updatePost(updatedPost, id)
 
         return result.success(null)
     }

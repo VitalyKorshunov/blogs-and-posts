@@ -3,6 +3,7 @@ import {result, ResultType} from '../../../common/utils/errorsAndStatusCodes.uti
 import {DeviceId, SecurityServiceModel} from '../../../types/entities/security-types';
 import {SecurityRepository} from '../repositories/securityRepository';
 import {inject, injectable} from 'inversify';
+import {HydratedSecurityType} from '../../../domain/SecurityEntity';
 
 @injectable()
 export class SecurityService {
@@ -18,12 +19,13 @@ export class SecurityService {
     }
 
     async deleteUserDeviceByDeviceId(userId: UserId, deviceId: DeviceId): Promise<ResultType<null>> {
-        const session: SecurityServiceModel | null = await this.securityRepository.findUserSessionByDeviceId(deviceId)
+        const session: HydratedSecurityType | null = await this.securityRepository.findUserSessionByDeviceId(deviceId)
+
         if (!session) {
             return result.notFound('not found session by deviceId')
         }
 
-        if (session.userId !== userId) {
+        if (session.userId.toString() !== userId) {
             return result.permissionDeniedError('this user cannot delete sessions that are not his own')
         }
 
