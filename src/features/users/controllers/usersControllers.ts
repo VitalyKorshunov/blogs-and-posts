@@ -2,8 +2,8 @@ import {Request, Response} from 'express';
 import {UserInputModel, UsersSortViewModel, UserViewModel} from '../../../types/entities/users-types';
 import {ParamType} from '../../../types/request-response/request-types';
 import {ErrorsType} from '../../../types/utils/output-errors-type';
-import {UsersService} from '../../../application/users-service';
-import {UsersQueryRepository} from '../../../infrastructure/userRepositories/usersQueryRepository';
+import {UsersService} from '../application/usersService';
+import {UsersQueryRepository} from '../infrastructure/usersQueryRepository';
 import {inject, injectable} from 'inversify';
 
 @injectable()

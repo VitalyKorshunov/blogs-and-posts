@@ -1,7 +1,7 @@
 import {Request, Response} from 'express';
 import {ParamType} from '../../../types/request-response/request-types';
 import {CommentId, CommentInputModel, CommentViewModel} from '../../../types/entities/comments-types';
-import {CommentsService} from '../domain/comments-service';
+import {CommentsService} from '../application/commentsService';
 import {CommentsQueryRepository} from '../repositories/commentsQueryRepository';
 import {StatusCode} from '../../../common/utils/errorsAndStatusCodes.utils';
 import {accessTokenUtils} from '../../../common/utils/accessToken.utils';

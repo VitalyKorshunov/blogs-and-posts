@@ -8,9 +8,9 @@ import {
     CommentViewModel
 } from '../../../types/entities/comments-types';
 import {StatusCode} from '../../../common/utils/errorsAndStatusCodes.utils';
-import {PostsService} from '../../../application/posts-service';
-import {PostsQueryRepository} from '../../../infrastructure/postRepositories/postsQueryRepository';
-import {CommentsService} from '../../comments/domain/comments-service';
+import {PostsService} from '../application/postsService';
+import {PostsQueryRepository} from '../infrastructure/postsQueryRepository';
+import {CommentsService} from '../../comments/application/commentsService';
 import {CommentsQueryRepository} from '../../comments/repositories/commentsQueryRepository';
 import {accessTokenUtils} from '../../../common/utils/accessToken.utils';
 import {UserId} from '../../../types/entities/users-types';

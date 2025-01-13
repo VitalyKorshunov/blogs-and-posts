@@ -1,8 +1,8 @@
 import mongoose, {HydratedDocument, Model, Schema} from 'mongoose';
-import {SETTINGS} from '../settings';
+import {SETTINGS} from '../../../settings';
 import {add} from 'date-fns';
 import {v7 as uuidv7} from 'uuid';
-import {SecurityDbType} from '../types/db/security-db-types';
+import {SecurityDbType} from '../../../types/db/security-db-types';
 
 export interface SecurityMethodsType {
 

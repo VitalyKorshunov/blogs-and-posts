@@ -1,7 +1,7 @@
 import mongoose, {HydratedDocument, Model} from 'mongoose';
-import {EmailConfirmationType, RecoveryPasswordType} from '../types/entities/users-types';
-import {UserDbType} from '../types/db/user-db-types';
-import {SETTINGS} from '../settings';
+import {EmailConfirmationType, RecoveryPasswordType} from '../../../types/entities/users-types';
+import {UserDbType} from '../../../types/db/user-db-types';
+import {SETTINGS} from '../../../settings';
 import {add} from 'date-fns';
 import {v7 as uuidv7} from 'uuid';
 

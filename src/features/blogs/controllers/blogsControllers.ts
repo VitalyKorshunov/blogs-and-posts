@@ -5,13 +5,13 @@ import {
     BlogViewModel,
     PostsForBlogSortViewModel
 } from '../../../types/entities/blogs-types';
-import {BlogsService} from '../../../application/blogs-service';
+import {BlogsService} from '../application/blogsService';
 import {BlogPostInputModel, PostId, PostInputModel, PostViewModel} from '../../../types/entities/posts-types';
 import {ParamType} from '../../../types/request-response/request-types';
 import {StatusCode} from '../../../common/utils/errorsAndStatusCodes.utils';
-import {BlogsQueryRepository} from '../../../infrastructure/blogRepositories/blogsQueryRepository';
-import {PostsService} from '../../../application/posts-service';
-import {PostsQueryRepository} from '../../../infrastructure/postRepositories/postsQueryRepository';
+import {BlogsQueryRepository} from '../infrastructure/blogsQueryRepository';
+import {PostsService} from '../../posts/application/postsService';
+import {PostsQueryRepository} from '../../posts/infrastructure/postsQueryRepository';
 import {inject, injectable} from 'inversify';
 
 @injectable()

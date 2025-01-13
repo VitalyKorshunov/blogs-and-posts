@@ -1,22 +1,14 @@
-import {ObjectId, WithId} from 'mongodb';
-import {IdQueryDbType} from '../../types/db/query-db-types';
-import {UserId, UserServiceModel} from '../../types/entities/users-types';
-import {UserDbType} from '../../types/db/user-db-types';
+import {ObjectId} from 'mongodb';
+import {IdQueryDbType} from '../../../types/db/query-db-types';
+import {UserId} from '../../../types/entities/users-types';
+import {UserDbType} from '../../../types/db/user-db-types';
 import {injectable} from 'inversify';
-import {HydratedUserType, UserModel} from '../../domain/UsersEntity';
+import {HydratedUserType, UserModel} from '../domain/usersEntity';
 
 @injectable()
 export class UsersRepository {
     private toIdQuery(id: UserId): IdQueryDbType {
         return {_id: new ObjectId(id)}
-    }
-
-    private mapToUserServiceModel(user: WithId<UserDbType>): UserServiceModel {
-        const {_id, ...rest} = user
-        return {
-            id: _id.toString(),
-            ...rest
-        }
     }
 
     async createUser(user: UserDbType): Promise<UserId> {

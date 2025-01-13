@@ -1,9 +1,9 @@
 import {ObjectId, WithId} from 'mongodb';
-import {IdQueryDbType,} from '../../types/db/query-db-types';
-import {UserDbType, UsersQueryDbType} from '../../types/db/user-db-types';
-import {UserId, UsersSortViewModel, UserViewModel} from '../../types/entities/users-types';
+import {IdQueryDbType,} from '../../../types/db/query-db-types';
+import {UserDbType, UsersQueryDbType} from '../../../types/db/user-db-types';
+import {UserId, UsersSortViewModel, UserViewModel} from '../../../types/entities/users-types';
 import {injectable} from 'inversify';
-import {UserModel} from '../../domain/UsersEntity';
+import {UserModel} from '../domain/usersEntity';
 
 @injectable()
 export class UsersQueryRepository {

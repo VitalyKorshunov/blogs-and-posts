@@ -3,7 +3,7 @@ import {SecurityDbType} from '../../../types/db/security-db-types';
 import {ObjectId, WithId} from 'mongodb';
 import {UserId} from '../../../types/entities/users-types';
 import {injectable} from 'inversify';
-import {HydratedSecurityType, SecurityModel} from '../../../domain/SecurityEntity';
+import {HydratedSecurityType, SecurityModel} from '../domain/securityEntity';
 
 @injectable()
 export class SecurityQueryRepository {

@@ -1,22 +1,11 @@
-import {DeviceId, SecurityServiceModel} from '../../../types/entities/security-types';
+import {DeviceId} from '../../../types/entities/security-types';
 import {UserId} from '../../../types/entities/users-types';
-import {ObjectId, WithId} from 'mongodb';
-import {SecurityDbType} from '../../../types/db/security-db-types';
+import {ObjectId} from 'mongodb';
 import {injectable} from 'inversify';
-import {HydratedSecurityType, SecurityModel} from '../../../domain/SecurityEntity';
+import {HydratedSecurityType, SecurityModel} from '../domain/securityEntity';
 
 @injectable()
 export class SecurityRepository {
-    private mapToSecuritySessionServiceModel(securitySession: WithId<SecurityDbType>): SecurityServiceModel {
-        const {_id, userId, ...rest} = securitySession
-
-        return {
-            id: _id.toString(),
-            userId: userId.toString(),
-            ...rest
-        }
-    }
-
     async deleteAllUserDevicesExceptCurrent(userId: UserId, deviceId: DeviceId): Promise<boolean> {
         const result = await SecurityModel.deleteMany({userId: new ObjectId(userId), deviceId: {$ne: deviceId}})
 

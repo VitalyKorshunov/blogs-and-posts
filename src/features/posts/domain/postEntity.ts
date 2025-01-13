@@ -1,6 +1,6 @@
 import mongoose, {HydratedDocument, Model, Schema} from 'mongoose';
-import {SETTINGS} from '../settings';
-import {PostDbType} from '../types/db/post-db-types';
+import {SETTINGS} from '../../../settings';
+import {PostDbType} from '../../../types/db/post-db-types';
 import {ObjectId} from 'mongodb';
 
 export interface PostMethodsType {

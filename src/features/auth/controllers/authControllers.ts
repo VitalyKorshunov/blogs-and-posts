@@ -3,8 +3,8 @@ import {AuthInputModel, AuthTokensType} from '../../../types/auth/auth-types';
 import {UserInputModel} from '../../../types/entities/users-types';
 import {handleError, StatusCode} from '../../../common/utils/errorsAndStatusCodes.utils';
 import {DeviceName, IP} from '../../../types/entities/security-types';
-import {AuthService} from '../../../application/auth-service';
-import {AuthQueryRepository} from '../../../infrastructure/authRepositories/authQueryRepository';
+import {AuthService} from '../application/authService';
+import {AuthQueryRepository} from '../infrastructure/authQueryRepository';
 import {inject, injectable} from 'inversify';
 
 @injectable()
@@ -107,7 +107,7 @@ export class AuthControllers {
     async passwordRecovery(req: Request, res: Response) {
         const {email} = req.body;
 
-        const result = await this.authService.passwordRecovery(email)
+        await this.authService.passwordRecovery(email)
 
         res.sendStatus(204)
     }

@@ -2,7 +2,7 @@ import {Request, Response} from 'express';
 import {DeviceId, SecurityViewModel} from '../../../types/entities/security-types';
 import {ResultType, StatusCode} from '../../../common/utils/errorsAndStatusCodes.utils';
 import {SecurityQueryRepository} from '../repositories/securityQueryRepository';
-import {SecurityService} from '../domain/securityService';
+import {SecurityService} from '../application/securityService';
 import {inject, injectable} from 'inversify';
 
 @injectable()

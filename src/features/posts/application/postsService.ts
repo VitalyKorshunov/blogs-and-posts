@@ -1,9 +1,9 @@
-import {PostId, PostInputModel} from '../types/entities/posts-types';
-import {result, ResultType} from '../common/utils/errorsAndStatusCodes.utils';
-import {PostsRepository} from '../infrastructure/postRepositories/postsRepository';
+import {PostId, PostInputModel} from '../../../types/entities/posts-types';
+import {result, ResultType} from '../../../common/utils/errorsAndStatusCodes.utils';
+import {PostsRepository} from '../infrastructure/postsRepository';
 import {inject, injectable} from 'inversify';
-import {HydratedBlogType} from '../domain/BlogsEntity';
-import {HydratedPostType, PostModel} from '../domain/PostEntity';
+import {HydratedBlogType} from '../../blogs/domain/blogEntity';
+import {HydratedPostType, PostModel} from '../domain/postEntity';
 
 @injectable()
 export class PostsService {

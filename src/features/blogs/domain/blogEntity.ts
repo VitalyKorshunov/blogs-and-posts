@@ -1,6 +1,6 @@
 import mongoose, {HydratedDocument, Model} from 'mongoose';
-import {BlogDbType} from '../types/db/blog-db-types';
-import {SETTINGS} from '../settings';
+import {BlogDbType} from '../../../types/db/blog-db-types';
+import {SETTINGS} from '../../../settings';
 
 export interface BlogMethodsType {
     getId(): string

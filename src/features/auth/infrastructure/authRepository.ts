@@ -1,24 +1,23 @@
-import {EmailConfirmationCodeInputModel} from '../../types/auth/auth-types';
+import {EmailConfirmationCodeInputModel} from '../../../types/auth/auth-types';
 import {
     EmailConfirmationType,
     PasswordUpdateWithRecoveryType,
     RecoveryPasswordType,
     UserId,
     UserServiceModel
-} from '../../types/entities/users-types';
-import {IdQueryDbType} from '../../types/db/query-db-types';
+} from '../../../types/entities/users-types';
+import {IdQueryDbType} from '../../../types/db/query-db-types';
 import {ObjectId, WithId} from 'mongodb';
-import {UserDbType} from '../../types/db/user-db-types';
+import {UserDbType} from '../../../types/db/user-db-types';
 import {
     DeviceId,
     SecurityInputModel,
-    SecurityServiceModel,
     SecuritySessionSearchQueryType,
     SecurityUpdateType
-} from '../../types/entities/security-types';
-import {SecurityDbType} from '../../types/db/security-db-types';
-import {HydratedUserType, UserModel} from '../../domain/UsersEntity';
-import {HydratedSecurityType, SecurityModel} from '../../domain/SecurityEntity';
+} from '../../../types/entities/security-types';
+import {SecurityDbType} from '../../../types/db/security-db-types';
+import {HydratedUserType, UserModel} from '../../users/domain/usersEntity';
+import {HydratedSecurityType, SecurityModel} from '../../security/domain/securityEntity';
 
 
 export class AuthRepository {
@@ -30,16 +29,6 @@ export class AuthRepository {
         const {_id, ...rest} = user
         return {
             id: _id.toString(),
-            ...rest
-        }
-    }
-
-    private mapToSecuritySessionServiceModel(securitySession: WithId<SecurityDbType>): SecurityServiceModel {
-        const {_id, userId, ...rest} = securitySession
-
-        return {
-            id: _id.toString(),
-            userId: userId.toString(),
             ...rest
         }
     }
@@ -109,7 +98,7 @@ export class AuthRepository {
     }
 
     async updateSecuritySessionData(securitySessionQuery: SecuritySessionSearchQueryType, securitySessionUpdateData: SecurityUpdateType): Promise<boolean> {
-        const result = await securityCollection.updateOne(securitySessionQuery, {$set: securitySessionUpdateData})
+        const result = await SecurityModel.updateOne(securitySessionQuery, {$set: securitySessionUpdateData})
 
         return !!result.matchedCount
     }

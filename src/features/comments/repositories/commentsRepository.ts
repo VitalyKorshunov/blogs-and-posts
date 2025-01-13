@@ -14,8 +14,8 @@ import {
 } from '../../../types/entities/comments-types';
 import {CommentDbType, CommentUserLikeStatusInfoDbType, LikeStatus} from '../../../types/db/comments-db-types';
 import {injectable} from 'inversify';
-import {UserModel} from '../../../domain/UsersEntity';
-import {PostModel} from '../../../domain/PostEntity';
+import {UserModel} from '../../users/domain/usersEntity';
+import {PostModel} from '../../posts/domain/postEntity';
 
 @injectable()
 export class CommentsRepository {

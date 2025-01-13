@@ -1,8 +1,8 @@
-import {BlogId, BlogInputModel} from '../types/entities/blogs-types';
-import {BlogsRepository} from '../infrastructure/blogRepositories/blogsRepository';
+import {BlogId, BlogInputModel} from '../../../types/entities/blogs-types';
+import {BlogsRepository} from '../infrastructure/blogsRepository';
 import {inject, injectable} from 'inversify';
-import {BlogModel, HydratedBlogType} from '../domain/BlogsEntity';
-import {result, ResultType} from '../common/utils/errorsAndStatusCodes.utils';
+import {BlogModel, HydratedBlogType} from '../domain/blogEntity';
+import {result, ResultType} from '../../../common/utils/errorsAndStatusCodes.utils';
 
 @injectable()
 export class BlogsService {

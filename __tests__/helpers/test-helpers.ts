@@ -13,7 +13,8 @@ import {BlogDbType} from '../../src/types/db/blog-db-types';
 import {PostDbType} from '../../src/types/db/post-db-types';
 import {routersPaths} from '../../src/common/path/paths';
 import {nodemailerService} from '../../src/application/adapters/nodemailer.service';
-import {UserModel} from '../../src/domain/UsersEntity';
+import {UserModel} from '../../src/features/users/domain/usersEntity';
+import {MongoMemoryServer} from 'mongodb-memory-server';
 
 export type EmailWithConfirmationCodeType = {
     email: string
@@ -45,7 +46,9 @@ export const testHelpers = {
     },
 
     connectToDbForTests: async () => {
-        if (!await connectToDB('mongodb://localhost:27017', SETTINGS.DB.DB_NAME)) {
+        const mongoServer = await MongoMemoryServer.create();
+        const uri = mongoServer.getUri();
+        if (!await connectToDB(uri, SETTINGS.DB.DB_NAME)) {
             console.log('not connect to db');
             process.exit(1);
         }

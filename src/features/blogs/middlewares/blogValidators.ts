@@ -4,7 +4,7 @@ import {NextFunction, Request, Response} from 'express'
 import {adminMiddleware} from '../../../global-middlewares/admin-middleware'
 import {ObjectId} from 'mongodb';
 import {contentValidator, shortDescriptionValidator, titleValidator} from '../../posts/middlewares/postValidators';
-import {BlogsQueryRepository} from '../../../infrastructure/blogRepositories/blogsQueryRepository';
+import {BlogsQueryRepository} from '../infrastructure/blogsQueryRepository';
 
 export const nameValidator = body('name').isString().withMessage('not string').trim()
     .isLength({min: 1, max: 15}).withMessage('more than 15 or 0')

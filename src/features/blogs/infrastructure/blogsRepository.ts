@@ -1,8 +1,8 @@
-import {BlogCreateType, BlogId, BlogUpdateType} from '../../types/entities/blogs-types'
+import {BlogCreateType, BlogId, BlogUpdateType} from '../../../types/entities/blogs-types'
 import {ObjectId} from 'mongodb';
-import {IdQueryDbType} from '../../types/db/query-db-types';
+import {IdQueryDbType} from '../../../types/db/query-db-types';
 import {injectable} from 'inversify';
-import {BlogModel, HydratedBlogType} from '../../domain/BlogsEntity';
+import {BlogModel, HydratedBlogType} from '../domain/blogEntity';
 
 @injectable()
 export class BlogsRepository {

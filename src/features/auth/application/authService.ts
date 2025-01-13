@@ -1,25 +1,25 @@
-import {hashPassService} from './adapters/hashPass.service';
-import {UserId, UserInputModel} from '../types/entities/users-types';
-import {result, ResultType} from '../common/utils/errorsAndStatusCodes.utils';
+import {hashPassService} from '../../../application/adapters/hashPass.service';
+import {UserId, UserInputModel} from '../../../types/entities/users-types';
+import {result, ResultType} from '../../../common/utils/errorsAndStatusCodes.utils';
 import {v7 as uuidv7} from 'uuid';
-import {ErrorsType} from '../types/utils/output-errors-type';
-import {AuthTokensType, EmailConfirmationCodeInputModel} from '../types/auth/auth-types';
-import {nodemailerService} from './adapters/nodemailer.service';
-import {jwtService} from './adapters/jwt.service';
-import {PayloadRefreshTokenInputType, VerifyRefreshTokenViewModel} from '../types/auth/jwt-types';
+import {ErrorsType} from '../../../types/utils/output-errors-type';
+import {AuthTokensType, EmailConfirmationCodeInputModel} from '../../../types/auth/auth-types';
+import {nodemailerService} from '../../../application/adapters/nodemailer.service';
+import {jwtService} from '../../../application/adapters/jwt.service';
+import {PayloadRefreshTokenInputType, VerifyRefreshTokenViewModel} from '../../../types/auth/jwt-types';
 import {
     DeviceId,
     DeviceName,
     IP,
     SecurityInputModel,
-    SecurityServiceModel,
     SecuritySessionSearchQueryType,
     SecurityUpdateType
-} from '../types/entities/security-types';
-import {AuthRepository} from '../infrastructure/authRepositories/authRepository';
-import {UsersRepository} from '../infrastructure/userRepositories/usersRepository';
+} from '../../../types/entities/security-types';
+import {AuthRepository} from '../infrastructure/authRepository';
+import {UsersRepository} from '../../users/infrastructure/usersRepository';
 import {inject} from 'inversify';
-import {HydratedUserType, UserModel} from '../domain/UsersEntity';
+import {HydratedUserType, UserModel} from '../../users/domain/usersEntity';
+import {HydratedSecurityType} from '../../security/domain/securityEntity';
 
 export class AuthService {
     constructor(
@@ -206,12 +206,12 @@ export class AuthService {
             lastActiveDate
         }
 
-        const securitySession: SecurityServiceModel | null = await this.authRepository.getSecuritySession(securitySessionQuery)
+        const securitySession: HydratedSecurityType | null = await this.authRepository.getSecuritySession(securitySessionQuery)
         if (!securitySession) {
             return result.tokenError('session does not exist with current data')
         }
 
-        if (oldRefreshTokenPayload.userId !== securitySession.userId) {
+        if (oldRefreshTokenPayload.userId !== securitySession.userId.toString()) {
             return result.tokenError('userId does not match current user')
         }
 

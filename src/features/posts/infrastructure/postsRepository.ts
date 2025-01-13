@@ -1,34 +1,16 @@
-import {PostCreateType, PostId, PostServiceModel, PostUpdateType} from '../../types/entities/posts-types'
-import {PostDbType, PostUpdateDbType} from '../../types/db/post-db-types'
-import {ObjectId, WithId} from 'mongodb';
-import {IdQueryDbType} from '../../types/db/query-db-types';
-import {BlogId, BlogServiceModel} from '../../types/entities/blogs-types';
-import {BlogDbType} from '../../types/db/blog-db-types';
+import {PostCreateType, PostId, PostUpdateType} from '../../../types/entities/posts-types'
+import {PostDbType, PostUpdateDbType} from '../../../types/db/post-db-types'
+import {ObjectId} from 'mongodb';
+import {IdQueryDbType} from '../../../types/db/query-db-types';
+import {BlogId} from '../../../types/entities/blogs-types';
 import {injectable} from 'inversify';
-import {BlogModel, HydratedBlogType} from '../../domain/BlogsEntity';
-import {HydratedPostType, PostModel} from '../../domain/PostEntity';
+import {BlogModel, HydratedBlogType} from '../../blogs/domain/blogEntity';
+import {HydratedPostType, PostModel} from '../domain/postEntity';
 
 @injectable()
 export class PostsRepository {
     private toIdQuery(id: PostId): IdQueryDbType {
         return {_id: new ObjectId(id)}
-    }
-
-    private mapToPostWithCorrectId(post: WithId<PostDbType>): PostServiceModel {
-        const {_id, blogId, ...rest} = post
-        return {
-            id: _id.toString(),
-            blogId: blogId.toString(),
-            ...rest
-        }
-    }
-
-    private mapToBlogWithCorrectId(blog: WithId<BlogDbType>): BlogServiceModel {
-        const {_id, ...rest} = blog
-        return {
-            id: _id.toString(),
-            ...rest
-        }
     }
 
     async createPost(post: PostCreateType): Promise<PostId> {

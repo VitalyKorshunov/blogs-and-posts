@@ -2,7 +2,6 @@ import {SETTINGS} from '../settings';
 import {Collection, Db, MongoClient} from 'mongodb';
 import {CommentDbType} from '../types/db/comments-db-types';
 import {RateLimitDBType} from '../types/db/rateLimit-db-types';
-import {SecurityDbType} from '../types/db/security-db-types';
 import * as mongoose from 'mongoose';
 
 let client: MongoClient = {} as MongoClient
@@ -24,9 +23,7 @@ export const connectToDB = async (MONGO_URL: string, DB_NAME: string) => {
     client = new MongoClient(MONGO_URL)
     db = client.db(DB_NAME)
 
-    // blogCollection = db.collection<BlogDbType>(SETTINGS.DB.BLOG_COLLECTION_NAME)
-    // postCollection = db.collection<PostDbType>(SETTINGS.DB.POST_COLLECTION_NAME)
-    // userCollection = db.collection<UserDbType>(SETTINGS.DB.USER_COLLECTION_NAME)
+
     commentCollection = db.collection<CommentDbType>(SETTINGS.DB.COMMENT_COLLECTION_NAME)
     rateLimitCollection = db.collection<RateLimitDBType>(SETTINGS.DB.RATE_LIMIT_COLLECTION_NAME)
     // securityCollection = db.collection<SecurityDbType>(SETTINGS.DB.SESSION_COLLECTION_NAME)
