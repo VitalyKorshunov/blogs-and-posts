@@ -41,7 +41,7 @@ export const jwtService = {
         try {
             return jwt.verify(token, SETTINGS.AT_SECRET_KEY) as VerifyAccessTokenViewModel
         } catch (err) {
-            console.error('Access token verify error')
+            console.info('Access token verify error')
             return null
         }
     },
@@ -50,7 +50,7 @@ export const jwtService = {
         try {
             return jwt.verify(token, SETTINGS.RT_SECRET_KEY) as VerifyRefreshTokenViewModel
         } catch (err) {
-            console.error('Refresh token verify error')
+            console.info('Refresh token verify error')
             return null
         }
     },

@@ -1,11 +1,11 @@
-import {hashPassService} from '../../../application/adapters/hashPass.service';
+import {hashPassService} from '../../../common/adapters/hashPass.service';
 import {UserId, UserInputModel} from '../../../types/entities/users-types';
 import {result, ResultType} from '../../../common/utils/errorsAndStatusCodes.utils';
 import {v7 as uuidv7} from 'uuid';
 import {ErrorsType} from '../../../types/utils/output-errors-type';
 import {AuthTokensType, EmailConfirmationCodeInputModel} from '../../../types/auth/auth-types';
-import {nodemailerService} from '../../../application/adapters/nodemailer.service';
-import {jwtService} from '../../../application/adapters/jwt.service';
+import {nodemailerService} from '../../../common/adapters/nodemailer.service';
+import {jwtService} from '../../../common/adapters/jwt.service';
 import {PayloadRefreshTokenInputType, VerifyRefreshTokenViewModel} from '../../../types/auth/jwt-types';
 import {
     DeviceId,

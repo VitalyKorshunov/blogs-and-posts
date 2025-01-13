@@ -1,5 +1,5 @@
 import {UserId, UserInputModel} from '../../../types/entities/users-types';
-import {hashPassService} from '../../../application/adapters/hashPass.service';
+import {hashPassService} from '../../../common/adapters/hashPass.service';
 import {ErrorsType} from '../../../types/utils/output-errors-type';
 import {UsersRepository} from '../infrastructure/usersRepository';
 import {inject, injectable} from 'inversify';

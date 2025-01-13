@@ -1,11 +1,12 @@
-import {EmailWithConfirmationCodeType, req, testHelpers} from './helpers/test-helpers'
+import {req, testHelpers, UserDataType} from './helpers/test-helpers'
 import {SETTINGS} from '../src/settings'
-import {AuthInputModel} from '../src/types/auth/auth-types';
+import {AuthInputModel, AuthTokensType} from '../src/types/auth/auth-types';
 import {routersPaths} from '../src/common/path/paths';
 import {UserInputModel} from '../src/types/entities/users-types';
 import {UserDbType} from '../src/types/db/user-db-types';
 import {ObjectId, WithId} from 'mongodb';
-import {jwtService} from '../src/application/adapters/jwt.service';
+import {jwtService} from '../src/common/adapters/jwt.service';
+import {Response} from 'superagent';
 import ms = require('ms');
 
 describe('/auth', () => {
@@ -175,7 +176,7 @@ describe('/auth', () => {
     })
 
     it('post[/auth/registration-confirmation] should correct verify user, 204', async () => {
-        const userEmailWithEmailConfirmationCode: EmailWithConfirmationCodeType = await testHelpers.createUserByUser()
+        const userEmailWithEmailConfirmationCode: UserDataType = await testHelpers.createUserByUser()
 
         const registrationConfirmationData = {
             code: userEmailWithEmailConfirmationCode.code
@@ -192,7 +193,7 @@ describe('/auth', () => {
         expect(user.emailConfirmation.isConfirmed).toBe(true)
     })
     it('post[/auth/registration-confirmation] shouldn\'t verify user with incorrect data, 400', async () => {
-        const userEmailWithEmailConfirmationCode: EmailWithConfirmationCodeType = await testHelpers.createUserByUser()
+        const userEmailWithEmailConfirmationCode: UserDataType = await testHelpers.createUserByUser()
 
         const registrationConfirmationData1 = {
             code: userEmailWithEmailConfirmationCode.code + '1'
@@ -236,7 +237,7 @@ describe('/auth', () => {
     })
 
     it('post[/auth/registration-email-resending] should be input data accepted, 204', async () => {
-        const emailAndCode: EmailWithConfirmationCodeType = await testHelpers.createUserByUser('user1', 'user1@gmail.com')
+        const emailAndCode: UserDataType = await testHelpers.createUserByUser('user1', 'user1@gmail.com')
         const userFromBd1: WithId<UserDbType> = await testHelpers.findAndMapUserByIndex(0)
 
         expect(userFromBd1.emailConfirmation.confirmationCode).toBe(emailAndCode.code)
@@ -255,7 +256,7 @@ describe('/auth', () => {
         await testHelpers.confirmRegistrationByCode(userFromBd2.emailConfirmation.confirmationCode)
     })
     it('post[/auth/registration-email-resending] shouldn\'t be input data accepted, 400', async () => {
-        const emailAndCode: EmailWithConfirmationCodeType = await testHelpers.createUserByUser('user1', 'user1@gmail.com')
+        const emailAndCode: UserDataType = await testHelpers.createUserByUser('user1', 'user1@gmail.com')
         const userFromBd1: WithId<UserDbType> = await testHelpers.findAndMapUserByIndex(0)
 
         expect(userFromBd1.emailConfirmation.confirmationCode).toBe(emailAndCode.code)
@@ -277,7 +278,7 @@ describe('/auth', () => {
         await testHelpers.confirmRegistrationByCode(userFromBd2.emailConfirmation.confirmationCode)
     })
     it('post[/auth/registration-email-resending] shouldn\'t be input data accepted after 5 tries within 10 second, 429', async () => {
-        const emailAndCode: EmailWithConfirmationCodeType = await testHelpers.createUserByUser('user1', 'user1@gmail.com')
+        const emailAndCode: UserDataType = await testHelpers.createUserByUser('user1', 'user1@gmail.com')
         const userFromBd1: WithId<UserDbType> = await testHelpers.findAndMapUserByIndex(0)
 
         expect(userFromBd1.emailConfirmation.confirmationCode).toBe(emailAndCode.code)
@@ -299,7 +300,7 @@ describe('/auth', () => {
 
     it('post[/auth/login] should be access login or email and get accessToken in body and refreshToken in cookie, 200', async () => {
         const users = await testHelpers.createMultiplyUsersWithConfirmedEmail(1)
-        const user1: EmailWithConfirmationCodeType = users[0]
+        const user1: UserDataType = users[0]
         const userFromBd: WithId<UserDbType> = await testHelpers.findAndMapUserByIndex(0)
 
         const loginData: AuthInputModel = {
@@ -317,7 +318,7 @@ describe('/auth', () => {
         await testIt(loginData2, userFromBd)
 
         async function testIt(loginData: AuthInputModel, userFromBd: WithId<UserDbType>) {
-            const res = await req
+            const res: Response = await req
                 .post(SETTINGS.PATH.AUTH + routersPaths.auth.login)
                 .send(loginData)
                 .expect(200)
@@ -332,7 +333,8 @@ describe('/auth', () => {
             expect((payloadAccessToken.exp - payloadAccessToken.iat) * 1000).toBe(ms(SETTINGS.AT_LIFE_TIME))
             expect(payloadAccessToken.userId).toBe(userFromBd._id.toString())
 
-            const refreshToken = res.headers['set-cookie'][0].split(';')[0].split('=')[1]
+            const refreshToken = testHelpers.getRefreshTokenFromResponseHeaders(res)
+
             expect(typeof refreshToken).toBe('string')
             const payloadRefreshToken = await jwtService.verifyRefreshToken(refreshToken)
             if (!payloadRefreshToken) {
@@ -346,7 +348,7 @@ describe('/auth', () => {
     })
     it('post[/auth/login] shouldn\'t be access with incorrect data, 400', async () => {
         const users = await testHelpers.createMultiplyUsersWithConfirmedEmail(1)
-        const user1: EmailWithConfirmationCodeType = users[0]
+        const user1: UserDataType = users[0]
 
         const loginData: AuthInputModel = {
             loginOrEmail: user1.email + '@',
@@ -378,7 +380,7 @@ describe('/auth', () => {
     })
     it('post[/auth/login] shouldn\'t be access with invalid login or password, 401', async () => {
         const users = await testHelpers.createMultiplyUsersWithConfirmedEmail(1)
-        const user1: EmailWithConfirmationCodeType = users[0]
+        const user1: UserDataType = users[0]
 
         const loginData: AuthInputModel = {
             loginOrEmail: '123',
@@ -400,7 +402,7 @@ describe('/auth', () => {
     })
     it('post[/auth/login] shouldn\'t be access witch valid data after 5 tries within 10 seconds, 429', async () => {
         const users = await testHelpers.createMultiplyUsersWithConfirmedEmail(1)
-        const user1: EmailWithConfirmationCodeType = users[0]
+        const user1: UserDataType = users[0]
 
         // with invalid data
         for (let i = 1; i <= 5; i++) {
@@ -428,7 +430,31 @@ describe('/auth', () => {
 
 
     it('should return info about user, 200', async () => {
-        await testHelpers.createUserByAdmin()
+        const users = await testHelpers.createMultiplyUsersWithConfirmedEmail(1)
+        const user1 = users[0]
+        const userTokens: AuthTokensType = await testHelpers.loginUserAndGetTokens(user1.login, user1.password)
+
+        const res = await req
+            .get(SETTINGS.PATH.AUTH + routersPaths.auth.me)
+            .set({'Authorization': 'Bearer ' + userTokens.accessToken})
+            .expect(200)
+
+        expect(Object.keys(res.body).length).toBe(3)
+        expect(res.body.email).toBe(user1.email)
+        expect(res.body.login).toBe(user1.login)
+        expect(typeof res.body.userId).toBe('string')
     })
 
+    it('should\'t return info about user, 401', async () => {
+        const users = await testHelpers.createMultiplyUsersWithConfirmedEmail(1)
+        const user1 = users[0]
+        const userTokens: AuthTokensType = await testHelpers.loginUserAndGetTokens(user1.login, user1.password)
+
+        const res = await req
+            .get(SETTINGS.PATH.AUTH + routersPaths.auth.me)
+            .set({'Authorization': 'Bearer ' + userTokens.accessToken + 'invalid'})
+            .expect(401)
+
+        expect(Object.keys(res.body).length).toBe(0)
+    })
 })

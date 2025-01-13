@@ -12,13 +12,21 @@ import {UserDbType} from '../../src/types/db/user-db-types';
 import {BlogDbType} from '../../src/types/db/blog-db-types';
 import {PostDbType} from '../../src/types/db/post-db-types';
 import {routersPaths} from '../../src/common/path/paths';
-import {nodemailerService} from '../../src/application/adapters/nodemailer.service';
+import {nodemailerService} from '../../src/common/adapters/nodemailer.service';
 import {UserModel} from '../../src/features/users/domain/usersEntity';
 import {MongoMemoryServer} from 'mongodb-memory-server';
+import {Response} from 'superagent';
+import {AuthTokensType} from '../../src/types/auth/auth-types';
 
-export type EmailWithConfirmationCodeType = {
+export type UserDataType = {
+    login: string
     email: string
+    password: string
     code: string
+}
+
+export type UserDataWithTokensType = UserDataType & {
+    tokens: AuthTokensType
 }
 
 export const req = agent(app)
@@ -33,6 +41,10 @@ export const testHelpers = {
         restoreAllMocks() {
             jest.restoreAllMocks()
         }
+    },
+
+    getRefreshTokenFromResponseHeaders(response: Response): string {
+        return response.headers['set-cookie'][0].split(';')[0].split('=')[1]
     },
 
     generateString(count: number, symbol: string = 'x'): string {
@@ -123,7 +135,7 @@ export const testHelpers = {
 
         return res.body;
     },
-    createUserByUser: async (login: string = '123', email: string = '123@gmail.com', password: string = '123456'): Promise<EmailWithConfirmationCodeType> => {
+    createUserByUser: async (login: string = '123', email: string = '123@gmail.com', password: string = '123456'): Promise<UserDataType> => {
         const mockedSendEmailConfirmation = testHelpers.mock.nodemailerService.sendEmailConfirmation()
 
         const newUser: UserInputModel = {
@@ -146,7 +158,9 @@ export const testHelpers = {
 
         return {
             email: emailFromMock,
-            code: codeFromMock
+            code: codeFromMock,
+            login,
+            password
         }
     },
 
@@ -215,25 +229,44 @@ export const testHelpers = {
         return posts
     },
 
-    async createMultiplyUsersWithUnconfirmedEmail(countUsers: number): Promise<EmailWithConfirmationCodeType[]> {
-        const usersEmailsAndEmailConfirmationCodes = []
+    async createMultiplyUsersWithUnconfirmedEmail(countUsers: number): Promise<UserDataType[]> {
+        const usersData: UserDataType[] = []
 
         for (let i = 1; i <= countUsers; i++) {
-            usersEmailsAndEmailConfirmationCodes.push(await this.createUserByUser('user' + i, 'user' + i + '@gmail.com'))
+            usersData.push(await this.createUserByUser('user' + i, 'user' + i + '@gmail.com'))
         }
 
-        expect(usersEmailsAndEmailConfirmationCodes.length).toBe(countUsers)
+        expect(usersData.length).toBe(countUsers)
 
-        return usersEmailsAndEmailConfirmationCodes
+        return usersData
     },
 
-    async createMultiplyUsersWithConfirmedEmail(countUsers: number): Promise<EmailWithConfirmationCodeType[]> {
-        const usersEmailWithCode: EmailWithConfirmationCodeType[] = await this.createMultiplyUsersWithUnconfirmedEmail(countUsers)
+    async createMultiplyUsersWithConfirmedEmail(countUsers: number): Promise<UserDataType[]> {
+        const usersData: UserDataType[] = await this.createMultiplyUsersWithUnconfirmedEmail(countUsers)
 
         for (let i = 1; i <= countUsers; i++) {
-            await this.confirmRegistrationByCode(usersEmailWithCode[i - 1].code)
+            await this.confirmRegistrationByCode(usersData[i - 1].code)
         }
 
-        return usersEmailWithCode
-    }
+        return usersData
+    },
+
+    async loginUserAndGetTokens(loginOrEmail: string, password: string): Promise<AuthTokensType> {
+        const response = await req
+            .post(SETTINGS.PATH.AUTH + routersPaths.auth.login)
+            .send({loginOrEmail, password})
+            .expect(200)
+
+        const {accessToken} = response.body
+        expect(typeof accessToken).toBe('string')
+
+        const refreshToken = this.getRefreshTokenFromResponseHeaders(response)
+        expect(typeof refreshToken).toBe('string')
+
+        return {
+            accessToken,
+            refreshToken
+        }
+    },
+
 }

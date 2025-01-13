@@ -8,13 +8,8 @@ let client: MongoClient = {} as MongoClient
 export let db: Db = {} as Db
 
 
-// получение доступа к коллекциям
-// export let blogCollection: Collection<BlogDbType> = {} as Collection<BlogDbType>
-// export let postCollection: Collection<PostDbType> = {} as Collection<PostDbType>
-// export let userCollection: Collection<UserDbType> = {} as Collection<UserDbType>
 export let commentCollection: Collection<CommentDbType> = {} as Collection<CommentDbType>
 export let rateLimitCollection: Collection<RateLimitDBType> = {} as Collection<RateLimitDBType>
-// export let securityCollection: Collection<SecurityDbType> = {} as Collection<SecurityDbType>
 
 
 // проверка подключения к бд
@@ -26,7 +21,6 @@ export const connectToDB = async (MONGO_URL: string, DB_NAME: string) => {
 
     commentCollection = db.collection<CommentDbType>(SETTINGS.DB.COMMENT_COLLECTION_NAME)
     rateLimitCollection = db.collection<RateLimitDBType>(SETTINGS.DB.RATE_LIMIT_COLLECTION_NAME)
-    // securityCollection = db.collection<SecurityDbType>(SETTINGS.DB.SESSION_COLLECTION_NAME)
 
     try {
         await mongoose.connect(MONGO_URL, {dbName: DB_NAME})
