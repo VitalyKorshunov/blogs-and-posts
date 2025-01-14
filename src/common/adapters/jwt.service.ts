@@ -8,15 +8,17 @@ import {
 } from '../../types/auth/jwt-types';
 import {UserId} from '../../types/entities/users-types';
 import {DeviceId} from '../../types/entities/security-types';
+import ms from 'ms';
 
 export const jwtService = {
     async createAccessToken(userId: UserId): Promise<string | null> {
         const accessTokenPayload: PayloadAccessTokenInputType = {
             userId,
+            iat: Date.now()
         }
         try {
             return jwt.sign(accessTokenPayload, SETTINGS.AT_SECRET_KEY, {
-                expiresIn: SETTINGS.AT_LIFE_TIME
+                expiresIn: ms(SETTINGS.AT_LIFE_TIME)
             });
         } catch (err) {
             return null
@@ -26,11 +28,12 @@ export const jwtService = {
     async createRefreshToken(userId: UserId, deviceId: DeviceId): Promise<string | null> {
         const refreshTokenPayload: PayloadRefreshTokenInputType = {
             userId,
-            deviceId
+            deviceId,
+            iat: Date.now()
         }
         try {
             return jwt.sign(refreshTokenPayload, SETTINGS.RT_SECRET_KEY, {
-                expiresIn: SETTINGS.RT_LIFE_TIME
+                expiresIn: ms(SETTINGS.RT_LIFE_TIME)
             });
         } catch (err) {
             return null

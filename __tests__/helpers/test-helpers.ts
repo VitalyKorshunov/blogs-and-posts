@@ -17,6 +17,7 @@ import {UserModel} from '../../src/features/users/domain/usersEntity';
 import {MongoMemoryServer} from 'mongodb-memory-server';
 import {Response} from 'superagent';
 import {AuthTokensType} from '../../src/types/auth/auth-types';
+import {SecurityViewModel} from '../../src/types/entities/security-types';
 
 export type UserDataType = {
     login: string
@@ -43,8 +44,21 @@ export const testHelpers = {
         }
     },
 
-    getRefreshTokenFromResponseHeaders(response: Response): string {
+    getAccessTokenFromResponseBody(response: Response): string {
+        return response.body.accessToken
+    },
+    getRefreshTokenFromResponseCookie(response: Response): string {
         return response.headers['set-cookie'][0].split(';')[0].split('=')[1]
+    },
+
+    getTokensFromResponse(response: Response): AuthTokensType {
+        const accessToken = this.getAccessTokenFromResponseBody(response)
+        const refreshToken = this.getRefreshTokenFromResponseCookie(response)
+
+        return {
+            accessToken,
+            refreshToken
+        }
     },
 
     generateString(count: number, symbol: string = 'x'): string {
@@ -251,16 +265,17 @@ export const testHelpers = {
         return usersData
     },
 
-    async loginUserAndGetTokens(loginOrEmail: string, password: string): Promise<AuthTokensType> {
+    async loginUserAndGetTokens(loginOrEmail: string, password: string, userAgent?: string): Promise<AuthTokensType> {
         const response = await req
             .post(SETTINGS.PATH.AUTH + routersPaths.auth.login)
+            .set(userAgent ? {'user-agent': userAgent} : {})
             .send({loginOrEmail, password})
             .expect(200)
 
         const {accessToken} = response.body
         expect(typeof accessToken).toBe('string')
 
-        const refreshToken = this.getRefreshTokenFromResponseHeaders(response)
+        const refreshToken = this.getRefreshTokenFromResponseCookie(response)
         expect(typeof refreshToken).toBe('string')
 
         return {
@@ -269,4 +284,35 @@ export const testHelpers = {
         }
     },
 
+    async updateTokensForUser(refreshToken: string): Promise<AuthTokensType> {
+        const res = await req
+            .post(SETTINGS.PATH.AUTH + routersPaths.auth.refreshToken)
+            .set({'Cookie': 'refreshToken=' + refreshToken})
+            .expect(200)
+
+        return this.getTokensFromResponse(res)
+    },
+
+    async getUserSessionsByRefreshToken(refreshToken: string): Promise<SecurityViewModel[]> {
+        const res = await req
+            .get(SETTINGS.PATH.SECURITY + routersPaths.security.devices)
+            .set({'Cookie': 'refreshToken=' + refreshToken})
+            .expect(200)
+
+        return res.body
+    },
+
+    async deleteUserSessionByDeviceId(deviceId: string, refreshToken: string): Promise<void> {
+        await req
+            .delete(SETTINGS.PATH.SECURITY + routersPaths.security.devices + '/' + deviceId)
+            .set({'Cookie': 'refreshToken=' + refreshToken})
+            .expect(204)
+    },
+
+    async logoutUserByRefreshToken(refreshToken: string): Promise<void> {
+        await req
+            .post(SETTINGS.PATH.AUTH + routersPaths.auth.logout)
+            .set({'Cookie': 'refreshToken=' + refreshToken})
+            .expect(204)
+    }
 }

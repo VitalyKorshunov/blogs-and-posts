@@ -1,13 +1,12 @@
 export type VerifyAccessTokenViewModel = {
     userId: string
-    // deviceId: string
     iat: number
     exp: number
 }
 
 export type PayloadAccessTokenInputType = {
     userId: string
-    // deviceId: string
+    iat: number
 }
 
 export type VerifyRefreshTokenViewModel = {
@@ -20,5 +19,6 @@ export type VerifyRefreshTokenViewModel = {
 export type PayloadRefreshTokenInputType = {
     userId: string
     deviceId: string
+    iat: number
 }
 

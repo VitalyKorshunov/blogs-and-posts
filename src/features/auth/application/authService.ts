@@ -66,11 +66,6 @@ export class AuthService {
         }
     }
 
-    private unixTimestampToDate(unixTimestamp: number): Date {
-        return new Date(unixTimestamp * 1000)
-
-    }
-
     async loginUser(loginOrEmail: string, password: string, deviceName: DeviceName, ip: IP): Promise<ResultType<AuthTokensType>> {
         const smartUser: HydratedUserType | null = await this.findUserByLoginOrEmail(loginOrEmail)
         if (!smartUser) {
@@ -98,8 +93,8 @@ export class AuthService {
             deviceName,
             ip,
             userId: smartUser.getId(),
-            lastActiveDate: this.unixTimestampToDate(refreshTokenPayload.iat),
-            expireDate: this.unixTimestampToDate(refreshTokenPayload.exp),
+            lastActiveDate: new Date(refreshTokenPayload.iat),
+            expireDate: new Date(refreshTokenPayload.exp),
         }
 
         const isSecuritySessionSet: boolean = await this.authRepository.setSecuritySessionData(securitySessionData)
@@ -117,7 +112,7 @@ export class AuthService {
         }
 
         const {deviceId, iat} = refreshTokenPayload
-        const lastActiveDate: Date = this.unixTimestampToDate(iat)
+        const lastActiveDate: Date = new Date(iat)
 
         const isSecuritySessionDataDeleted: boolean = await this.authRepository.deleteSecuritySessionData(deviceId, lastActiveDate)
         if (!isSecuritySessionDataDeleted) {
@@ -200,7 +195,7 @@ export class AuthService {
         }
 
         const {userId, deviceId}: PayloadRefreshTokenInputType = oldRefreshTokenPayload
-        const lastActiveDate: Date = this.unixTimestampToDate(oldRefreshTokenPayload.iat)
+        const lastActiveDate: Date = new Date(oldRefreshTokenPayload.iat)
         const securitySessionQuery: SecuritySessionSearchQueryType = {
             deviceId,
             lastActiveDate
@@ -228,8 +223,8 @@ export class AuthService {
 
         const securitySessionUpdateData: SecurityUpdateType = {
             deviceId,
-            lastActiveDate: this.unixTimestampToDate(newRefreshTokenPayload.iat),
-            expireDate: this.unixTimestampToDate(newRefreshTokenPayload.exp),
+            lastActiveDate: new Date(newRefreshTokenPayload.iat),
+            expireDate: new Date(newRefreshTokenPayload.exp),
         }
 
         const isSecuritySessionUpdated: boolean = await this.authRepository.updateSecuritySessionData(securitySessionQuery, securitySessionUpdateData)

@@ -323,17 +323,17 @@ describe('/auth', () => {
                 .send(loginData)
                 .expect(200)
 
-            const {accessToken} = res.body
+            const accessToken = testHelpers.getAccessTokenFromResponseBody(res)
             expect(typeof accessToken).toBe('string')
             const payloadAccessToken = await jwtService.verifyAccessToken(accessToken)
             if (!payloadAccessToken) {
                 fail('payload accessToken is null')
             }
             expect(Object.keys(payloadAccessToken).length).toBe(3)
-            expect((payloadAccessToken.exp - payloadAccessToken.iat) * 1000).toBe(ms(SETTINGS.AT_LIFE_TIME))
+            expect(payloadAccessToken.exp - payloadAccessToken.iat).toBe(ms(SETTINGS.AT_LIFE_TIME))
             expect(payloadAccessToken.userId).toBe(userFromBd._id.toString())
 
-            const refreshToken = testHelpers.getRefreshTokenFromResponseHeaders(res)
+            const refreshToken = testHelpers.getRefreshTokenFromResponseCookie(res)
 
             expect(typeof refreshToken).toBe('string')
             const payloadRefreshToken = await jwtService.verifyRefreshToken(refreshToken)
@@ -341,7 +341,7 @@ describe('/auth', () => {
                 fail('payload refreshToken is null')
             }
             expect(Object.keys(payloadRefreshToken).length).toBe(4)
-            expect((payloadRefreshToken.exp - payloadRefreshToken.iat) * 1000).toBe(ms(SETTINGS.RT_LIFE_TIME))
+            expect(payloadRefreshToken.exp - payloadRefreshToken.iat).toBe(ms(SETTINGS.RT_LIFE_TIME))
             expect(payloadRefreshToken.userId).toBe(userFromBd._id.toString())
             expect(payloadRefreshToken.deviceId).toBeDefined()
         }
@@ -378,7 +378,7 @@ describe('/auth', () => {
             expect(body.errorsMessages[1].field).toBe('password')
         }
     })
-    it('post[/auth/login] shouldn\'t be access with invalid login or password, 401', async () => {
+    it('post[/auth/login] shouldn\'t be access with invalid login or password, 401 [Unauthorized]', async () => {
         const users = await testHelpers.createMultiplyUsersWithConfirmedEmail(1)
         const user1: UserDataType = users[0]
 
@@ -428,8 +428,7 @@ describe('/auth', () => {
     })
 
 
-
-    it('should return info about user, 200', async () => {
+    it('get[/auth/me] should return info about user, 200', async () => {
         const users = await testHelpers.createMultiplyUsersWithConfirmedEmail(1)
         const user1 = users[0]
         const userTokens: AuthTokensType = await testHelpers.loginUserAndGetTokens(user1.login, user1.password)
@@ -445,7 +444,7 @@ describe('/auth', () => {
         expect(typeof res.body.userId).toBe('string')
     })
 
-    it('should\'t return info about user, 401', async () => {
+    it('get[/auth/me] shouldn\'t return info about user, 401 [Unauthorized]', async () => {
         const users = await testHelpers.createMultiplyUsersWithConfirmedEmail(1)
         const user1 = users[0]
         const userTokens: AuthTokensType = await testHelpers.loginUserAndGetTokens(user1.login, user1.password)
@@ -456,5 +455,69 @@ describe('/auth', () => {
             .expect(401)
 
         expect(Object.keys(res.body).length).toBe(0)
+    })
+
+
+    it('post[/auth/refresh-token] should be update tokens, 200', async () => {
+        const users = await testHelpers.createMultiplyUsersWithConfirmedEmail(1)
+        const user1 = users[0]
+        const userTokens: AuthTokensType = await testHelpers.loginUserAndGetTokens(user1.login, user1.password)
+
+        const res = await req
+            .post(SETTINGS.PATH.AUTH + routersPaths.auth.refreshToken)
+            .set({'Cookie': 'refreshToken=' + userTokens.refreshToken})
+            .expect(200)
+
+        expect(testHelpers.getAccessTokenFromResponseBody(res)).not.toBe(userTokens.accessToken)
+        expect(testHelpers.getRefreshTokenFromResponseCookie(res)).not.toBe(userTokens.refreshToken)
+
+        await req
+            .post(SETTINGS.PATH.AUTH + routersPaths.auth.refreshToken)
+            .set({'Cookie': 'refreshToken=' + userTokens.refreshToken})
+            .expect(401)
+    })
+
+    it('post[/auth/refresh-token] shouldn\'t update tokens, 401 [Unauthorized]', async () => {
+        const users = await testHelpers.createMultiplyUsersWithConfirmedEmail(1)
+        const user1 = users[0]
+        const userTokens: AuthTokensType = await testHelpers.loginUserAndGetTokens(user1.login, user1.password)
+
+        await req
+            .post(SETTINGS.PATH.AUTH + routersPaths.auth.refreshToken)
+            .set({'Cookie': 'refreshToken=' + userTokens.refreshToken + 'invalid'})
+            .expect(401)
+    })
+
+
+    it('post[auth/logout] should be logout, 204 [No Content] and after shouldn\'t be logout, 401 [Unauthorized]', async () => {
+        const users = await testHelpers.createMultiplyUsersWithConfirmedEmail(1)
+        const user1 = users[0]
+        const userTokens: AuthTokensType = await testHelpers.loginUserAndGetTokens(user1.login, user1.password)
+
+        await req
+            .post(SETTINGS.PATH.AUTH + routersPaths.auth.logout)
+            .set({'Cookie': 'refreshToken=' + userTokens.refreshToken})
+            .expect(204)
+
+        await req
+            .post(SETTINGS.PATH.AUTH + routersPaths.auth.logout)
+            .set({'Cookie': 'refreshToken=' + userTokens.refreshToken})
+            .expect(401)
+    })
+
+    it('post[auth/logout] shouldn\'t be logout, 401 [Unauthorized]', async () => {
+        const users = await testHelpers.createMultiplyUsersWithConfirmedEmail(1)
+        const user1 = users[0]
+        const userTokens: AuthTokensType = await testHelpers.loginUserAndGetTokens(user1.login, user1.password)
+
+        await req
+            .post(SETTINGS.PATH.AUTH + routersPaths.auth.logout)
+            .set({'Cookie': 'refreshToken=' + userTokens.refreshToken})
+            .expect(204)
+
+        await req
+            .post(SETTINGS.PATH.AUTH + routersPaths.auth.logout)
+            .set({'Cookie': 'refreshToken=' + userTokens.refreshToken})
+            .expect(401)
     })
 })
