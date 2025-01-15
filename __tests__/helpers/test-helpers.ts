@@ -27,7 +27,7 @@ export type UserDataType = {
 }
 
 export type UserDataWithTokensType = UserDataType & {
-    tokens: AuthTokensType
+    tokens: AuthTokensType[]
 }
 
 export const req = agent(app)
@@ -314,5 +314,21 @@ export const testHelpers = {
             .post(SETTINGS.PATH.AUTH + routersPaths.auth.logout)
             .set({'Cookie': 'refreshToken=' + refreshToken})
             .expect(204)
+    },
+
+    async loginMultiplyUsersAndGetTokens(users: UserDataType[], authCount: number): Promise<UserDataWithTokensType[]> {
+        const authorizedUsers: UserDataWithTokensType[] = []
+
+        for (let i = 0; i < users.length; i++) {
+            const tokens: AuthTokensType[] = []
+
+            for (let j = 0; j < authCount; j++) {
+                tokens.push(await this.loginUserAndGetTokens(users[i].login, users[i].password, `${users[i]} agent${j}`))
+            }
+
+            authorizedUsers.push({...users[i], tokens})
+        }
+
+        return authorizedUsers
     }
 }
