@@ -58,11 +58,7 @@ export class CommentsControllers {
         const commentId = req.params.id
         const userId = req.user!.id
         const likeStatus = req.body.likeStatus
-        console.log('from controllers ', {
-            commentId,
-            userId,
-            likeStatus
-        })
+
         const result = await this.commentsService.updateUserLikeStatusForComment(commentId, userId, likeStatus)
 
         if (result.statusCode === StatusCode.Success) {

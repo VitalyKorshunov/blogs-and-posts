@@ -18,6 +18,8 @@ import {MongoMemoryServer} from 'mongodb-memory-server';
 import {Response} from 'superagent';
 import {AuthTokensType} from '../../src/types/auth/auth-types';
 import {SecurityViewModel} from '../../src/types/entities/security-types';
+import {CommentInputModel, CommentsSortViewModel, CommentViewModel} from '../../src/types/entities/comments-types';
+import {LikeStatus} from '../../src/types/db/comments-db-types';
 
 export type UserDataType = {
     login: string
@@ -330,5 +332,47 @@ export const testHelpers = {
         }
 
         return authorizedUsers
+    },
+
+    async createUsersWithConfirmedEmailAndLogin(usersCount: number = 1, authCount: number = 1): Promise<UserDataWithTokensType[]> {
+        const createdUsers: UserDataType[] = await this.createMultiplyUsersWithConfirmedEmail(usersCount)
+
+        return await this.loginMultiplyUsersAndGetTokens(createdUsers, authCount)
+    },
+
+    async createCommentByUser(postId: string, comment: CommentInputModel, accessToken: string): Promise<CommentViewModel> {
+        const res = await req
+            .post(`${SETTINGS.PATH.POSTS}/${postId}${routersPaths.comments.comments}`)
+            .set({'Authorization': `Bearer ${accessToken}`})
+            .send(comment)
+            .expect(201)
+
+        return res.body
+    },
+
+    async getPostComments(postId: string, accessToken?: string): Promise<CommentsSortViewModel> {
+        const postComments = await req
+            .get(`${SETTINGS.PATH.POSTS}/${postId}${routersPaths.comments.comments}`)
+            .set({'Authorization': `Bearer ${accessToken}`})
+            .expect(200)
+
+        return postComments.body
+    },
+
+    async getComment(commentId: string, accessToken?: string): Promise<CommentViewModel> {
+        const comment = await req
+            .get(`${SETTINGS.PATH.COMMENTS}/${commentId}`)
+            .set({'Authorization': `Bearer ${accessToken}`})
+            .expect(200)
+
+        return comment.body
+    },
+
+    async setLikeForComment(commentId: string, likeStatus: LikeStatus, accessToken: string): Promise<void> {
+        await req
+            .put(SETTINGS.PATH.COMMENTS + '/' + commentId + routersPaths.comments.likeStatus)
+            .set({'Authorization': `Bearer ${accessToken}`})
+            .send({likeStatus: likeStatus})
+            .expect(204)
     }
 }
