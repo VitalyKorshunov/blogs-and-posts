@@ -21,7 +21,7 @@ describe('/comments', () => {
 
     describe('get[/comments/{commentId}]', () => {
         it('get[/comments/{commentId}] should be get comment, 200', async () => {
-            const posts: PostViewModel[] = await testHelpers.createMultiplePostsInBlog(1)
+            const posts: PostViewModel[] = await testHelpers.createMultiplePostsInBlogByAdmin(1)
             const postId = posts[0].id
 
             const users: UserDataWithTokensType[] = await testHelpers.createUsersWithConfirmedEmailAndLogin(5, 1)
@@ -53,7 +53,7 @@ describe('/comments', () => {
         })
 
         it(`get[/comments/{commentId}] shouldn't be get comment, 404`, async () => {
-            const posts: PostViewModel[] = await testHelpers.createMultiplePostsInBlog(1)
+            const posts: PostViewModel[] = await testHelpers.createMultiplePostsInBlogByAdmin(1)
             const postId = posts[0].id
 
             const users: UserDataWithTokensType[] = await testHelpers.createUsersWithConfirmedEmailAndLogin(5, 1)
@@ -76,7 +76,7 @@ describe('/comments', () => {
 
     describe('put[/comments/{commentId}]', () => {
         it('put[/comments/{commentId}] should be success edit comment, 204', async () => {
-            const posts: PostViewModel[] = await testHelpers.createMultiplePostsInBlog(1)
+            const posts: PostViewModel[] = await testHelpers.createMultiplePostsInBlogByAdmin(1)
             const postId = posts[0].id
 
             const users: UserDataWithTokensType[] = await testHelpers.createUsersWithConfirmedEmailAndLogin(1, 1)
@@ -131,7 +131,7 @@ describe('/comments', () => {
         })
 
         it(`put[/comments/{commentId}] shouldn't be success edit comment, 400`, async () => {
-            const posts: PostViewModel[] = await testHelpers.createMultiplePostsInBlog(1)
+            const posts: PostViewModel[] = await testHelpers.createMultiplePostsInBlogByAdmin(1)
             const postId = posts[0].id
 
             const users: UserDataWithTokensType[] = await testHelpers.createUsersWithConfirmedEmailAndLogin(1, 1)
@@ -164,7 +164,7 @@ describe('/comments', () => {
         })
 
         it(`put[/comments/{commentId}] shouldn't be success edit comment, 401`, async () => {
-            const posts: PostViewModel[] = await testHelpers.createMultiplePostsInBlog(1)
+            const posts: PostViewModel[] = await testHelpers.createMultiplePostsInBlogByAdmin(1)
             const postId = posts[0].id
 
             const users: UserDataWithTokensType[] = await testHelpers.createUsersWithConfirmedEmailAndLogin(1, 1)
@@ -188,7 +188,7 @@ describe('/comments', () => {
         })
 
         it(`put[/comments/{commentId}] shouldn't be success edit comment, 403`, async () => {
-            const posts: PostViewModel[] = await testHelpers.createMultiplePostsInBlog(1)
+            const posts: PostViewModel[] = await testHelpers.createMultiplePostsInBlogByAdmin(1)
             const postId = posts[0].id
 
             const users: UserDataWithTokensType[] = await testHelpers.createUsersWithConfirmedEmailAndLogin(2, 1)
@@ -213,7 +213,7 @@ describe('/comments', () => {
         })
 
         it(`put[/comments/{commentId}] shouldn't be success edit comment, 404`, async () => {
-            const posts: PostViewModel[] = await testHelpers.createMultiplePostsInBlog(1)
+            const posts: PostViewModel[] = await testHelpers.createMultiplePostsInBlogByAdmin(1)
             const postId = posts[0].id
 
             const users: UserDataWithTokensType[] = await testHelpers.createUsersWithConfirmedEmailAndLogin(2, 1)
@@ -240,7 +240,7 @@ describe('/comments', () => {
 
     describe('delete[/comments/{commentId}]', () => {
         it('delete[/comments/{commentId}] should be success delete comment, 204', async () => {
-            const posts: PostViewModel[] = await testHelpers.createMultiplePostsInBlog(1)
+            const posts: PostViewModel[] = await testHelpers.createMultiplePostsInBlogByAdmin(1)
             const postId = posts[0].id
 
             const users: UserDataWithTokensType[] = await testHelpers.createUsersWithConfirmedEmailAndLogin(1, 1)
@@ -266,7 +266,7 @@ describe('/comments', () => {
         })
 
         it(`delete[/comments/{commentId}] shouldn't be success delete comment, 401`, async () => {
-            const posts: PostViewModel[] = await testHelpers.createMultiplePostsInBlog(1)
+            const posts: PostViewModel[] = await testHelpers.createMultiplePostsInBlogByAdmin(1)
             const postId = posts[0].id
 
             const users: UserDataWithTokensType[] = await testHelpers.createUsersWithConfirmedEmailAndLogin(1, 1)
@@ -287,7 +287,7 @@ describe('/comments', () => {
         })
 
         it(`delete[/comments/{commentId}] shouldn't be success delete comment, 403`, async () => {
-            const posts: PostViewModel[] = await testHelpers.createMultiplePostsInBlog(1)
+            const posts: PostViewModel[] = await testHelpers.createMultiplePostsInBlogByAdmin(1)
             const postId = posts[0].id
 
             const users: UserDataWithTokensType[] = await testHelpers.createUsersWithConfirmedEmailAndLogin(2, 1)
@@ -309,7 +309,7 @@ describe('/comments', () => {
         })
 
         it(`delete[/comments/{commentId}] shouldn't be success delete comment, 404`, async () => {
-            const posts: PostViewModel[] = await testHelpers.createMultiplePostsInBlog(1)
+            const posts: PostViewModel[] = await testHelpers.createMultiplePostsInBlogByAdmin(1)
             const postId = posts[0].id
 
             const users: UserDataWithTokensType[] = await testHelpers.createUsersWithConfirmedEmailAndLogin(1, 1)
@@ -332,7 +332,7 @@ describe('/comments', () => {
 
     describe('put[/comments/{commentId}/like-status]', () => {
         it('put[/comments/{commentId}/like-status] should be success for change like-status, 204', async () => {
-            const posts: PostViewModel[] = await testHelpers.createMultiplePostsInBlog(1)
+            const posts: PostViewModel[] = await testHelpers.createMultiplePostsInBlogByAdmin(1)
             const postId = posts[0].id
 
             const users: UserDataWithTokensType[] = await testHelpers.createUsersWithConfirmedEmailAndLogin(5, 1)
@@ -408,7 +408,7 @@ describe('/comments', () => {
         });
 
         it('put[/comments/{commentId}/like-status] shouldn\'t be success for change like-status, 400', async () => {
-            const posts: PostViewModel[] = await testHelpers.createMultiplePostsInBlog(1)
+            const posts: PostViewModel[] = await testHelpers.createMultiplePostsInBlogByAdmin(1)
             const postId = posts[0].id
 
             const users: UserDataWithTokensType[] = await testHelpers.createUsersWithConfirmedEmailAndLogin(5, 1)
@@ -433,7 +433,7 @@ describe('/comments', () => {
         })
 
         it('put[/comments/{commentId}/like-status] shouldn\'t be success for change like-status, 401', async () => {
-            const posts: PostViewModel[] = await testHelpers.createMultiplePostsInBlog(1)
+            const posts: PostViewModel[] = await testHelpers.createMultiplePostsInBlogByAdmin(1)
             const postId = posts[0].id
 
             const users: UserDataWithTokensType[] = await testHelpers.createUsersWithConfirmedEmailAndLogin(5, 1)
@@ -453,7 +453,7 @@ describe('/comments', () => {
         })
 
         it('put[/comments/{commentId}/like-status] shouldn\'t be success for change like-status, 404', async () => {
-            const posts: PostViewModel[] = await testHelpers.createMultiplePostsInBlog(1)
+            const posts: PostViewModel[] = await testHelpers.createMultiplePostsInBlogByAdmin(1)
             const postId = posts[0].id
 
             const users: UserDataWithTokensType[] = await testHelpers.createUsersWithConfirmedEmailAndLogin(5, 1)

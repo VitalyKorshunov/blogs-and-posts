@@ -66,7 +66,7 @@ describe('/blogs', () => {
             websiteUrl: 'https://some.com',
         }
 
-        const res = await req
+        await req
             .post(SETTINGS.PATH.BLOGS)
             .send(newBlog)
             .expect(401)
@@ -134,7 +134,7 @@ describe('/blogs', () => {
             .send(newPost)
             .expect(201)
 
-        const createdPost: PostViewModel = await testHelpers.findAndMapPost(res.body.id)
+        const createdPost: PostViewModel = await testHelpers.getPostById(res.body.id)
 
         expect(res.body.title).toEqual(newPost.title)
         expect(res.body.shortDescription).toEqual(newPost.shortDescription)
@@ -165,7 +165,7 @@ describe('/blogs', () => {
             .send(newPost2)
             .expect(201)
 
-        const createdPost2: PostViewModel = await testHelpers.findAndMapPost(res2.body.id)
+        const createdPost2: PostViewModel = await testHelpers.getPostById(res2.body.id)
 
         expect(res2.body.title).toEqual(newPost2.title)
         expect(res2.body.shortDescription).toEqual(newPost2.shortDescription)
@@ -251,7 +251,7 @@ describe('/blogs', () => {
             content: testHelpers.generateString(9999)
         }
 
-        const res = await req
+        await req
             .post(SETTINGS.PATH.BLOGS + '/123' + SETTINGS.PATH.POSTS)
             .set({'Authorization': 'Basic ' + codedAuth})
             .send(newPost)
@@ -268,7 +268,7 @@ describe('/blogs', () => {
             content: testHelpers.generateString(9999)
         }
 
-        const res = await req
+        await req
             .post(SETTINGS.PATH.BLOGS + '/' + blog.id + SETTINGS.PATH.POSTS)
             .set({'Authorization': 'Basic ' + codedAuth + 'some'})
             .send(newPost)
@@ -408,12 +408,12 @@ describe('/blogs', () => {
     })
 
     it('[/blogs/{blogId}] shouldn\'t find blog by blogId with invalid blogId, 404', async () => {
-        const res = await req
+        await req
             .get(SETTINGS.PATH.BLOGS + '/1')
             .expect(404)
     })
     it('[/blogs/{blogId}] shouldn\'t find blog by blogId with valid blogId, 404', async () => {
-        const res = await req
+        await req
             .get(SETTINGS.PATH.BLOGS + '/' + (new ObjectId().toString()))
             .expect(404)
     })
@@ -429,7 +429,7 @@ describe('/blogs', () => {
 
     it('[/blogs/{blogId}/posts] should find filtered posts in blog, 200', async () => {
         const createdBlog = await testHelpers.createBlogByAdmin()
-        const posts : PostViewModel[] = await testHelpers.createMultiplePostsInBlog(3, createdBlog.id)
+        const posts: PostViewModel[] = await testHelpers.createMultiplePostsInBlogByAdmin(3, createdBlog.id)
         const post1 = posts[0]
         const post2 = posts[1]
         const post3 = posts[2]
@@ -487,7 +487,7 @@ describe('/blogs', () => {
     })
     it('[/blogs/{blogId}/posts] shouldn\'t find filtered posts in blog, 404', async () => {
         const createdBlog = await testHelpers.createBlogByAdmin()
-        const posts: PostViewModel[] = await testHelpers.createMultiplePostsInBlog(3, createdBlog.id)
+        await testHelpers.createMultiplePostsInBlogByAdmin(3, createdBlog.id)
 
         const query = {
             pageNumber: 1,
@@ -496,7 +496,7 @@ describe('/blogs', () => {
             sortDirection: 'asd'
         }
 
-        const res = await req
+        await req
             .get(SETTINGS.PATH.BLOGS + '/' + createdBlog.id + '1' + SETTINGS.PATH.POSTS)
             .query(query)
             .expect(404)
@@ -507,7 +507,7 @@ describe('/blogs', () => {
 
         expect(await testHelpers.countBlogsInDb()).toEqual(5)
 
-        const res = await req
+        await req
             .delete(SETTINGS.PATH.BLOGS + '/' + blogs[0].id)
             .set({'Authorization': 'Basic ' + codedAuth})
             .expect(204)
@@ -515,11 +515,11 @@ describe('/blogs', () => {
         expect(await testHelpers.countBlogsInDb()).toEqual(4)
     })
     it('[/blogs/{blogId}] shouldn\'t delete blog by admin, 404', async () => {
-        const createdBlog = await testHelpers.createBlogByAdmin()
+        await testHelpers.createBlogByAdmin()
 
         expect(await testHelpers.countBlogsInDb()).toEqual(1)
 
-        const res = await req
+        await req
             .delete(SETTINGS.PATH.BLOGS + '/1')
             .set({'Authorization': 'Basic ' + codedAuth})
             .expect(404)
@@ -531,7 +531,7 @@ describe('/blogs', () => {
 
         expect(await testHelpers.countBlogsInDb()).toEqual(1)
 
-        const res = await req
+        await req
             .delete(SETTINGS.PATH.BLOGS + '/' + createdBlog.id)
             .set({'Authorization': 'Basic' + codedAuth}) // no ' '
             .expect(401)
@@ -548,7 +548,7 @@ describe('/blogs', () => {
             websiteUrl: 'https://some2.com',
         }
 
-        const res = await req
+        await req
             .put(SETTINGS.PATH.BLOGS + '/' + createdBlog.id)
             .set({'Authorization': 'Basic ' + codedAuth})
             .send(blogToUpdate)
@@ -567,7 +567,7 @@ describe('/blogs', () => {
             websiteUrl: 'http://some.com',
         }
 
-        const res = await req
+        await req
             .put(SETTINGS.PATH.BLOGS + '/1')
             .set({'Authorization': 'Basic ' + codedAuth})
             .send(updatedBlog)
@@ -609,7 +609,7 @@ describe('/blogs', () => {
             websiteUrl: createString(101),
         }
 
-        const res = await req
+        await req
             .put(SETTINGS.PATH.BLOGS + '/' + newBlog.id)
             .set({'Authorization': 'Basic ' + codedAuth + 'error'})
             .send(blogToUpdate)

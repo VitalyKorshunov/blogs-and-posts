@@ -10,7 +10,6 @@ import {ObjectId, WithId} from 'mongodb';
 import {UserInputModel, UserViewModel} from '../../src/types/entities/users-types';
 import {UserDbType} from '../../src/types/db/user-db-types';
 import {BlogDbType} from '../../src/types/db/blog-db-types';
-import {PostDbType} from '../../src/types/db/post-db-types';
 import {routersPaths} from '../../src/common/path/paths';
 import {nodemailerService} from '../../src/common/adapters/nodemailer.service';
 import {UserModel} from '../../src/features/users/domain/usersEntity';
@@ -180,6 +179,14 @@ export const testHelpers = {
         }
     },
 
+    async getPostById(postId: string): Promise<PostViewModel> {
+        const res = await req
+            .get(SETTINGS.PATH.POSTS + '/' + postId)
+            .expect(200)
+
+        return res.body
+    },
+
     findAndMapBlog: async (id: string): Promise<BlogViewModel> => {
         const queryId: IdQueryDbType = {_id: new ObjectId(id)}
 
@@ -193,7 +200,7 @@ export const testHelpers = {
             isMembership: blog.isMembership
         };
     },
-    findAndMapPost: async (id: string): Promise<PostViewModel> => {
+    /*findAndMapPost: async (id: string): Promise<PostViewModel> => {
         const queryId: IdQueryDbType = {_id: new ObjectId(id)}
 
         const post: WithId<PostDbType> = await db.collection(SETTINGS.DB.POST_COLLECTION_NAME).findOne(queryId) as WithId<PostDbType>
@@ -204,9 +211,14 @@ export const testHelpers = {
             content: post.content,
             shortDescription: post.shortDescription,
             title: post.title,
-            createdAt: post.createdAt.toISOString()
+            createdAt: post.createdAt.toISOString(),
+            extendedLikesInfo: {
+                likesCount: post.likesAndDislikesInfo.countPostsLikesAndDislikes.likesCount,
+                dislikesCount: post.likesAndDislikesInfo.countPostsLikesAndDislikes.dislikesCount,
+                myStatus:
+            }
         };
-    },
+    },*/
     findAndMapUserByIndex: async (index: number = 0): Promise<WithId<UserDbType>> => {
         const users: WithId<UserDbType>[] = await UserModel.find({}, {__v: 0}).lean()
 
@@ -230,7 +242,7 @@ export const testHelpers = {
         return blogs
     },
 
-    async createMultiplePostsInBlog(count: number, blogId?: string): Promise<PostViewModel[]> {
+    async createMultiplePostsInBlogByAdmin(count: number, blogId?: string): Promise<PostViewModel[]> {
         if (!blogId) {
             const blog = await this.createBlogByAdmin()
             blogId = blog.id

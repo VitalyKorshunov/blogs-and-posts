@@ -14,7 +14,7 @@ describe('some tests', () => {
 
     it.skip('some test', async () => {
         const createdBlog = await testHelpers.createBlogByAdmin()
-        const posts: PostViewModel[] = await testHelpers.createMultiplePostsInBlog(200, createdBlog.id)
+        const posts: PostViewModel[] = await testHelpers.createMultiplePostsInBlogByAdmin(200, createdBlog.id)
         console.log(await testHelpers.countPostsInDb())
 
     }, 1000 * 60 * 60)

@@ -1,3 +1,5 @@
+import {LikeStatus} from '../db/comments-db-types';
+
 export type PostId = string
 
 export type PostInputModel = {
@@ -15,6 +17,20 @@ export type PostViewModel = {
     blogId: string
     blogName: string
     createdAt: string
+    extendedLikesInfo: PostLikeInfo
+}
+
+export type PostLikeInfo = {
+    likesCount: number
+    dislikesCount: number
+    myStatus: keyof typeof LikeStatus
+    newestLikes: PostNewestLikes[]
+}
+
+export type PostNewestLikes = {
+    addedAt: string
+    userId: string
+    login: string
 }
 
 export type PostServiceModel = {
