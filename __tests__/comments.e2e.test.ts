@@ -362,24 +362,15 @@ describe('/comments', () => {
 
             const update1CommentViewUser1 = await testHelpers.getComment(commentInfo1.id, user1.tokens[0].accessToken)
             const update1CommentViewUser2 = await testHelpers.getComment(commentInfo1.id, user2.tokens[0].accessToken)
+
             const update1CommentViewAnonymous = await testHelpers.getComment(commentInfo1.id)
-
             expect(update1CommentViewAnonymous).toEqual(update1CommentViewUser2)
             expect(update1CommentViewAnonymous.likesInfo.myStatus).toBe('None')
             expect(update1CommentViewAnonymous.likesInfo.likesCount).toBe(1)
+
             expect(update1CommentViewAnonymous.likesInfo.dislikesCount).toBe(0)
-
             expect(update1CommentViewUser1.likesInfo.myStatus).toBe('Like')
-            expect(update1CommentViewUser2.likesInfo.myStatus).toBe('None')
 
-            await testHelpers.setLikeForComment(commentInfo1.id, LikeStatus.Like, user1.tokens[0].accessToken) // must be no effect
-
-            expect(update1CommentViewAnonymous).toEqual(update1CommentViewUser2)
-            expect(update1CommentViewAnonymous.likesInfo.myStatus).toBe('None')
-            expect(update1CommentViewAnonymous.likesInfo.likesCount).toBe(1)
-            expect(update1CommentViewAnonymous.likesInfo.dislikesCount).toBe(0)
-
-            expect(update1CommentViewUser1.likesInfo.myStatus).toBe('Like')
             expect(update1CommentViewUser2.likesInfo.myStatus).toBe('None')
 
             // set user3 like, user 4 dislike, user1 none

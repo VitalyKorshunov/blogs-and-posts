@@ -7,6 +7,7 @@ import {ObjectId} from 'mongodb';
 import {routersPaths} from '../src/common/path/paths';
 import {CommentsSortViewModel, CommentViewModel} from '../src/types/entities/comments-types';
 import {ErrorsType} from '../src/types/utils/output-errors-type';
+import {LikeStatus} from '../src/types/db/comments-db-types';
 
 describe('/posts', () => {
     beforeAll(async () => {
@@ -431,8 +432,8 @@ describe('/posts', () => {
         })
     })
 
-    describe('post[/posts/:id/comments]', () => {
-        it('post[/posts/:id/comments] should create comment in post by user, 201', async () => {
+    describe('post[/posts/{postId}/comments]', () => {
+        it('post[/posts/{postId}/comments] should create comment in post by user, 201', async () => {
             const posts: PostViewModel[] = await testHelpers.createMultiplePostsInBlogByAdmin(1)
             const postId = posts[0].id
 
@@ -479,7 +480,7 @@ describe('/posts', () => {
                 .expect(201)
         })
 
-        it('post[/posts/:id/comments] shouldn\'t create comment in post by user, 400', async () => {
+        it('post[/posts/{postId}/comments] shouldn\'t create comment in post by user, 400', async () => {
             const posts: PostViewModel[] = await testHelpers.createMultiplePostsInBlogByAdmin(1)
             const postId = posts[0].id
 
@@ -512,7 +513,7 @@ describe('/posts', () => {
                 .expect(400)
         })
 
-        it('post[/posts/:id/comments] shouldn\'t create comment in post by user, 401', async () => {
+        it('post[/posts/{postId}/comments] shouldn\'t create comment in post by user, 401', async () => {
             const posts: PostViewModel[] = await testHelpers.createMultiplePostsInBlogByAdmin(1)
             const postId = posts[0].id
 
@@ -583,153 +584,172 @@ describe('/posts', () => {
         })
     })
 
-    //TODO Изменить на лайки для постов (сейчас для комментариев)
-    /*
-       describe('put[/posts/{postId}/like-status]', () => {
-           it('put[/posts/{postId}/like-status] should be success for change like-status, 204', async () => {
-               const posts: PostViewModel[] = await testHelpers.createMultiplePostsInBlog(1)
-               const postId = posts[0].id
+    describe('put[/posts/{postId}/like-status]', () => {
+        it('put[/posts/{postId}/like-status] should be success for change like-status, 204', async () => {
+            const posts: PostViewModel[] = await testHelpers.createMultiplePostsInBlogByAdmin(1)
+            const postId = posts[0].id
 
-               const users: UserDataWithTokensType[] = await testHelpers.createUsersWithConfirmedEmailAndLogin(5, 1)
-               const user1 = users[0]
-               const user2 = users[1]
-               const user3 = users[2]
-               const user4 = users[3]
+            const users: UserDataWithTokensType[] = await testHelpers.createUsersWithConfirmedEmailAndLogin(5, 1)
+            const user1 = users[0]
+            const user2 = users[1]
+            const user3 = users[2]
+            const user4 = users[3]
 
-               const comment = {
-                   content: testHelpers.generateString(20)
-               }
+            const update0PostViewUser1 = await testHelpers.getPostById(postId, user1.tokens[0].accessToken)
+            const update0PostViewUser2 = await testHelpers.getPostById(postId, user2.tokens[0].accessToken)
+            const update0PostViewAnonymous = await testHelpers.getPostById(postId)
 
-               const commentInfo1: CommentViewModel = await testHelpers.createCommentByUser(postId, comment, user1.tokens[0].accessToken)
+            expect(update0PostViewAnonymous).toEqual(update0PostViewUser1)
+            expect(update0PostViewAnonymous).toEqual(update0PostViewUser2)
 
-               const postCommentsViewUser1 = await testHelpers.getPostComments(postId, user1.tokens[0].accessToken)
-               const postCommentsViewUser2 = await testHelpers.getPostComments(postId, user2.tokens[0].accessToken)
-               const postComments = await testHelpers.getPostComments(postId)
+            expect(update0PostViewUser1.extendedLikesInfo.myStatus).toBe('None')
+            expect(update0PostViewUser1.extendedLikesInfo.likesCount).toBe(0)
+            expect(update0PostViewUser1.extendedLikesInfo.dislikesCount).toBe(0)
+            expect(update0PostViewUser1.extendedLikesInfo.newestLikes).toEqual([])
 
-               expect(postComments).toEqual(postCommentsViewUser1)
-               expect(postComments).toEqual(postCommentsViewUser2)
+            await req
+                .put(SETTINGS.PATH.POSTS + '/' + postId + routersPaths.posts.likeStatus)
+                .set({'Authorization': `Bearer ${user1.tokens[0].accessToken}`})
+                .send({likeStatus: LikeStatus.Like})
+                .expect(204)
 
-               await req
-                   .put(SETTINGS.PATH.COMMENTS + '/' + commentInfo1.id + routersPaths.comments.likeStatus)
-                   .set({'Authorization': `Bearer ${user1.tokens[0].accessToken}`})
-                   .send({likeStatus: LikeStatus.Like})
-                   .expect(204)
+            await testHelpers.setLikeForPost(postId, LikeStatus.Like, user1.tokens[0].accessToken) // must be no effect
 
-               const update1PostCommentsViewUser1 = await testHelpers.getPostComments(postId, user1.tokens[0].accessToken)
-               const update1PostCommentsViewUser2 = await testHelpers.getPostComments(postId, user2.tokens[0].accessToken)
-               const update1PostComments = await testHelpers.getPostComments(postId)
+            const update1PostViewUser1 = await testHelpers.getPostById(postId, user1.tokens[0].accessToken)
+            const update1PostViewUser2 = await testHelpers.getPostById(postId, user2.tokens[0].accessToken)
+            const update1PostViewAnonymous = await testHelpers.getPostById(postId)
 
-               expect(update1PostComments).toEqual(update1PostCommentsViewUser2)
-               expect(update1PostComments.items[0].likesInfo.myStatus).toBe('None')
-               expect(update1PostComments.items[0].likesInfo.likesCount).toBe(1)
-               expect(update1PostComments.items[0].likesInfo.dislikesCount).toBe(0)
+            expect(update1PostViewAnonymous).toEqual(update1PostViewUser2)
+            expect(update1PostViewAnonymous.extendedLikesInfo.myStatus).toBe('None')
+            expect(update1PostViewAnonymous.extendedLikesInfo.likesCount).toBe(1)
+            expect(update1PostViewAnonymous.extendedLikesInfo.dislikesCount).toBe(0)
+            expect(typeof update1PostViewAnonymous.extendedLikesInfo.newestLikes[0].addedAt).toBe('string')
+            expect(typeof update1PostViewAnonymous.extendedLikesInfo.newestLikes[0].userId).toBe('string')
+            expect(update1PostViewAnonymous.extendedLikesInfo.newestLikes[0].login).toBe(user1.login)
 
-               expect(update1PostCommentsViewUser1.items[0].likesInfo.myStatus).toBe('Like')
-               expect(update1PostCommentsViewUser2.items[0].likesInfo.myStatus).toBe('None')
+            expect(update1PostViewUser1.extendedLikesInfo.myStatus).toBe('Like')
+            expect(update1PostViewUser1.extendedLikesInfo.likesCount).toBe(1)
+            expect(update1PostViewUser1.extendedLikesInfo.dislikesCount).toBe(0)
+            expect(typeof update1PostViewUser1.extendedLikesInfo.newestLikes.length).toBe(1)
+            expect(typeof update1PostViewUser1.extendedLikesInfo.newestLikes[0].addedAt).toBe('string')
+            expect(typeof update1PostViewUser1.extendedLikesInfo.newestLikes[0].userId).toBe('string')
+            expect(update1PostViewUser1.extendedLikesInfo.newestLikes[0].login).toBe(user1.login)
 
-               await testHelpers.setLikeForComment(commentInfo1.id, LikeStatus.Like, user1.tokens[0].accessToken) // must be no effect
+            expect(update1PostViewUser2.extendedLikesInfo.myStatus).toBe('None')
 
-               expect(update1PostComments).toEqual(update1PostCommentsViewUser2)
-               expect(update1PostComments.items[0].likesInfo.myStatus).toBe('None')
-               expect(update1PostComments.items[0].likesInfo.likesCount).toBe(1)
-               expect(update1PostComments.items[0].likesInfo.dislikesCount).toBe(0)
+            // set user3 like, user 4 dislike, user1 none
+            await testHelpers.setLikeForPost(postId, LikeStatus.Like, user3.tokens[0].accessToken)
+            await testHelpers.setLikeForPost(postId, LikeStatus.Dislike, user4.tokens[0].accessToken)
+            await testHelpers.setLikeForPost(postId, LikeStatus.Dislike, user4.tokens[0].accessToken)// should be no effect
+            await testHelpers.setLikeForPost(postId, LikeStatus.None, user1.tokens[0].accessToken)
+            await testHelpers.setLikeForPost(postId, LikeStatus.None, user1.tokens[0].accessToken) // should be no effect
 
-               expect(update1PostCommentsViewUser1.items[0].likesInfo.myStatus).toBe('Like')
-               expect(update1PostCommentsViewUser2.items[0].likesInfo.myStatus).toBe('None')
+            const update2PostViewUser1 = await testHelpers.getPostById(postId, user1.tokens[0].accessToken)
+            const update2PostViewUser2 = await testHelpers.getPostById(postId, user2.tokens[0].accessToken)
+            const update2PostViewUser3 = await testHelpers.getPostById(postId, user3.tokens[0].accessToken)
+            const update2PostViewUser4 = await testHelpers.getPostById(postId, user4.tokens[0].accessToken)
+            const update2PostViewAnonymous = await testHelpers.getPostById(postId)
 
-               // set user3 like, user 4 dislike, user1 none
-               await testHelpers.setLikeForComment(commentInfo1.id, LikeStatus.Like, user3.tokens[0].accessToken)
-               await testHelpers.setLikeForComment(commentInfo1.id, LikeStatus.Dislike, user4.tokens[0].accessToken)
-               await testHelpers.setLikeForComment(commentInfo1.id, LikeStatus.Dislike, user4.tokens[0].accessToken)// should be no effect
-               await testHelpers.setLikeForComment(commentInfo1.id, LikeStatus.None, user1.tokens[0].accessToken)
-               await testHelpers.setLikeForComment(commentInfo1.id, LikeStatus.None, user1.tokens[0].accessToken) // should be no effect
+            expect(update2PostViewAnonymous.extendedLikesInfo.myStatus).toBe('None')
+            expect(update2PostViewAnonymous.extendedLikesInfo.likesCount).toBe(1)
+            expect(update2PostViewAnonymous.extendedLikesInfo.dislikesCount).toBe(1)
+            expect(update2PostViewAnonymous.extendedLikesInfo.newestLikes.length).toBe(1)
+            expect(typeof update2PostViewAnonymous.extendedLikesInfo.newestLikes[0].addedAt).toBe('string')
+            expect(typeof update2PostViewAnonymous.extendedLikesInfo.newestLikes[0].userId).toBe('string')
+            expect(update2PostViewAnonymous.extendedLikesInfo.newestLikes[0].login).toBe(user3.login)
 
-               const update2PostCommentsViewUser1 = await testHelpers.getPostComments(postId, user1.tokens[0].accessToken)
-               const update2PostCommentsViewUser2 = await testHelpers.getPostComments(postId, user2.tokens[0].accessToken)
-               const update2PostCommentsViewUser3 = await testHelpers.getPostComments(postId, user3.tokens[0].accessToken)
-               const update2PostCommentsViewUser4 = await testHelpers.getPostComments(postId, user4.tokens[0].accessToken)
-               const update2PostComments = await testHelpers.getPostComments(postId)
+            expect(update2PostViewUser1.extendedLikesInfo.myStatus).toBe('None')
+            expect(update2PostViewUser2.extendedLikesInfo.myStatus).toBe('None')
+            expect(update2PostViewUser3.extendedLikesInfo.myStatus).toBe('Like')
+            expect(update2PostViewUser4.extendedLikesInfo.myStatus).toBe('Dislike')
+            expect(update2PostViewUser4.extendedLikesInfo.likesCount).toBe(1)
+            expect(update2PostViewUser4.extendedLikesInfo.dislikesCount).toBe(1)
 
-               expect(update2PostComments.items[0].likesInfo.myStatus).toBe('None')
-               expect(update2PostComments.items[0].likesInfo.likesCount).toBe(1)
-               expect(update2PostComments.items[0].likesInfo.dislikesCount).toBe(1)
+            // user1 Like. newestLikes should be [{user3, user1}]
+            await testHelpers.setLikeForPost(postId, LikeStatus.Like, user1.tokens[0].accessToken)
+            const update3PostViewAnonymous = await testHelpers.getPostById(postId)
 
-               expect(update2PostCommentsViewUser1.items[0].likesInfo.myStatus).toBe('None')
-               expect(update2PostCommentsViewUser2.items[0].likesInfo.myStatus).toBe('None')
-               expect(update2PostCommentsViewUser3.items[0].likesInfo.myStatus).toBe('Like')
-               expect(update2PostCommentsViewUser4.items[0].likesInfo.myStatus).toBe('Dislike')
-               expect(update2PostCommentsViewUser4.items[0].likesInfo.likesCount).toBe(1)
-               expect(update2PostCommentsViewUser4.items[0].likesInfo.dislikesCount).toBe(1)
-           });
+            expect(update3PostViewAnonymous.extendedLikesInfo.newestLikes.length).toBe(2)
+            expect(update3PostViewAnonymous.extendedLikesInfo.newestLikes[0].login).toBe(user3.login)
+            expect(update3PostViewAnonymous.extendedLikesInfo.newestLikes[1].login).toBe(user1.login)
 
-           it('put[/posts/{postId}/like-status] shouldn\'t be success for change like-status, 400', async () => {
-               const posts: PostViewModel[] = await testHelpers.createMultiplePostsInBlog(1)
-               const postId = posts[0].id
+            // user2 Like, user4 Like. newestLikes should be [{user3, user2, user4}]. user1 is missing because max length is 3 and user1 was the first to like
+            await testHelpers.setLikeForPost(postId, LikeStatus.Like, user2.tokens[0].accessToken)
+            await testHelpers.setLikeForPost(postId, LikeStatus.Like, user4.tokens[0].accessToken)
+            const update4PostViewAnonymous = await testHelpers.getPostById(postId)
 
-               const users: UserDataWithTokensType[] = await testHelpers.createUsersWithConfirmedEmailAndLogin(5, 1)
-               const user1 = users[0]
+            expect(update4PostViewAnonymous.extendedLikesInfo.newestLikes.length).toBe(3)
+            expect(update4PostViewAnonymous.extendedLikesInfo.newestLikes[0].login).toBe(user3.login)
+            expect(update4PostViewAnonymous.extendedLikesInfo.newestLikes[1].login).toBe(user2.login)
+            expect(update4PostViewAnonymous.extendedLikesInfo.newestLikes[1].login).toBe(user4.login)
 
-               const comment = {
-                   content: testHelpers.generateString(20)
-               }
+            // user2 Dislike. newestLikes should be [{user3, user4, user1}]
+            await testHelpers.setLikeForPost(postId, LikeStatus.Dislike, user2.tokens[0].accessToken)
+            const update5PostViewAnonymous = await testHelpers.getPostById(postId)
 
-               const commentInfo1 = await testHelpers.createCommentByUser(postId, comment, user1.tokens[0].accessToken)
+            expect(update5PostViewAnonymous.extendedLikesInfo.newestLikes.length).toBe(3)
+            expect(update5PostViewAnonymous.extendedLikesInfo.newestLikes[0].login).toBe(user3.login)
+            expect(update5PostViewAnonymous.extendedLikesInfo.newestLikes[1].login).toBe(user4.login)
+            expect(update5PostViewAnonymous.extendedLikesInfo.newestLikes[1].login).toBe(user1.login)
 
-               const res = await req
-                   .put(SETTINGS.PATH.COMMENTS + '/' + commentInfo1.id + routersPaths.comments.likeStatus)
-                   .set({'Authorization': `Bearer ${user1.tokens[0].accessToken}`})
-                   .send({likeStatus: 'Good'})
-                   .expect(400)
+            // user2 Like. newestLikes should be [{user3, user2, user4}]
+            await testHelpers.setLikeForPost(postId, LikeStatus.Dislike, user2.tokens[0].accessToken)
+            const update6PostViewAnonymous = await testHelpers.getPostById(postId)
 
-               const resBody: ErrorsType = res.body
+            expect(update6PostViewAnonymous.extendedLikesInfo.newestLikes.length).toBe(3)
+            expect(update6PostViewAnonymous.extendedLikesInfo.newestLikes[0].login).toBe(user3.login)
+            expect(update6PostViewAnonymous.extendedLikesInfo.newestLikes[1].login).toBe(user2.login)
+            expect(update6PostViewAnonymous.extendedLikesInfo.newestLikes[1].login).toBe(user4.login)
+        });
 
-               expect(Object.keys(resBody.errorsMessages).length).toBe(1)
-               expect(resBody.errorsMessages[0].field).toBe('likeStatus')
-           })
+        it('put[/posts/{postId}/like-status] shouldn\'t be success for change like-status, 400', async () => {
+            const posts: PostViewModel[] = await testHelpers.createMultiplePostsInBlogByAdmin(1)
+            const postId = posts[0].id
 
-           it('put[/posts/{postId}/like-status] shouldn\'t be success for change like-status, 401', async () => {
-               const posts: PostViewModel[] = await testHelpers.createMultiplePostsInBlog(1)
-               const postId = posts[0].id
+            const users: UserDataWithTokensType[] = await testHelpers.createUsersWithConfirmedEmailAndLogin(5, 1)
+            const user1 = users[0]
 
-               const users: UserDataWithTokensType[] = await testHelpers.createUsersWithConfirmedEmailAndLogin(5, 1)
-               const user1 = users[0]
+            const res = await req
+                .put(SETTINGS.PATH.POSTS + '/' + postId + routersPaths.posts.likeStatus)
+                .set({'Authorization': `Bearer ${user1.tokens[0].accessToken}`})
+                .send({likeStatus: 'Good'})
+                .expect(400)
 
-               const comment = {
-                   content: testHelpers.generateString(20)
-               }
+            const resBody: ErrorsType = res.body
 
-               const commentInfo1 = await testHelpers.createCommentByUser(postId, comment, user1.tokens[0].accessToken)
+            expect(Object.keys(resBody.errorsMessages).length).toBe(1)
+            expect(resBody.errorsMessages[0].field).toBe('likeStatus')
+        })
 
-               const res = await req
-                   .put(SETTINGS.PATH.COMMENTS + '/' + commentInfo1.id + routersPaths.comments.likeStatus)
-                   .set({'Authorization': `Bearer ${user1.tokens[0].accessToken}` + 'invalid'})
-                   .send({likeStatus: LikeStatus.Like})
-                   .expect(401)
-           })
+        it('put[/posts/{postId}/like-status] shouldn\'t be success for change like-status, 401', async () => {
+            const posts: PostViewModel[] = await testHelpers.createMultiplePostsInBlogByAdmin(1)
+            const postId = posts[0].id
 
-           it('put[/posts/{postId}/like-status] shouldn\'t be success for change like-status, 404', async () => {
-               const posts: PostViewModel[] = await testHelpers.createMultiplePostsInBlog(1)
-               const postId = posts[0].id
+            const users: UserDataWithTokensType[] = await testHelpers.createUsersWithConfirmedEmailAndLogin(5, 1)
+            const user1 = users[0]
 
-               const users: UserDataWithTokensType[] = await testHelpers.createUsersWithConfirmedEmailAndLogin(5, 1)
-               const user1 = users[0]
+            await req
+                .put(SETTINGS.PATH.POSTS + '/' + postId + routersPaths.posts.likeStatus)
+                .set({'Authorization': `Bearer ${user1.tokens[0].accessToken}` + 'invalid'})
+                .send({likeStatus: LikeStatus.Like})
+                .expect(401)
+        })
 
-               const comment = {
-                   content: testHelpers.generateString(20)
-               }
+        it('put[/posts/{postId}/like-status] shouldn\'t be success for change like-status, 404', async () => {
+            const posts: PostViewModel[] = await testHelpers.createMultiplePostsInBlogByAdmin(1)
+            const postId = posts[0].id
 
-               const commentInfo1 = await testHelpers.createCommentByUser(postId, comment, user1.tokens[0].accessToken)
+            const users: UserDataWithTokensType[] = await testHelpers.createUsersWithConfirmedEmailAndLogin(5, 1)
+            const user1 = users[0]
 
-               const commentIdNotFound = new ObjectId()
+            const fakePostId = new ObjectId()
 
-               const res = await req
-                   .put(SETTINGS.PATH.COMMENTS + '/' + commentIdNotFound + routersPaths.comments.likeStatus)
-                   .set({'Authorization': `Bearer ${user1.tokens[0].accessToken}`})
-                   .send({likeStatus: LikeStatus.Like})
-                   .expect(404)
-           })
-       })
-   */
-
+            await req
+                .put(SETTINGS.PATH.POSTS + '/' + fakePostId + routersPaths.posts.likeStatus)
+                .set({'Authorization': `Bearer ${user1.tokens[0].accessToken}`})
+                .send({likeStatus: LikeStatus.Like})
+                .expect(404)
+        })
+    })
 
 })

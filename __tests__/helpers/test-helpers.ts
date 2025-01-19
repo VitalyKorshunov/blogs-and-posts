@@ -179,9 +179,10 @@ export const testHelpers = {
         }
     },
 
-    async getPostById(postId: string): Promise<PostViewModel> {
+    async getPostById(postId: string, accessToken?: string): Promise<PostViewModel> {
         const res = await req
             .get(SETTINGS.PATH.POSTS + '/' + postId)
+            .set({'Authorization': `Bearer ${accessToken}`})
             .expect(200)
 
         return res.body
@@ -378,6 +379,14 @@ export const testHelpers = {
             .expect(200)
 
         return comment.body
+    },
+
+    async setLikeForPost(postId: string, likeStatus: LikeStatus, accessToken: string): Promise<void> {
+        await req
+            .put(SETTINGS.PATH.POSTS + '/' + postId + routersPaths.posts.likeStatus)
+            .set({'Authorization': `Bearer ${accessToken}`})
+            .send({likeStatus: likeStatus})
+            .expect(204)
     },
 
     async setLikeForComment(commentId: string, likeStatus: LikeStatus, accessToken: string): Promise<void> {
