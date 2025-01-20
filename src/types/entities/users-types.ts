@@ -1,5 +1,9 @@
 export type UserId = string
 
+export type UserIdParamModel = {
+    id: UserId
+}
+
 export type UserInputModel = {
     login: string
     password: string

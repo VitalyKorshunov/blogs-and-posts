@@ -2,6 +2,10 @@ import {LikeStatus} from '../db/comments-db-types';
 
 export type PostId = string
 
+export type PostIdParamModel = {
+    id: PostId
+}
+
 export type PostInputModel = {
     title: string
     shortDescription: string
@@ -25,6 +29,11 @@ export type PostLikeInfo = {
     dislikesCount: number
     myStatus: keyof typeof LikeStatus
     newestLikes: PostNewestLikes[]
+}
+
+
+export type PostLikeStatusInputModel = {
+    likeStatus: keyof typeof LikeStatus
 }
 
 export type PostNewestLikes = {

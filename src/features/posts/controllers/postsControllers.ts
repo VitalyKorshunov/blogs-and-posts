@@ -1,5 +1,12 @@
 import {Request, Response} from 'express';
-import {PostId, PostInputModel, PostsSortViewModel, PostViewModel} from '../../../types/entities/posts-types';
+import {
+    PostId,
+    PostIdParamModel,
+    PostInputModel,
+    PostLikeStatusInputModel,
+    PostsSortViewModel,
+    PostViewModel
+} from '../../../types/entities/posts-types';
 import {ParamType} from '../../../types/request-response/request-types';
 import {
     CommentId,
@@ -15,6 +22,7 @@ import {CommentsQueryRepository} from '../../comments/repositories/commentsQuery
 import {accessTokenUtils} from '../../../common/utils/accessToken.utils';
 import {UserId} from '../../../types/entities/users-types';
 import {inject, injectable} from 'inversify';
+import {OneOfLikeStatus} from '../../../types/db/comments-db-types';
 
 @injectable()
 export class PostsControllers {
@@ -113,7 +121,19 @@ export class PostsControllers {
         }
     }
 
-    async updateUserLikeStatusForPost(req: Request, res: Response) {
+    async updateUserLikeStatusForPost(req: Request<PostIdParamModel, {}, PostLikeStatusInputModel>, res: Response) {
+        const postId: PostId = req.params.id
+        const userId: UserId = req.user!.id
+        const likeStatus: OneOfLikeStatus = req.body.likeStatus
 
+        const result = await this.postsService.updatePostLikeStatus(postId, userId, likeStatus)
+
+        if (result.statusCode === StatusCode.Success) {
+            res.sendStatus(204)
+        } else if (result.statusCode === StatusCode.NotFound) {
+            res.sendStatus(404)
+        } else {
+            res.sendStatus(500)
+        }
     };
 }

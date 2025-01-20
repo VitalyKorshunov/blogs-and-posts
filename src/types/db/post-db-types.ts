@@ -1,5 +1,4 @@
 import {ObjectId} from 'mongodb';
-import {LikeStatus} from './comments-db-types';
 
 export interface PostDbType  {
     title: string
@@ -22,8 +21,8 @@ export type CountPostsLikesAndDislikes = {
 }
 export type PostsUserLikeStatusInfoDbType = {
     userId: ObjectId
-    likeStatus: keyof typeof LikeStatus
-    firstStatusCreatedAt: Date
+    login: string
+    createdAt: Date
 }
 
 export type PostUpdateDbType = {

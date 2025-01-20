@@ -1,6 +1,7 @@
 import {NextFunction, Request, Response} from 'express';
 import {jwtService} from '../common/adapters/jwt.service';
 import {PayloadAccessTokenInputType, VerifyAccessTokenViewModel} from '../types/auth/jwt-types';
+import {UserIdParamModel} from '../types/entities/users-types';
 
 export const accessTokenGuardMiddleware = async (req: Request, res: Response, next: NextFunction) => {
     const auth = req.headers.authorization as string
@@ -20,7 +21,7 @@ export const accessTokenGuardMiddleware = async (req: Request, res: Response, ne
     if (payload) {
         const {userId}: PayloadAccessTokenInputType = payload
 
-        req.user = {id: userId} as { id: string}
+        req.user = {id: userId} as UserIdParamModel
         next()
     } else {
         res.sendStatus(401)
