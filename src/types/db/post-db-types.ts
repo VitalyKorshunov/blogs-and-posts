@@ -20,9 +20,9 @@ export type CountPostsLikesAndDislikes = {
     dislikesCount: number
 }
 export type PostsUserLikeStatusInfoDbType = {
-    userId: ObjectId
+    userId: string
     login: string
-    createdAt: Date
+    addedAt: string
 }
 
 export type PostUpdateDbType = {

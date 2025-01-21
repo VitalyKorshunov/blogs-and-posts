@@ -15,6 +15,7 @@ import {result, ResultType} from '../../../common/utils/errorsAndStatusCodes.uti
 import {injectable} from 'inversify';
 import {BlogModel} from '../domain/blogEntity';
 import {PostModel} from '../../posts/domain/postEntity';
+import {LikeStatus} from '../../../types/db/comments-db-types';
 
 @injectable()
 export class BlogsQueryRepository {
@@ -41,7 +42,13 @@ export class BlogsQueryRepository {
             content: post.content,
             blogId: post.blogId.toString(),
             blogName: post.blogName,
-            createdAt: post.createdAt.toISOString()
+            createdAt: post.createdAt.toISOString(),
+            extendedLikesInfo: {
+                likesCount: post.likesAndDislikesInfo.countPostsLikesAndDislikes.likesCount,
+                dislikesCount: post.likesAndDislikesInfo.countPostsLikesAndDislikes.dislikesCount,
+                myStatus: LikeStatus.None,
+                newestLikes: post.likesAndDislikesInfo.postsUserLikeStatusInfo
+            }
         }
     }
 

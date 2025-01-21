@@ -17,6 +17,10 @@ export class UsersRepository {
         return _id[0]._id.toString()
     }
 
+    async findUserById(userId: UserId): Promise<HydratedUserType | null> {
+        return UserModel.findById(userId)
+    }
+
     async findUserByFieldAndValue(field: string, value: string): Promise<HydratedUserType | null> {
         const queryToDb = (
             (field === 'id')

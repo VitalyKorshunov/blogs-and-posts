@@ -45,7 +45,8 @@ export class PostsControllers {
 
         if (result.statusCode === StatusCode.Success) {
             const postId = result.data
-            const newPost = await this.postsQueryRepository.findPostById(postId)
+            const userId: UserId | null = await accessTokenUtils.getAccessTokenUserId(req)
+            const newPost = await this.postsQueryRepository.findPostById(postId, userId)
 
             res.status(201).json(newPost)
         } else if (result.statusCode === StatusCode.NotFound) {
@@ -66,13 +67,16 @@ export class PostsControllers {
     }
 
     async findPost(req: Request<ParamType>, res: Response<PostViewModel>) {
-        const post = await this.postsQueryRepository.findPostById(req.params.id)
+        const userId: UserId | null = await accessTokenUtils.getAccessTokenUserId(req)
+        const post = await this.postsQueryRepository.findPostById(req.params.id, userId)
 
         res.status(200).json(post)
     }
 
     async getPosts(req: Request, res: Response<PostsSortViewModel>) {
-        const posts = await this.postsQueryRepository.getAllSortedPosts(req.query);
+        const userId: UserId | null = await accessTokenUtils.getAccessTokenUserId(req)
+
+        const posts = await this.postsQueryRepository.getAllSortedPosts(req.query, userId);
 
         res.status(200).json(posts)
     }

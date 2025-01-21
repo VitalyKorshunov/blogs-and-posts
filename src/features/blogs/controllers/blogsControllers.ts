@@ -13,6 +13,8 @@ import {BlogsQueryRepository} from '../infrastructure/blogsQueryRepository';
 import {PostsService} from '../../posts/application/postsService';
 import {PostsQueryRepository} from '../../posts/infrastructure/postsQueryRepository';
 import {inject, injectable} from 'inversify';
+import {UserId} from '../../../types/entities/users-types';
+import {accessTokenUtils} from '../../../common/utils/accessToken.utils';
 
 @injectable()
 export class BlogsControllers {
@@ -50,8 +52,8 @@ export class BlogsControllers {
 
         if (result.statusCode === StatusCode.Success) {
             const postId: PostId = result.data
-
-            const post: PostViewModel = await this.postsQueryRepository.findPostById(postId)
+            const userId: UserId | null = await accessTokenUtils.getAccessTokenUserId(req)
+            const post: PostViewModel = await this.postsQueryRepository.findPostById(postId, userId)
             res
                 .status(201)
                 .json(post)

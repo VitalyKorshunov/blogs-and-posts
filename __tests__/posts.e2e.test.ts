@@ -618,6 +618,9 @@ describe('/posts', () => {
             const update1PostViewUser1 = await testHelpers.getPostById(postId, user1.tokens[0].accessToken)
             const update1PostViewUser2 = await testHelpers.getPostById(postId, user2.tokens[0].accessToken)
             const update1PostViewAnonymous = await testHelpers.getPostById(postId)
+            // console.log(update1PostViewUser1)
+            // console.log(update1PostViewUser2)
+            // console.log(update1PostViewAnonymous)
 
             expect(update1PostViewAnonymous).toEqual(update1PostViewUser2)
             expect(update1PostViewAnonymous.extendedLikesInfo.myStatus).toBe('None')
@@ -630,7 +633,7 @@ describe('/posts', () => {
             expect(update1PostViewUser1.extendedLikesInfo.myStatus).toBe('Like')
             expect(update1PostViewUser1.extendedLikesInfo.likesCount).toBe(1)
             expect(update1PostViewUser1.extendedLikesInfo.dislikesCount).toBe(0)
-            expect(typeof update1PostViewUser1.extendedLikesInfo.newestLikes.length).toBe(1)
+            expect(update1PostViewUser1.extendedLikesInfo.newestLikes.length).toBe(1)
             expect(typeof update1PostViewUser1.extendedLikesInfo.newestLikes[0].addedAt).toBe('string')
             expect(typeof update1PostViewUser1.extendedLikesInfo.newestLikes[0].userId).toBe('string')
             expect(update1PostViewUser1.extendedLikesInfo.newestLikes[0].login).toBe(user1.login)
@@ -668,38 +671,39 @@ describe('/posts', () => {
             // user1 Like. newestLikes should be [{user3, user1}]
             await testHelpers.setLikeForPost(postId, LikeStatus.Like, user1.tokens[0].accessToken)
             const update3PostViewAnonymous = await testHelpers.getPostById(postId)
-
+            console.log(update3PostViewAnonymous.extendedLikesInfo.newestLikes)
             expect(update3PostViewAnonymous.extendedLikesInfo.newestLikes.length).toBe(2)
             expect(update3PostViewAnonymous.extendedLikesInfo.newestLikes[0].login).toBe(user3.login)
             expect(update3PostViewAnonymous.extendedLikesInfo.newestLikes[1].login).toBe(user1.login)
 
-            // user2 Like, user4 Like. newestLikes should be [{user3, user2, user4}]. user1 is missing because max length is 3 and user1 was the first to like
+            // user2 Like, user4 Like. newestLikes should be [{user2, user4, user3}]. user1 is missing because max length is 3 and user1 was the first to like. user2 set like status after user1, user3 set like status after user2
             await testHelpers.setLikeForPost(postId, LikeStatus.Like, user2.tokens[0].accessToken)
             await testHelpers.setLikeForPost(postId, LikeStatus.Like, user4.tokens[0].accessToken)
+
             const update4PostViewAnonymous = await testHelpers.getPostById(postId)
-
+            console.log(update4PostViewAnonymous.extendedLikesInfo.newestLikes)
             expect(update4PostViewAnonymous.extendedLikesInfo.newestLikes.length).toBe(3)
-            expect(update4PostViewAnonymous.extendedLikesInfo.newestLikes[0].login).toBe(user3.login)
-            expect(update4PostViewAnonymous.extendedLikesInfo.newestLikes[1].login).toBe(user2.login)
+            expect(update4PostViewAnonymous.extendedLikesInfo.newestLikes[0].login).toBe(user2.login)
             expect(update4PostViewAnonymous.extendedLikesInfo.newestLikes[1].login).toBe(user4.login)
+            expect(update4PostViewAnonymous.extendedLikesInfo.newestLikes[2].login).toBe(user3.login)
 
-            // user2 Dislike. newestLikes should be [{user3, user4, user1}]
+            // user2 Dislike. newestLikes should be [{user4, user3, user1}]
             await testHelpers.setLikeForPost(postId, LikeStatus.Dislike, user2.tokens[0].accessToken)
             const update5PostViewAnonymous = await testHelpers.getPostById(postId)
 
             expect(update5PostViewAnonymous.extendedLikesInfo.newestLikes.length).toBe(3)
-            expect(update5PostViewAnonymous.extendedLikesInfo.newestLikes[0].login).toBe(user3.login)
-            expect(update5PostViewAnonymous.extendedLikesInfo.newestLikes[1].login).toBe(user4.login)
-            expect(update5PostViewAnonymous.extendedLikesInfo.newestLikes[1].login).toBe(user1.login)
+            expect(update5PostViewAnonymous.extendedLikesInfo.newestLikes[0].login).toBe(user4.login)
+            expect(update5PostViewAnonymous.extendedLikesInfo.newestLikes[1].login).toBe(user3.login)
+            expect(update5PostViewAnonymous.extendedLikesInfo.newestLikes[2].login).toBe(user1.login)
 
-            // user2 Like. newestLikes should be [{user3, user2, user4}]
-            await testHelpers.setLikeForPost(postId, LikeStatus.Dislike, user2.tokens[0].accessToken)
+            // user2 Like. newestLikes should be [{user2, user4, user3}]
+            await testHelpers.setLikeForPost(postId, LikeStatus.Like, user2.tokens[0].accessToken)
             const update6PostViewAnonymous = await testHelpers.getPostById(postId)
 
             expect(update6PostViewAnonymous.extendedLikesInfo.newestLikes.length).toBe(3)
-            expect(update6PostViewAnonymous.extendedLikesInfo.newestLikes[0].login).toBe(user3.login)
-            expect(update6PostViewAnonymous.extendedLikesInfo.newestLikes[1].login).toBe(user2.login)
+            expect(update6PostViewAnonymous.extendedLikesInfo.newestLikes[0].login).toBe(user2.login)
             expect(update6PostViewAnonymous.extendedLikesInfo.newestLikes[1].login).toBe(user4.login)
+            expect(update6PostViewAnonymous.extendedLikesInfo.newestLikes[2].login).toBe(user3.login)
         });
 
         it('put[/posts/{postId}/like-status] shouldn\'t be success for change like-status, 400', async () => {

@@ -7,11 +7,14 @@ import {
     PostsUserLikeStatusInfoDbType
 } from '../../../types/db/post-db-types';
 import {ObjectId} from 'mongodb';
+import {LastNewestLikes, LikesAndDislikesCount} from '../../../types/entities/likes-types';
 
 export interface PostMethodsType {
     getId(): string
 
-    update(title: string, shortDescription: string, content: string, blogId: string, blogName: string): void
+    updatePost(title: string, shortDescription: string, content: string, blogId: string, blogName: string): void
+
+    updateLikesInfo(likesAndDislikesCount: LikesAndDislikesCount, lastThreeNewestLikes: LastNewestLikes[]): void
 }
 
 export type HydratedPostType = HydratedDocument<PostDbType, PostMethodsType>
@@ -21,20 +24,20 @@ export interface PostModelType extends Model<PostDbType, {}, PostMethodsType> {
 }
 
 const countPostsLikesAndDislikesSchema = new mongoose.Schema<CountPostsLikesAndDislikes>({
-        likesCount: {type: Number, default: 0},
-        dislikesCount: {type: Number, default: 0},
+        likesCount: {type: Number, required: true, default: 0},
+        dislikesCount: {type: Number, required: true, default: 0},
     },
     {_id: false})
 
 const postsUserLikeStatusInfoSchema = new mongoose.Schema<PostsUserLikeStatusInfoDbType>({
-        userId: {type: Schema.Types.ObjectId, required: true},
+        userId: {type: String, required: true},
         login: {type: String, required: true},
-        createdAt: {type: Date, required: true}
+        addedAt: {type: String, required: true}
     },
     {_id: false})
 
 const likesAndDislikesInfoSchema = new mongoose.Schema<LikesAndDislikesPostsInfoDbType>({
-        countPostsLikesAndDislikes: countPostsLikesAndDislikesSchema,
+        countPostsLikesAndDislikes: {type: countPostsLikesAndDislikesSchema},
         postsUserLikeStatusInfo: {type: [postsUserLikeStatusInfoSchema], required: true, default: []}
     },
     {_id: false})
@@ -46,17 +49,27 @@ const postSchema = new mongoose.Schema<PostDbType, PostModelType, PostMethodsTyp
     blogId: {type: Schema.Types.ObjectId, required: true},
     blogName: {type: String, required: true},
     createdAt: {type: Date, required: true},
-    likesAndDislikesInfo: likesAndDislikesInfoSchema
+    likesAndDislikesInfo: {type: likesAndDislikesInfoSchema}
 })
 postSchema.method('getId', function getId(): string {
     return this.id
 })
-postSchema.method('update', function update(title: string, shortDescription: string, content: string, blogId: string, blogName: string): void {
+postSchema.method('updatePost', function updatePost(title: string, shortDescription: string, content: string, blogId: string, blogName: string): void {
     this.title = title
     this.shortDescription = shortDescription
     this.content = content
     this.blogId = new ObjectId(blogId)
     this.blogName = blogName
+})
+postSchema.method('updateLikesInfo', function updateLikesInfo(likesAndDislikesCount: LikesAndDislikesCount, lastThreeNewestLikes: LastNewestLikes[]): void {
+    console.log('from postSchema before', lastThreeNewestLikes)
+    const sortedLastThreeNewestLikes = lastThreeNewestLikes.sort((info1, info2) => new Date(info2.addedAt).getTime() - new Date(info1.addedAt).getTime())
+    console.log('from postSchema after', sortedLastThreeNewestLikes)
+
+    this.likesAndDislikesInfo.postsUserLikeStatusInfo = sortedLastThreeNewestLikes.slice(0, 3)
+
+    this.likesAndDislikesInfo.countPostsLikesAndDislikes.likesCount = likesAndDislikesCount.likesCount
+    this.likesAndDislikesInfo.countPostsLikesAndDislikes.dislikesCount = likesAndDislikesCount.dislikesCount
 })
 postSchema.static('createPost', function createPost(title: string, content: string, shortDescription: string, blogId: string, blogName: string): HydratedPostType {
     return new PostModel({
@@ -65,7 +78,14 @@ postSchema.static('createPost', function createPost(title: string, content: stri
         shortDescription,
         blogId,
         blogName,
-        createdAt: new Date()
+        createdAt: new Date(),
+        likesAndDislikesInfo: {
+            countPostsLikesAndDislikes: {
+                likesCount: 0,
+                dislikesCount: 0,
+            },
+            postsUserLikeStatusInfo: []
+        }
     })
 })
 export const PostModel = mongoose.model<PostDbType, PostModelType>(SETTINGS.DB.POST_COLLECTION_NAME, postSchema)

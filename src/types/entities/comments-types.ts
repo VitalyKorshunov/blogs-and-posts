@@ -1,4 +1,4 @@
-import {LikeStatus} from '../db/comments-db-types';
+import {OneOfLikeStatus} from '../db/comments-db-types';
 
 export type CommentId = string
 
@@ -19,22 +19,22 @@ export type CommentViewModel = {
 
 export type CommentUserLikeStatusInfoServiceType = {
     userId: string
-    likeStatus: keyof typeof LikeStatus
+    likeStatus: OneOfLikeStatus
 }
 
 export type CommentUserLikeStatus = {
-    myStatus: keyof typeof LikeStatus
+    myStatus: OneOfLikeStatus
 }
 
 export type CommentIdWithCommentUserLikeStatus = {
     commentId: string
-    myStatus: keyof typeof LikeStatus
+    myStatus: OneOfLikeStatus
 }
 
 export type CommentLikeInfo = {
     likesCount: number
     dislikesCount: number
-    myStatus: keyof typeof LikeStatus
+    myStatus: OneOfLikeStatus
 }
 
 export type CommentServiceModel = {

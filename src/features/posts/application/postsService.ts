@@ -4,11 +4,19 @@ import {PostsRepository} from '../infrastructure/postsRepository';
 import {inject, injectable} from 'inversify';
 import {HydratedBlogType} from '../../blogs/domain/blogEntity';
 import {HydratedPostType, PostModel} from '../domain/postEntity';
+import {UserId} from '../../../types/entities/users-types';
+import {OneOfLikeStatus} from '../../../types/db/comments-db-types';
+import {LikesRepository} from '../../likes/infrastructure/likesRepository';
+import {HydratedLikeType, LikesModel} from '../../likes/domain/like-entity';
+import {HydratedUserType} from '../../users/domain/usersEntity';
+import {UsersRepository} from '../../users/infrastructure/usersRepository';
 
 @injectable()
 export class PostsService {
     constructor(
-        @inject(PostsRepository) protected postsRepository: PostsRepository
+        @inject(PostsRepository) protected postsRepository: PostsRepository,
+        @inject(LikesRepository) protected likesRepository: LikesRepository,
+        @inject(UsersRepository) protected usersRepository: UsersRepository,
     ) {
     }
 
@@ -45,13 +53,40 @@ export class PostsService {
 
         if (!smartPost) return result.notFound('post not found')
 
-        smartPost.update(
+        smartPost.updatePost(
             updatedPost.title,
             updatedPost.shortDescription,
             updatedPost.content,
             updatedPost.blogId,
             smartBlog.getName()
         )
+
+        await this.postsRepository.save(smartPost)
+
+        return result.success(null)
+    }
+
+    async updatePostLikeStatus(postId: PostId, userId: UserId, likeStatus: OneOfLikeStatus): Promise<ResultType<null>> {
+        const smartPost: HydratedPostType | null = await this.postsRepository.findPostById(postId)
+        if (!smartPost) return result.notFound('post not found')
+
+        const smartUser: HydratedUserType | null = await this.usersRepository.findUserById(userId)
+        if (!smartUser) return result.notFound('user not found')
+
+        let smartLike: HydratedLikeType | null = await this.likesRepository.findLike(postId, userId)
+
+        if (smartLike) {
+            smartLike.updateLike(likeStatus)
+        } else {
+            smartLike = LikesModel.setLike(postId, likeStatus, userId, smartUser.login)
+        }
+
+        await this.likesRepository.save(smartLike)
+
+        const likesAndDislikesCount = await this.likesRepository.getLikesAndDislikesCount(postId)
+        const lastThreeNewestLikes = await this.likesRepository.getLastThreeNewestLikes(postId)
+
+        smartPost.updateLikesInfo(likesAndDislikesCount, lastThreeNewestLikes)
 
         await this.postsRepository.save(smartPost)
 

@@ -23,6 +23,7 @@ export const SETTINGS = {
         COMMENT_COLLECTION_NAME: process.env.COMMENT_COLLECTION_NAME as string,
         RATE_LIMIT_COLLECTION_NAME: process.env.RATE_LIMIT_COLLECTION_NAME as string,
         SESSION_COLLECTION_NAME: process.env.SESSION_COLLECTION_NAME as string,
+        LIKE_COLLECTION_NAME: process.env.LIKE_COLLECTION_NAME as string,
     },
 
     ADMIN: process.env.ADMIN as string,

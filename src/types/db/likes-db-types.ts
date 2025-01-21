@@ -1,7 +1,7 @@
 import {ObjectId} from 'mongodb';
 import {OneOfLikeStatus} from './comments-db-types';
 
-export type LikesDbType = {
+export type LikeDbType = {
     parentId: ObjectId
     userId: ObjectId
     userLogin: string

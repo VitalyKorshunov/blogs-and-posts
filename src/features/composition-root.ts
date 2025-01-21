@@ -23,6 +23,7 @@ import {CommentsControllers} from './comments/controllers/commentsControllers';
 import {CommentsService} from './comments/application/commentsService';
 import {CommentsRepository} from './comments/repositories/commentsRepository';
 import {CommentsQueryRepository} from './comments/repositories/commentsQueryRepository';
+import {LikesRepository} from './likes/infrastructure/likesRepository';
 
 export const container = new Container()
 
@@ -55,3 +56,5 @@ container.bind<CommentsControllers>(CommentsControllers).to(CommentsControllers)
 container.bind<CommentsService>(CommentsService).to(CommentsService)
 container.bind<CommentsRepository>(CommentsRepository).to(CommentsRepository)
 container.bind<CommentsQueryRepository>(CommentsQueryRepository).to(CommentsQueryRepository)
+
+container.bind<LikesRepository>(LikesRepository).to(LikesRepository)
