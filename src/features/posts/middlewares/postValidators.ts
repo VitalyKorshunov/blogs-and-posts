@@ -7,6 +7,7 @@ import {accessTokenGuardMiddleware} from '../../../global-middlewares/accessToke
 import {BlogsQueryRepository} from '../../blogs/infrastructure/blogsQueryRepository';
 import {PostsQueryRepository} from '../infrastructure/postsQueryRepository';
 import {likeStatusValidator} from '../../comments/middlewares/commentsValidators';
+import {container} from '../../composition-root';
 
 export const commentContentValidator = body('content').isString().withMessage('not string').trim()
     .isLength({min: 20, max: 300}).withMessage('more than 300 or less than 20')
@@ -24,7 +25,7 @@ export const blogIdBodyValidator = body('blogId').isString().withMessage('not st
     .custom(async (blogId: string) => {
         if (!ObjectId.isValid(blogId)) throw new Error('invalid id')
 
-        const blogsQueryRepository = new BlogsQueryRepository()
+        const blogsQueryRepository = container.resolve(BlogsQueryRepository)
         const isBlogFound: boolean = await blogsQueryRepository.isBlogFound(blogId)
 
         if (!isBlogFound) throw new Error('no blog')

@@ -87,13 +87,10 @@ export class BlogsControllers {
     }
 
     async getPostsInBlog(req: Request/*<ParamType, {}, {}, SortQueryType>*/, res: Response<PostsForBlogSortViewModel>/*<BlogPostFilterViewModel>*/) {
-        const result = await this.blogsQueryRepository.getSortedPostsInBlog(req.params.id, req.query)
+        const userId: UserId | null = await accessTokenUtils.getAccessTokenUserId(req)
 
-        if (result.statusCode === StatusCode.Success) {
-            const sortedPostsInBlog: PostsForBlogSortViewModel = result.data
-            res.status(200).json(sortedPostsInBlog)
-        } else {
-            res.sendStatus(404)
-        }
+        const posts = await this.blogsQueryRepository.getSortedPostsInBlog(req.params.id, req.query, userId)
+
+        res.status(200).json(posts)
     }
 }

@@ -7,18 +7,24 @@ import {
     PostsForBlogSortViewModel
 } from '../../../types/entities/blogs-types';
 import {PostViewModel} from '../../../types/entities/posts-types';
-import {BlogDbType, BlogsQueryDBType, PostsForBlogQueryDbType} from '../../../types/db/blog-db-types';
+import {BlogDbType, BlogsQueryDBType} from '../../../types/db/blog-db-types';
 import {sortQueryFieldsUtils} from '../../../common/utils/sortQueryFields.utils';
 import {SortOutputQueryType} from '../../../types/utils/sort-types';
 import {PostDbType} from '../../../types/db/post-db-types';
 import {result, ResultType} from '../../../common/utils/errorsAndStatusCodes.utils';
-import {injectable} from 'inversify';
+import {inject, injectable} from 'inversify';
 import {BlogModel} from '../domain/blogEntity';
-import {PostModel} from '../../posts/domain/postEntity';
 import {LikeStatus} from '../../../types/db/comments-db-types';
+import {PostsQueryRepository} from '../../posts/infrastructure/postsQueryRepository';
+import {UserId} from '../../../types/entities/users-types';
 
 @injectable()
 export class BlogsQueryRepository {
+    constructor(
+        @inject(PostsQueryRepository) protected postsQueryRepository: PostsQueryRepository
+    ) {
+    }
+
     private toIdQuery(id: string): IdQueryDbType {
         return {_id: new ObjectId(id)}
     }
@@ -97,8 +103,9 @@ export class BlogsQueryRepository {
     //     return postsQueryRepository.sortPosts(query, blogId)
     // },
 
-    async getSortedPostsInBlog(blogId: BlogId, query: any): Promise<ResultType<PostsForBlogSortViewModel>> {
-        const blogObjectId: ObjectId | null = new ObjectId(blogId)
+    async getSortedPostsInBlog(blogId: BlogId, query: any, userId: UserId | null): Promise<PostsForBlogSortViewModel> {
+        return this.postsQueryRepository.getAllSortedPosts(query, userId, blogId)
+        /*const blogObjectId: ObjectId | null = new ObjectId(blogId)
         const isBlogFound = await this.isBlogFound(blogId)
 
         if (!isBlogFound) return result.notFound('blog not found')
@@ -128,6 +135,6 @@ export class BlogsQueryRepository {
             items: posts.map(post => this.mapToPostViewModel(post))
         }
 
-        return result.success(data)
+        return result.success(data)*/
     }
 }

@@ -10,6 +10,7 @@ import {LikeStatus} from '../../../types/db/comments-db-types';
 import {PostIdWithPostUserLikeStatus} from '../../../types/entities/likes-types';
 import {HydratedLikeType, LikesModel} from '../../likes/domain/like-entity';
 import {UserId} from '../../../types/entities/users-types';
+import {BlogId} from '../../../types/entities/blogs-types';
 
 @injectable()
 export class PostsQueryRepository {
@@ -57,8 +58,11 @@ export class PostsQueryRepository {
         return !!post
     }
 
-    async getAllSortedPosts(query: any, userId: string | null): Promise<PostsSortViewModel> {
-        const queryFindAllPosts = {}
+    async getAllSortedPosts(query: any, userId: string | null, blogId?: BlogId): Promise<PostsSortViewModel> {
+        const queryFindAllPostsOrForBlog =
+            blogId
+                ? {blogId: new ObjectId(blogId)}
+                : {}
 
         const sortedQueryFields: SortOutputQueryType = sortQueryFieldsUtils(query)
         const filter: PostsQueryDbType = {
@@ -66,12 +70,12 @@ export class PostsQueryRepository {
         }
 
         const posts: WithId<PostDbType>[] = await PostModel
-            .find(queryFindAllPosts)
+            .find(queryFindAllPostsOrForBlog)
             .sort({[filter.sortBy]: filter.sortDirection})
             .skip(filter.countSkips)
             .limit(filter.pageSize)
 
-        const totalPostsCount = await PostModel.countDocuments(queryFindAllPosts)
+        const totalPostsCount = await PostModel.countDocuments(queryFindAllPostsOrForBlog)
         const pagesCount = Math.ceil(totalPostsCount / filter.pageSize)
 
         const postIds: PostId[] = posts.map(post => post._id.toString())
