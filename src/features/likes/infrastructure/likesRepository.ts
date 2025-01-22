@@ -40,8 +40,6 @@ export class LikesRepository {
             .sort({createdAt: 'desc'})
             .limit(3)
 
-        console.log('from likeRepo', likes)
-
         return likes.map(like => {
             return {
                 userId: like.userId.toString(),

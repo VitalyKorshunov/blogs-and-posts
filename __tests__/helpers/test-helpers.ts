@@ -2,9 +2,9 @@ import {app} from '../../src/app'
 import {agent} from 'supertest'
 import {closeConnectToDB, connectToDB, db} from '../../src/db/mongo-db';
 import {SETTINGS} from '../../src/settings';
-import {BlogInputModel, BlogViewModel} from '../../src/types/entities/blogs-types';
+import {BlogId, BlogInputModel, BlogViewModel} from '../../src/types/entities/blogs-types';
 import {codedAuth} from './datasets';
-import {PostInputModel, PostViewModel} from '../../src/types/entities/posts-types';
+import {PostId, PostInputModel, PostsSortViewModel, PostViewModel} from '../../src/types/entities/posts-types';
 import {IdQueryDbType} from '../../src/types/db/query-db-types';
 import {ObjectId, WithId} from 'mongodb';
 import {UserInputModel, UserViewModel} from '../../src/types/entities/users-types';
@@ -19,6 +19,7 @@ import {AuthTokensType} from '../../src/types/auth/auth-types';
 import {SecurityViewModel} from '../../src/types/entities/security-types';
 import {CommentInputModel, CommentsSortViewModel, CommentViewModel} from '../../src/types/entities/comments-types';
 import {LikeStatus} from '../../src/types/db/comments-db-types';
+import {SortInputQueryType} from '../../src/types/utils/sort-types';
 
 export type UserDataType = {
     login: string
@@ -179,10 +180,20 @@ export const testHelpers = {
         }
     },
 
-    async getPostById(postId: string, accessToken?: string): Promise<PostViewModel> {
+    async getPostById(postId: PostId, accessToken?: string): Promise<PostViewModel> {
         const res = await req
             .get(SETTINGS.PATH.POSTS + '/' + postId)
             .set({'Authorization': `Bearer ${accessToken}`})
+            .expect(200)
+
+        return res.body
+    },
+
+    async getPostsForBlog(blogId: BlogId, accessToken?: string, query: Partial<SortInputQueryType> = {}): Promise<PostsSortViewModel> {
+        const res = await req
+            .get(SETTINGS.PATH.BLOGS + '/' + blogId + routersPaths.posts.posts)
+            .set({'Authorization': `Bearer ${accessToken}`})
+            .query(query)
             .expect(200)
 
         return res.body
@@ -201,25 +212,7 @@ export const testHelpers = {
             isMembership: blog.isMembership
         };
     },
-    /*findAndMapPost: async (id: string): Promise<PostViewModel> => {
-        const queryId: IdQueryDbType = {_id: new ObjectId(id)}
 
-        const post: WithId<PostDbType> = await db.collection(SETTINGS.DB.POST_COLLECTION_NAME).findOne(queryId) as WithId<PostDbType>
-        return {
-            id: post._id.toString(),
-            blogId: post.blogId.toString(),
-            blogName: post.blogName,
-            content: post.content,
-            shortDescription: post.shortDescription,
-            title: post.title,
-            createdAt: post.createdAt.toISOString(),
-            extendedLikesInfo: {
-                likesCount: post.likesAndDislikesInfo.countPostsLikesAndDislikes.likesCount,
-                dislikesCount: post.likesAndDislikesInfo.countPostsLikesAndDislikes.dislikesCount,
-                myStatus:
-            }
-        };
-    },*/
     findAndMapUserByIndex: async (index: number = 0): Promise<WithId<UserDbType>> => {
         const users: WithId<UserDbType>[] = await UserModel.find({}, {__v: 0}).lean()
 

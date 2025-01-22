@@ -6,15 +6,12 @@ import {
     BlogViewModel,
     PostsForBlogSortViewModel
 } from '../../../types/entities/blogs-types';
-import {PostViewModel} from '../../../types/entities/posts-types';
 import {BlogDbType, BlogsQueryDBType} from '../../../types/db/blog-db-types';
 import {sortQueryFieldsUtils} from '../../../common/utils/sortQueryFields.utils';
 import {SortOutputQueryType} from '../../../types/utils/sort-types';
-import {PostDbType} from '../../../types/db/post-db-types';
 import {result, ResultType} from '../../../common/utils/errorsAndStatusCodes.utils';
 import {inject, injectable} from 'inversify';
 import {BlogModel} from '../domain/blogEntity';
-import {LikeStatus} from '../../../types/db/comments-db-types';
 import {PostsQueryRepository} from '../../posts/infrastructure/postsQueryRepository';
 import {UserId} from '../../../types/entities/users-types';
 
@@ -37,24 +34,6 @@ export class BlogsQueryRepository {
             name: blog.name,
             createdAt: blog.createdAt.toISOString(),
             isMembership: blog.isMembership
-        }
-    }
-
-    private mapToPostViewModel(post: WithId<PostDbType>): PostViewModel {
-        return {
-            id: post._id.toString(),
-            title: post.title,
-            shortDescription: post.shortDescription,
-            content: post.content,
-            blogId: post.blogId.toString(),
-            blogName: post.blogName,
-            createdAt: post.createdAt.toISOString(),
-            extendedLikesInfo: {
-                likesCount: post.likesAndDislikesInfo.countPostsLikesAndDislikes.likesCount,
-                dislikesCount: post.likesAndDislikesInfo.countPostsLikesAndDislikes.dislikesCount,
-                myStatus: LikeStatus.None,
-                newestLikes: post.likesAndDislikesInfo.postsUserLikeStatusInfo
-            }
         }
     }
 
@@ -105,36 +84,5 @@ export class BlogsQueryRepository {
 
     async getSortedPostsInBlog(blogId: BlogId, query: any, userId: UserId | null): Promise<PostsForBlogSortViewModel> {
         return this.postsQueryRepository.getAllSortedPosts(query, userId, blogId)
-        /*const blogObjectId: ObjectId | null = new ObjectId(blogId)
-        const isBlogFound = await this.isBlogFound(blogId)
-
-        if (!isBlogFound) return result.notFound('blog not found')
-
-        const queryFindAllPostsForBlog = {blogId: blogObjectId}
-
-        const sortedQueryFields: SortOutputQueryType = sortQueryFieldsUtils(query)
-        const filter: PostsForBlogQueryDbType = {
-            ...sortedQueryFields,
-        }
-
-        const posts = await PostModel
-            .find(queryFindAllPostsForBlog, {__v: 0})
-            .sort({[filter.sortBy]: filter.sortDirection})
-            .skip(filter.countSkips)
-            .limit(filter.pageSize)
-            .lean()
-
-        const totalPostsCount = await PostModel.countDocuments(queryFindAllPostsForBlog)
-        const pagesCount = Math.ceil(totalPostsCount / filter.pageSize)
-
-        const data: PostsForBlogSortViewModel = {
-            pagesCount: pagesCount,
-            page: filter.pageNumber,
-            pageSize: filter.pageSize,
-            totalCount: totalPostsCount,
-            items: posts.map(post => this.mapToPostViewModel(post))
-        }
-
-        return result.success(data)*/
     }
 }

@@ -62,9 +62,7 @@ postSchema.method('updatePost', function updatePost(title: string, shortDescript
     this.blogName = blogName
 })
 postSchema.method('updateLikesInfo', function updateLikesInfo(likesAndDislikesCount: LikesAndDislikesCount, lastThreeNewestLikes: LastNewestLikes[]): void {
-    console.log('from postSchema before', lastThreeNewestLikes)
     const sortedLastThreeNewestLikes = lastThreeNewestLikes.sort((info1, info2) => new Date(info2.addedAt).getTime() - new Date(info1.addedAt).getTime())
-    console.log('from postSchema after', sortedLastThreeNewestLikes)
 
     this.likesAndDislikesInfo.postsUserLikeStatusInfo = sortedLastThreeNewestLikes.slice(0, 3)
 
